@@ -1,15 +1,12 @@
 services:
   - type: web
-    name: sanataningo
+    name: sarboshakti-backend
     env: node
-    plan: free
-    buildCommand: npm install
+    buildCommand: npm ci --only=production
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
@@ -17,17 +14,17 @@ services:
       - key: FRONTEND_URL
         sync: false
       - key: SMTP_HOST
-        value: smtp.hostinger.com
+        sync: false
       - key: SMTP_PORT
-        value: 587
+        sync: false
       - key: SMTP_USER
         sync: false
       - key: SMTP_PASS
         sync: false
       - key: ORG_NAME
-        value: Sarboshakti Sanatani Sangathan
+        sync: false
       - key: ORG_ADDRESS
-        value: K-11, S/F, Gali No. 6, Old Gobind Pura, Delhi — 110051, India
+        sync: false
       - key: ORG_EMAIL
         sync: false
       - key: ORG_PHONE

@@ -67,7 +67,7 @@ git push -u origin main
    - **Name**: `sarboshakti-backend`
    - **Root Directory**: `backend`
    - **Environment**: `Node`
-   - **Build Command**: `npm install`
+   - **Build Command**: `npm ci --only=production`
    - **Start Command**: `npm start`
 
 ### 3.3 Environment Variables
@@ -129,11 +129,20 @@ git push origin main
 
 ## 🔧 Troubleshooting
 
+### Build Fix for Render:
+```bash
+# In backend directory, regenerate package-lock.json
+cd backend
+rm -f package-lock.json
+npm install
+```
+
 ### Common Issues:
-1. **Build Failures**: Check Node.js version in package.json
-2. **Database Connection**: Verify MongoDB URI and IP whitelist
+1. **Build Failures**: Use `npm ci --only=production` as build command
+2. **Database Connection**: Verify MongoDB URI and IP whitelist  
 3. **File Uploads**: Render has ephemeral storage, consider cloud storage
 4. **Environment Variables**: Double-check all variables are set
+5. **Old Commit**: Render may use old commit, trigger manual deploy
 
 ### Logs Access:
 - View logs in Render dashboard

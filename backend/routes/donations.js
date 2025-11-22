@@ -2,9 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const Donation = require('../models/Donation');
 const Transaction = require('../models/Transaction');
-const { generateDonationReceipt } = require('../utils/pdfGenerator');
 const { sendAdminDonationNotification, sendDonationReceiptEmail } = require('../utils/emailService');
-const { donationValidation, handleValidationErrors } = require('../middleware/validation');
 const router = express.Router();
 
 // Configure multer for file uploads
@@ -73,7 +71,7 @@ router.post('/create', upload.single('paymentScreenshot'), async (req, res) => {
 });
 
 // Legacy route for backward compatibility
-router.post('/', donationValidation, handleValidationErrors, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { donorName, email, phone, address, amount, purpose, isAnonymous, panNumber, paymentReference } = req.body;
     
