@@ -74,15 +74,7 @@ const Home = () => {
           ))}
         </div>
         <div className="hero-overlay"></div>
-        <div className="slide-indicators">
-          {slides.map((_, index) => (
-            <div
-              key={index}
-              className={`indicator ${index === currentSlide ? 'active' : ''}`}
-              onClick={() => goToSlide(index)}
-            />
-          ))}
-        </div>
+
         <motion.div 
           className="hero-content"
           initial={{ opacity: 0, y: 50 }}
