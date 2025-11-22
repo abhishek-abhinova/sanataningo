@@ -209,6 +209,128 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Our Impact Section */}
+      <section style={{ padding: '80px 0', background: 'linear-gradient(135deg, #FFFBF0, #FFF8E7)' }}>
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            style={{ textAlign: 'center' }}
+          >
+            <h2 style={{ color: '#8B4513', marginBottom: '3rem' }}>Our Impact & Services</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+              {[
+                {
+                  icon: '📚',
+                  title: 'Educational Programs',
+                  description: 'Providing quality education and scholarships to underprivileged children, promoting literacy and knowledge sharing.',
+                  impact: '500+ Students Supported'
+                },
+                {
+                  icon: '🏥',
+                  title: 'Healthcare Services',
+                  description: 'Free medical camps, health awareness programs, and support for medical treatments in rural areas.',
+                  impact: '1000+ Patients Treated'
+                },
+                {
+                  icon: '🎭',
+                  title: 'Cultural Preservation',
+                  description: 'Organizing cultural events, preserving traditional arts, and promoting Sanatan values among youth.',
+                  impact: '50+ Cultural Events'
+                },
+                {
+                  icon: '🤝',
+                  title: 'Community Development',
+                  description: 'Empowering communities through skill development, women empowerment, and rural development programs.',
+                  impact: '25+ Villages Reached'
+                }
+              ].map((service, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  viewport={{ once: true }}
+                  style={{
+                    background: 'white',
+                    padding: '2rem',
+                    borderRadius: '15px',
+                    boxShadow: '0 8px 25px rgba(139, 69, 19, 0.15)',
+                    border: '1px solid #FFD700',
+                    textAlign: 'center'
+                  }}
+                >
+                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{service.icon}</div>
+                  <h3 style={{ color: '#8B4513', marginBottom: '1rem' }}>{service.title}</h3>
+                  <p style={{ color: '#666', marginBottom: '1rem', lineHeight: '1.6' }}>{service.description}</p>
+                  <div style={{ 
+                    background: 'linear-gradient(135deg, #d2691e, #ff8c00)', 
+                    color: 'white', 
+                    padding: '8px 16px', 
+                    borderRadius: '20px', 
+                    fontSize: '0.9rem',
+                    fontWeight: 'bold'
+                  }}>
+                    {service.impact}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Call to Action Section */}
+      <section style={{ 
+        padding: '80px 0', 
+        background: 'linear-gradient(135deg, #8B4513, #D2691E)', 
+        color: 'white',
+        textAlign: 'center'
+      }}>
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2 style={{ marginBottom: '2rem', fontSize: '2.5rem' }}>Join Our Mission</h2>
+            <p style={{ fontSize: '1.2rem', marginBottom: '3rem', maxWidth: '800px', margin: '0 auto 3rem' }}>
+              Be part of our spiritual family and help us serve humanity through the eternal values of Sanatan Dharma. 
+              Together, we can create positive change in society.
+            </p>
+            <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link to="/membership" className="btn btn-primary" style={{ 
+                background: 'white', 
+                color: '#8B4513',
+                border: '3px solid white',
+                minWidth: '200px'
+              }}>
+                <i className="fas fa-users"></i> Become a Member
+              </Link>
+              <Link to="/donate" className="btn btn-secondary" style={{
+                background: 'transparent',
+                color: 'white',
+                border: '3px solid white',
+                minWidth: '200px'
+              }}>
+                <i className="fas fa-heart"></i> Donate Now
+              </Link>
+              <Link to="/contact" className="btn" style={{
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                border: '3px solid rgba(255,255,255,0.5)',
+                minWidth: '200px'
+              }}>
+                <i className="fas fa-envelope"></i> Contact Us
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 };
