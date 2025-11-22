@@ -148,7 +148,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Founders Section */}
+      {/* Trustees Section */}
       <section className="founders">
         <div className="container">
           <motion.h2
@@ -157,7 +157,7 @@ const Home = () => {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            Our Founders
+            Our Trustees
           </motion.h2>
           <div className="founders-grid">
             <motion.div
@@ -172,7 +172,7 @@ const Home = () => {
                 <img src="images/p1.jpeg" alt="Founder 1" className="founder-photo" />
               </div>
               <h3>Shri Ajit Ray</h3>
-              <h4><i className="fas fa-crown"></i> Founder</h4>
+              <h4><i className="fas fa-crown"></i> Trustee</h4>
               <p>A devoted follower of Sanatan Sanskriti committed to serving society through dharma, awareness, and compassion. Leading the organization with spiritual wisdom and social vision.</p>
             </motion.div>
             <motion.div
@@ -187,7 +187,7 @@ const Home = () => {
                 <img src="images/p2.jpeg" alt="Founder 2" className="founder-photo" />
               </div>
               <h3>Shri Dinesh Bairagi</h3>
-              <h4><i className="fas fa-book-open"></i> Founder</h4>
+              <h4><i className="fas fa-book-open"></i> Trustee</h4>
               <p>A spiritual thinker and scholar guiding the Sangathan's cultural preservation and Sanatan awareness programs with deep knowledge of ancient scriptures.</p>
             </motion.div>
             <motion.div
@@ -202,7 +202,7 @@ const Home = () => {
                 <img src="images/p3.jpeg" alt="Founder 3" className="founder-photo" />
               </div>
               <h3>Shri Shreebash Halder</h3>
-              <h4><i className="fas fa-hands-helping"></i> Founder</h4>
+              <h4><i className="fas fa-hands-helping"></i> Trustee</h4>
               <p>Dedicated to executing social welfare activities, charity drives, and community upliftment programs with hands-on approach to serving the needy.</p>
             </motion.div>
             <motion.div
@@ -217,7 +217,7 @@ const Home = () => {
                 <img src="images/p4.jpeg" alt="Founder 4" className="founder-photo" />
               </div>
               <h3>Shri Goutam Chandra Biswas</h3>
-              <h4><i className="fas fa-seedling"></i> Founder</h4>
+              <h4><i className="fas fa-seedling"></i> Trustee</h4>
               <p>Works closely with the next generation to promote dharmic values, leadership development, and moral responsibility among youth and students.</p>
             </motion.div>
           </div>
