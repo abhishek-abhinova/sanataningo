@@ -1,213 +1,155 @@
 const express = require('express');
 const Member = require('../models/Member');
 const Donation = require('../models/Donation');
-const Contact = require('../models/Contact');
-const { generateMembershipCard } = require('../utils/pdfGenerator');
-const { generateDonationReceipt } = require('../utils/pdfGenerator');
-const { sendEmail } = require('../utils/emailService');
-const { verifyToken } = require('./auth');
+const Transaction = require('../models/Transaction');
+const auth = require('../middleware/auth');
+
 const router = express.Router();
 
-// Apply auth middleware to all admin routes
-router.use(verifyToken);
-
-// Dashboard stats
-router.get('/dashboard', async (req, res) => {
+// Dashboard statistics
+router.get('/dashboard', auth, async (req, res) => {
   try {
-    const [
-      totalMembers,
-      totalDonations,
-      totalAmount,
-      pendingContacts,
-      recentMembers,
-      recentDonations
-    ] = await Promise.all([
-      Member.countDocuments({ paymentStatus: 'completed' }),
-      Donation.countDocuments({ paymentStatus: 'completed' }),
-      Donation.aggregate([
-        { $match: { paymentStatus: 'completed' } },
-        { $group: { _id: null, total: { $sum: '$amount' } } }
-      ]),
-      Contact.countDocuments({ status: 'new' }),
-      Member.find({ paymentStatus: 'completed' })
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select('fullName email membershipType joinDate'),
-      Donation.find({ paymentStatus: 'completed' })
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select('donorName amount purpose donationDate')
-    ]);
-    
-    res.json({
-      stats: {
-        totalMembers,
-        totalDonations,
-        totalAmount: totalAmount[0]?.total || 0,
-        pendingContacts
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const stats = {
+      totalRegistered: await Member.countDocuments(),
+      activeMembers: await Member.countDocuments({ 
+        status: 'approved', 
+        validTill: { $gte: new Date() } 
+      }),
+      pendingMembers: await Member.countDocuments({ status: 'pending' }),
+      approvedMembers: await Member.countDocuments({ status: 'approved' }),
+      rejectedMembers: await Member.countDocuments({ status: 'rejected' }),
+      expiredMembers: await Member.countDocuments({ 
+        status: 'approved', 
+        validTill: { $lt: new Date() } 
+      }),
+      totalDonations: await Donation.countDocuments(),
+      approvedDonations: await Donation.countDocuments({ status: 'approved' }),
+      todayRegistrations: await Member.countDocuments({ 
+        createdAt: { $gte: today } 
+      }),
+      todayDonations: await Donation.countDocuments({ 
+        createdAt: { $gte: today } 
+      })
+    };
+
+    // Monthly registration data for graph
+    const monthlyData = await Member.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          count: { $sum: 1 }
+        }
       },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+      { $limit: 12 }
+    ]);
+
+    // Recent members
+    const recentMembers = await Member.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('fullName email membershipPlan status createdAt');
+
+    // Recent donations
+    const recentDonations = await Donation.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('donorName amount purpose status createdAt');
+
+    res.json({
+      success: true,
+      stats,
+      monthlyData,
       recentMembers,
       recentDonations
     });
   } catch (error) {
-    console.error('Dashboard error:', error);
-    res.status(500).json({ error: 'Failed to fetch dashboard data' });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Get all members
-router.get('/members', async (req, res) => {
+// Pending transactions
+router.get('/transactions/pending', auth, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    
-    const members = await Member.find()
-      .populate('verifiedBy', 'name')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-    
-    const total = await Member.countDocuments();
-    
-    res.json({
-      members,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
+    const transactions = await Transaction.find({ status: 'pending' })
+      .populate('memberId', 'fullName email phone membershipPlan')
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, transactions });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch members' });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Verify member payment
-router.post('/members/:id/verify', async (req, res) => {
+// Approve transaction
+router.put('/transactions/approve/:id', auth, async (req, res) => {
   try {
-    const member = await Member.findById(req.params.id);
-    if (!member) {
-      return res.status(404).json({ error: 'Member not found' });
+    const transaction = await Transaction.findById(req.params.id);
+    if (!transaction) {
+      return res.status(404).json({ error: 'Transaction not found' });
     }
-    
-    member.paymentStatus = 'completed';
-    member.verifiedBy = req.user.userId;
-    member.verificationDate = new Date();
-    await member.save();
-    
-    // Generate membership card PDF
-    const pdfPath = await generateMembershipCard(member);
-    member.cardGenerated = true;
-    member.cardPath = pdfPath;
-    await member.save();
-    
-    // Send email with membership card
-    await sendEmail({
-      to: member.email,
-      subject: 'Welcome to Sarboshakti Sanatani Sangathan - Membership Card',
-      template: 'membership-card',
-      data: { member },
-      attachments: [{ path: pdfPath }]
-    });
-    
-    res.json({ success: true, message: 'Member verified and activated successfully' });
-  } catch (error) {
-    console.error('Member verification error:', error);
-    res.status(500).json({ error: 'Failed to verify member' });
-  }
-});
 
-// Get all donations
-router.get('/donations', async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    
-    const donations = await Donation.find()
-      .populate('verifiedBy', 'name')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-    
-    const total = await Donation.countDocuments();
-    
-    res.json({
-      donations,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
+    transaction.status = 'approved';
+    transaction.verifiedBy = req.user.id;
+    transaction.verifiedAt = new Date();
+    await transaction.save();
+
+    // If membership transaction, approve member
+    if (transaction.type === 'membership') {
+      const member = await Member.findById(transaction.memberId);
+      if (member) {
+        const validTill = new Date();
+        validTill.setMonth(validTill.getMonth() + 12);
+        
+        member.status = 'approved';
+        member.approvedBy = req.user.id;
+        member.approvedAt = new Date();
+        member.validTill = validTill;
+        await member.save();
       }
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch donations' });
-  }
-});
-
-// Verify donation payment
-router.post('/donations/:id/verify', async (req, res) => {
-  try {
-    const donation = await Donation.findById(req.params.id);
-    if (!donation) {
-      return res.status(404).json({ error: 'Donation not found' });
     }
-    
-    donation.paymentStatus = 'completed';
-    donation.verifiedBy = req.user.userId;
-    donation.verificationDate = new Date();
-    await donation.save();
-    
-    // Generate donation receipt PDF
-    const pdfPath = await generateDonationReceipt(donation);
-    donation.receiptGenerated = true;
-    donation.receiptPath = pdfPath;
-    await donation.save();
-    
-    // Send email with receipt
-    await sendEmail({
-      to: donation.email,
-      subject: 'Thank You for Your Donation - Receipt',
-      template: 'donation-receipt',
-      data: { donation },
-      attachments: [{ path: pdfPath }]
-    });
-    
-    res.json({ success: true, message: 'Donation verified successfully' });
+
+    res.json({ success: true, message: 'Transaction approved' });
   } catch (error) {
-    console.error('Donation verification error:', error);
-    res.status(500).json({ error: 'Failed to verify donation' });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Get all contacts
-router.get('/contacts', async (req, res) => {
+// Reports
+router.get('/reports/daily', auth, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const { date } = req.query;
+    const targetDate = date ? new Date(date) : new Date();
+    targetDate.setHours(0, 0, 0, 0);
     
-    const contacts = await Contact.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-    
-    const total = await Contact.countDocuments();
-    
-    res.json({
-      contacts,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
+    const nextDay = new Date(targetDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+
+    const report = {
+      date: targetDate,
+      newMembers: await Member.countDocuments({
+        createdAt: { $gte: targetDate, $lt: nextDay }
+      }),
+      newDonations: await Donation.countDocuments({
+        createdAt: { $gte: targetDate, $lt: nextDay }
+      }),
+      approvedMembers: await Member.countDocuments({
+        approvedAt: { $gte: targetDate, $lt: nextDay }
+      }),
+      approvedDonations: await Donation.countDocuments({
+        approvedAt: { $gte: targetDate, $lt: nextDay }
+      })
+    };
+
+    res.json({ success: true, report });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch contacts' });
+    res.status(500).json({ error: error.message });
   }
 });
 

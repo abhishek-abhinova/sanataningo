@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import axios from 'axios';
-
-// Configure axios base URL
-axios.defaults.baseURL = process.env.REACT_APP_API_URL || '/api';
+import api from '../utils/api';
 
 const Contact = () => {
   const [loading, setLoading] = useState(false);
@@ -13,7 +10,7 @@ const Contact = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const response = await axios.post('/api/contact', data);
+      const response = await api.post('/contact', data);
       
       if (response.data.success) {
         toast.success('Message sent successfully! We will get back to you soon.');

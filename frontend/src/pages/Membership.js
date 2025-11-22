@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import axios from 'axios';
-
-// Configure axios base URL
-axios.defaults.baseURL = process.env.REACT_APP_API_URL || '/api';
+import api from '../utils/api';
 
 const Membership = () => {
   const [loading, setLoading] = useState(false);
@@ -13,13 +10,25 @@ const Membership = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const response = await axios.post('/members', data);
+      const formData = new FormData();
+      Object.keys(data).forEach(key => {
+        if (key === 'paymentScreenshot') {
+          formData.append(key, data[key][0]);
+        } else {
+          formData.append(key, data[key]);
+        }
+      });
+      
+      const response = await api.post('/members/register', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       
       if (response.data.success) {
         toast.success('Membership application submitted successfully! You will receive confirmation after payment verification.');
         reset();
-        // Redirect to thank you page with details
-        window.location.href = `/thank-you?type=membership&membershipId=${response.data.membershipId}&name=${encodeURIComponent(data.fullName)}`;
+        window.location.href = `/thank-you?type=membership&membershipId=${response.data.memberId}&name=${encodeURIComponent(data.fullName)}`;
       }
     } catch (error) {
       toast.error('Failed to submit membership application. Please try again.');
@@ -149,14 +158,26 @@ const Membership = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="paymentReference">Payment Reference Number *</label>
+                <label htmlFor="upiReference">UPI Reference Number *</label>
                 <input
                   type="text"
-                  id="paymentReference"
-                  placeholder="Enter your payment reference/transaction ID"
-                  {...register('paymentReference', { required: 'Payment reference is required' })}
+                  id="upiReference"
+                  placeholder="Enter UPI transaction reference number"
+                  {...register('upiReference', { required: 'UPI reference is required' })}
                 />
-                {errors.paymentReference && <span className="error">{errors.paymentReference.message}</span>}
+                {errors.upiReference && <span className="error">{errors.upiReference.message}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="paymentScreenshot">Payment Screenshot *</label>
+                <input
+                  type="file"
+                  id="paymentScreenshot"
+                  accept="image/*"
+                  {...register('paymentScreenshot', { required: 'Payment screenshot is required' })}
+                />
+                {errors.paymentScreenshot && <span className="error">{errors.paymentScreenshot.message}</span>}
+                <small style={{ color: '#666', display: 'block', marginTop: '0.5rem' }}>Upload screenshot of your UPI payment (Max 5MB)</small>
               </div>
 
               <div style={{ background: '#e8f5e8', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #90ee90' }}>
@@ -173,9 +194,10 @@ const Membership = () => {
                   <div>
                     <p style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#333' }}>
                       <strong>Bank Details:</strong><br/>
-                      Account Name: Sarboshakti Sanatani Sangathan<br/>
-                      Account No: XXXX-XXXX-XXXX<br/>
-                      IFSC: XXXXXXXX
+                      Account Name: Sarbo Shakti Sonatani Sangathan<br/>
+                      Account No: 43197114593<br/>
+                      IFSC: SBIN0032218<br/>
+                      Bank: SBI Noida Sector 49
                     </p>
                     <p style={{ margin: 0, fontSize: '0.9rem', color: '#333' }}>
                       Please make payment and enter the transaction reference number above. 

@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import axios from 'axios';
-
-// Configure axios base URL
-axios.defaults.baseURL = process.env.REACT_APP_API_URL || '/api';
+import api from '../utils/api';
 
 const Donate = () => {
   const [loading, setLoading] = useState(false);
@@ -21,13 +18,25 @@ const Donate = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const response = await axios.post('/donations', data);
+      const formData = new FormData();
+      Object.keys(data).forEach(key => {
+        if (key === 'paymentScreenshot') {
+          formData.append(key, data[key][0]);
+        } else {
+          formData.append(key, data[key]);
+        }
+      });
+      
+      const response = await api.post('/donations/create', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       
       if (response.data.success) {
         toast.success('Donation submitted successfully! You will receive receipt after payment verification.');
         reset();
         setSelectedAmount('');
-        // Redirect to thank you page with details
         window.location.href = `/thank-you?type=donation&donationId=${response.data.donationId}&amount=${data.amount}&name=${encodeURIComponent(data.donorName)}`;
       }
     } catch (error) {
@@ -165,14 +174,26 @@ const Donate = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="paymentReference">Payment Reference Number *</label>
+                <label htmlFor="upiReference">UPI Reference Number *</label>
                 <input
                   type="text"
-                  id="paymentReference"
-                  placeholder="Enter your payment reference/transaction ID"
-                  {...register('paymentReference', { required: 'Payment reference is required' })}
+                  id="upiReference"
+                  placeholder="Enter UPI transaction reference number"
+                  {...register('upiReference', { required: 'UPI reference is required' })}
                 />
-                {errors.paymentReference && <span className="error">{errors.paymentReference.message}</span>}
+                {errors.upiReference && <span className="error">{errors.upiReference.message}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="paymentScreenshot">Payment Screenshot *</label>
+                <input
+                  type="file"
+                  id="paymentScreenshot"
+                  accept="image/*"
+                  {...register('paymentScreenshot', { required: 'Payment screenshot is required' })}
+                />
+                {errors.paymentScreenshot && <span className="error">{errors.paymentScreenshot.message}</span>}
+                <small style={{ color: '#666', display: 'block', marginTop: '0.5rem' }}>Upload screenshot of your UPI payment (Max 5MB)</small>
               </div>
 
               <div className="form-group">
@@ -199,9 +220,10 @@ const Donate = () => {
                   <div>
                     <p style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#333' }}>
                       <strong>Bank Details:</strong><br/>
-                      Account Name: Sarboshakti Sanatani Sangathan<br/>
-                      Account No: XXXX-XXXX-XXXX<br/>
-                      IFSC: XXXXXXXX
+                      Account Name: Sarbo Shakti Sonatani Sangathan<br/>
+                      Account No: 43197114593<br/>
+                      IFSC: SBIN0032218<br/>
+                      Bank: SBI Noida Sector 49
                     </p>
                     <p style={{ margin: 0, fontSize: '0.9rem', color: '#333' }}>
                       Please make payment and enter the transaction reference number above. 

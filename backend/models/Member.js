@@ -1,21 +1,18 @@
 const mongoose = require('mongoose');
 
 const memberSchema = new mongoose.Schema({
-  membershipId: {
+  memberId: {
     type: String,
     unique: true,
     required: true
   },
   fullName: {
     type: String,
-    required: true,
-    trim: true
+    required: true
   },
   email: {
     type: String,
-    required: true,
-    lowercase: true,
-    trim: true
+    required: true
   },
   phone: {
     type: String,
@@ -25,60 +22,62 @@ const memberSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  dateOfBirth: {
-    type: Date,
-    required: true
-  },
-  occupation: {
+  state: {
     type: String,
     required: true
   },
-  membershipType: {
+  membershipPlan: {
     type: String,
     enum: ['basic', 'premium', 'lifetime'],
-    default: 'basic'
+    required: true
   },
   amount: {
     type: Number,
     required: true
   },
-  aadhaarNumber: {
+  upiReference: {
     type: String,
-    required: true,
-    match: /^[0-9]{12}$/
+    required: true
   },
-  paymentStatus: {
+  paymentScreenshot: {
+    type: String, // File path
+    required: true
+  },
+  status: {
     type: String,
-    enum: ['pending', 'completed', 'failed'],
+    enum: ['pending', 'approved', 'rejected', 'suspended', 'expired'],
     default: 'pending'
   },
-  paymentReference: String,
-  verifiedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+  validTill: {
+    type: Date
   },
-  verificationDate: Date,
-  cardGenerated: {
-    type: Boolean,
-    default: false
-  },
-  cardPath: String,
   joinDate: {
     type: Date,
     default: Date.now
   },
-  isActive: {
+  approvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  approvedAt: {
+    type: Date
+  },
+  rejectionReason: {
+    type: String
+  },
+  cardGenerated: {
     type: Boolean,
-    default: true
+    default: false
   }
 }, {
   timestamps: true
 });
 
+// Generate member ID before saving
 memberSchema.pre('save', async function(next) {
-  if (!this.membershipId) {
+  if (!this.memberId) {
     const count = await mongoose.model('Member').countDocuments();
-    this.membershipId = `SSS${String(count + 1).padStart(6, '0')}`;
+    this.memberId = `SSS${String(count + 1).padStart(6, '0')}`;
   }
   next();
 });

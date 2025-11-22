@@ -37,10 +37,23 @@ const donationSchema = new mongoose.Schema({
   },
   paymentStatus: {
     type: String,
-    enum: ['pending', 'completed', 'failed'],
+    enum: ['pending', 'approved', 'rejected', 'completed', 'failed'],
     default: 'pending'
   },
   paymentReference: String,
+  paymentScreenshot: {
+    type: String
+  },
+  approvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  approvedAt: {
+    type: Date
+  },
+  rejectionReason: {
+    type: String
+  },
   verifiedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

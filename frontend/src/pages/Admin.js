@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { toast } from 'react-toastify';
-
-// Configure axios base URL
-axios.defaults.baseURL = process.env.REACT_APP_API_URL || '/api';
+import api from '../utils/api';
 
 const MemberManagement = () => {
   const [members, setMembers] = useState([]);
@@ -15,7 +12,7 @@ const MemberManagement = () => {
 
   const fetchMembers = async () => {
     try {
-      const response = await axios.get('/admin/members');
+      const response = await api.get('/admin/members');
       setMembers(response.data.members);
     } catch (error) {
       toast.error('Failed to fetch members');
@@ -25,7 +22,7 @@ const MemberManagement = () => {
   const verifyMember = async (memberId) => {
     setLoading(true);
     try {
-      await axios.post(`/admin/members/${memberId}/verify`);
+      await api.post(`/admin/members/${memberId}/verify`);
       toast.success('Member verified successfully!');
       fetchMembers();
     } catch (error) {
@@ -104,7 +101,7 @@ const DonationManagement = () => {
 
   const fetchDonations = async () => {
     try {
-      const response = await axios.get('/admin/donations');
+      const response = await api.get('/admin/donations');
       setDonations(response.data.donations);
     } catch (error) {
       toast.error('Failed to fetch donations');
@@ -114,7 +111,7 @@ const DonationManagement = () => {
   const verifyDonation = async (donationId) => {
     setLoading(true);
     try {
-      await axios.post(`/admin/donations/${donationId}/verify`);
+      await api.post(`/admin/donations/${donationId}/verify`);
       toast.success('Donation verified successfully!');
       fetchDonations();
     } catch (error) {
@@ -183,6 +180,112 @@ const DonationManagement = () => {
   );
 };
 
+const TransactionManagement = () => {
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await api.get('/transactions/pending');
+      setTransactions(response.data.transactions);
+    } catch (error) {
+      toast.error('Failed to fetch transactions');
+    }
+  };
+
+  const approveTransaction = async (transactionId) => {
+    setLoading(true);
+    try {
+      await api.put(`/transactions/approve/${transactionId}`);
+      toast.success('Transaction approved successfully!');
+      fetchTransactions();
+    } catch (error) {
+      toast.error('Failed to approve transaction');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const rejectTransaction = async (transactionId, reason) => {
+    setLoading(true);
+    try {
+      await api.put(`/transactions/reject/${transactionId}`, { reason });
+      toast.success('Transaction rejected');
+      fetchTransactions();
+    } catch (error) {
+      toast.error('Failed to reject transaction');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
+      <h3 style={{ marginBottom: '2rem' }}>💳 UPI Transaction Verification</h3>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: '#f8f9fa' }}>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Member</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Amount</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>UPI Ref</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Screenshot</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Date</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {transactions.map(transaction => (
+              <tr key={transaction._id}>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  <div>
+                    <strong>{transaction.memberId?.fullName}</strong><br/>
+                    <small>{transaction.memberId?.email}</small>
+                  </div>
+                </td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>₹{transaction.amount}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{transaction.upiReference}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  <a href={`/${transaction.paymentScreenshot}`} target="_blank" rel="noopener noreferrer" 
+                     style={{ color: '#007bff', textDecoration: 'none' }}>View Screenshot</a>
+                </td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  {new Date(transaction.createdAt).toLocaleDateString()}
+                </td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      onClick={() => approveTransaction(transaction._id)}
+                      disabled={loading}
+                      style={{ background: '#28a745', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => {
+                        const reason = prompt('Rejection reason:');
+                        if (reason) rejectTransaction(transaction._id, reason);
+                      }}
+                      disabled={loading}
+                      style={{ background: '#dc3545', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
 const Admin = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -193,7 +296,7 @@ const Admin = () => {
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      localStorage.setItem('token', token);
       setIsLoggedIn(true);
       fetchDashboardData();
     }
@@ -203,10 +306,9 @@ const Admin = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('/auth/login', loginForm);
+      const response = await api.post('/auth/login', loginForm);
       if (response.data.success) {
-        localStorage.setItem('adminToken', response.data.token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        localStorage.setItem('token', response.data.token);
         setIsLoggedIn(true);
         toast.success('Login successful!');
         fetchDashboardData();
@@ -219,8 +321,7 @@ const Admin = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    delete axios.defaults.headers.common['Authorization'];
+    localStorage.removeItem('token');
     setIsLoggedIn(false);
     setDashboardData(null);
     toast.success('Logged out successfully!');
@@ -228,7 +329,7 @@ const Admin = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await axios.get('/admin/dashboard');
+      const response = await api.get('/admin/dashboard');
       setDashboardData(response.data);
     } catch (error) {
       toast.error('Failed to fetch dashboard data');
@@ -287,7 +388,7 @@ const Admin = () => {
 
       <div className="container" style={{ padding: '2rem 0' }}>
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-          {['dashboard', 'members', 'donations', 'contacts'].map(tab => (
+          {['dashboard', 'members', 'donations', 'transactions', 'contacts'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -309,21 +410,36 @@ const Admin = () => {
 
         {activeTab === 'dashboard' && dashboardData && (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
-              <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', color: '#28a745', marginBottom: '1rem' }}>👥</div>
-                <h3 style={{ color: '#333', marginBottom: '0.5rem' }}>Total Members</h3>
-                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#28a745', margin: 0 }}>{dashboardData.stats.totalMembers}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+              <div style={{ background: 'white', padding: '1.5rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+                <div style={{ fontSize: '2.5rem', color: '#28a745', marginBottom: '0.5rem' }}>👥</div>
+                <h4 style={{ color: '#333', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Total Registered</h4>
+                <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#28a745', margin: 0 }}>{dashboardData.stats?.totalRegistered || 0}</p>
               </div>
-              <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', color: '#ff8c00', marginBottom: '1rem' }}>💰</div>
-                <h3 style={{ color: '#333', marginBottom: '0.5rem' }}>Total Donations</h3>
-                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ff8c00', margin: 0 }}>₹{dashboardData.stats.totalAmount}</p>
+              <div style={{ background: 'white', padding: '1.5rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+                <div style={{ fontSize: '2.5rem', color: '#007bff', marginBottom: '0.5rem' }}>✅</div>
+                <h4 style={{ color: '#333', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Active Members</h4>
+                <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#007bff', margin: 0 }}>{dashboardData.stats?.activeMembers || 0}</p>
               </div>
-              <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', color: '#6f42c1', marginBottom: '1rem' }}>📧</div>
-                <h3 style={{ color: '#333', marginBottom: '0.5rem' }}>Pending Contacts</h3>
-                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#6f42c1', margin: 0 }}>{dashboardData.stats.pendingContacts}</p>
+              <div style={{ background: 'white', padding: '1.5rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+                <div style={{ fontSize: '2.5rem', color: '#ffc107', marginBottom: '0.5rem' }}>⏳</div>
+                <h4 style={{ color: '#333', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Pending</h4>
+                <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#ffc107', margin: 0 }}>{dashboardData.stats?.pendingMembers || 0}</p>
+              </div>
+              <div style={{ background: 'white', padding: '1.5rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+                <div style={{ fontSize: '2.5rem', color: '#dc3545', marginBottom: '0.5rem' }}>❌</div>
+                <h4 style={{ color: '#333', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Rejected</h4>
+                <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#dc3545', margin: 0 }}>{dashboardData.stats?.rejectedMembers || 0}</p>
+              </div>
+              <div style={{ background: 'white', padding: '1.5rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+                <div style={{ fontSize: '2.5rem', color: '#6c757d', marginBottom: '0.5rem' }}>⏰</div>
+                <h4 style={{ color: '#333', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Expired</h4>
+                <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#6c757d', margin: 0 }}>{dashboardData.stats?.expiredMembers || 0}</p>
+              </div>
+              <div style={{ background: 'white', padding: '1.5rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+                <div style={{ fontSize: '2.5rem', color: '#ff8c00', marginBottom: '0.5rem' }}>💰</div>
+                <h4 style={{ color: '#333', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Today's Entries</h4>
+                <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#ff8c00', margin: 0 }}>{dashboardData.stats?.todayRegistrations || 0}</p>
               </div>
             </div>
 
@@ -365,6 +481,7 @@ const Admin = () => {
 
         {activeTab === 'members' && <MemberManagement />}
         {activeTab === 'donations' && <DonationManagement />}
+        {activeTab === 'transactions' && <TransactionManagement />}
         {activeTab === 'contacts' && (
           <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', textAlign: 'center' }}>
             <h3>📧 Contact Management</h3>
