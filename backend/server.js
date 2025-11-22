@@ -37,6 +37,7 @@ app.use(helmet({
 const allowedOrigins = [
   'http://localhost:3000',
   'https://sarboshakti-sangathan.netlify.app',
+  'https://sanataningo.netlify.app',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 

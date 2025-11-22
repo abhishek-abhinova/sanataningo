@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sarboshakti-backend
+    name: sanataningo
     env: node
     plan: free
     buildCommand: npm install
@@ -17,16 +17,12 @@ services:
       - key: FRONTEND_URL
         sync: false
       - key: SMTP_HOST
-        sync: false
+        value: smtp.hostinger.com
       - key: SMTP_PORT
-        sync: false
+        value: 587
       - key: SMTP_USER
         sync: false
       - key: SMTP_PASS
-        sync: false
-      - key: RAZORPAY_KEY_ID
-        sync: false
-      - key: RAZORPAY_KEY_SECRET
         sync: false
       - key: ORG_NAME
         value: Sarboshakti Sanatani Sangathan
