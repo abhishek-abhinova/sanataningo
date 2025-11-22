@@ -86,6 +86,19 @@ router.post('/', upload.single('paymentScreenshot'), async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
+    const refNumber = upiReference || paymentReference;
+    
+    // Validate UPI reference format (12 digits)
+    if (!refNumber || !/^\d{12}$/.test(refNumber)) {
+      return res.status(400).json({ error: 'UPI reference must be exactly 12 digits' });
+    }
+    
+    // Check for duplicate UPI reference
+    const existingDonation = await Donation.findOne({ paymentReference: refNumber });
+    if (existingDonation) {
+      return res.status(400).json({ error: 'This UPI reference number has already been used' });
+    }
+    
     const donationData = {
       donorName,
       email,
@@ -95,7 +108,7 @@ router.post('/', upload.single('paymentScreenshot'), async (req, res) => {
       purpose: purpose || 'general',
       isAnonymous: isAnonymous === 'true' || isAnonymous === true,
       panNumber,
-      paymentReference: upiReference || paymentReference, // Handle both field names
+      paymentReference: refNumber,
       paymentStatus: 'pending'
     };
 
@@ -116,7 +129,13 @@ router.post('/', upload.single('paymentScreenshot'), async (req, res) => {
     res.json({
       success: true,
       message: 'Donation submitted successfully. Payment verification pending.',
-      donationId: donation.donationId || donation._id
+      donation: {
+        donationId: donation.donationId,
+        donorName: donation.donorName,
+        amount: donation.amount,
+        purpose: donation.purpose,
+        paymentReference: donation.paymentReference
+      }
     });
   } catch (error) {
     console.error('Donation creation error:', error);

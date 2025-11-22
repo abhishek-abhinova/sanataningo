@@ -30,7 +30,9 @@ const Membership = () => {
       if (response.data.success) {
         toast.success('Membership application submitted successfully!');
         reset();
-        navigate(`/thank-you?type=membership&memberId=${response.data.memberId}&name=${encodeURIComponent(data.fullName)}`);
+        navigate('/thank-you-member', { 
+          state: { memberData: response.data.member } 
+        });
       }
     } catch (error) {
       toast.error('Failed to submit membership application. Please try again.');
@@ -164,10 +166,17 @@ const Membership = () => {
                 <input
                   type="text"
                   id="upiReference"
-                  placeholder="Enter UPI transaction reference number"
-                  {...register('upiReference', { required: 'UPI reference is required' })}
+                  placeholder="Enter 12-digit UPI transaction reference number"
+                  {...register('upiReference', { 
+                    required: 'UPI reference is required',
+                    pattern: {
+                      value: /^\d{12}$/,
+                      message: 'UPI reference must be exactly 12 digits'
+                    }
+                  })}
                 />
                 {errors.upiReference && <span className="error">{errors.upiReference.message}</span>}
+                <small style={{ color: '#666', display: 'block', marginTop: '0.5rem' }}>Enter the 12-digit transaction reference number from your UPI payment</small>
               </div>
 
               <div className="form-group">

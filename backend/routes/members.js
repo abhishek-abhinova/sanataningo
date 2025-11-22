@@ -38,6 +38,17 @@ router.post('/register', upload.single('paymentScreenshot'), async (req, res) =>
     if (!req.file) {
       return res.status(400).json({ error: 'Payment screenshot is required' });
     }
+    
+    // Validate UPI reference format (12 digits)
+    if (!upiReference || !/^\d{12}$/.test(upiReference)) {
+      return res.status(400).json({ error: 'UPI reference must be exactly 12 digits' });
+    }
+    
+    // Check for duplicate UPI reference
+    const existingMember = await Member.findOne({ upiReference });
+    if (existingMember) {
+      return res.status(400).json({ error: 'This UPI reference number has already been used' });
+    }
 
     const member = new Member({
       fullName,
@@ -74,7 +85,15 @@ router.post('/register', upload.single('paymentScreenshot'), async (req, res) =>
     res.json({ 
       success: true, 
       message: 'Membership application submitted successfully',
-      memberId: member.memberId
+      member: {
+        memberId: member.memberId,
+        fullName: member.fullName,
+        email: member.email,
+        phone: member.phone,
+        membershipPlan: member.membershipPlan,
+        amount: member.amount,
+        upiReference: member.upiReference
+      }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

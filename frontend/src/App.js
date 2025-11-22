@@ -13,6 +13,8 @@ import Membership from './pages/Membership';
 import Donate from './pages/Donate';
 import Contact from './pages/Contact';
 import ThankYou from './pages/ThankYou';
+import ThankYouDonation from './pages/ThankYouDonation';
+import ThankYouMember from './pages/ThankYouMember';
 import Admin from './pages/Admin';
 import AdminPanel from './pages/AdminPanel';
 
@@ -30,6 +32,8 @@ function App() {
           <Route path="/donate" element={<Donate />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/thank-you" element={<ThankYou />} />
+          <Route path="/thank-you-donation" element={<ThankYouDonation />} />
+          <Route path="/thank-you-member" element={<ThankYouMember />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin-panel" element={<AdminPanel />} />
         </Routes>

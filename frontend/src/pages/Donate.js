@@ -39,7 +39,9 @@ const Donate = () => {
         toast.success('Donation submitted successfully!');
         reset();
         setSelectedAmount('');
-        navigate(`/thank-you?type=donation&donationId=${response.data.donationId}&amount=${data.amount}&name=${encodeURIComponent(data.donorName)}`);
+        navigate('/thank-you-donation', { 
+          state: { donationData: response.data.donation } 
+        });
       }
     } catch (error) {
       toast.error('Failed to submit donation. Please try again.');
@@ -180,10 +182,17 @@ const Donate = () => {
                 <input
                   type="text"
                   id="upiReference"
-                  placeholder="Enter UPI transaction reference number"
-                  {...register('upiReference', { required: 'UPI reference is required' })}
+                  placeholder="Enter 12-digit UPI transaction reference number"
+                  {...register('upiReference', { 
+                    required: 'UPI reference is required',
+                    pattern: {
+                      value: /^\d{12}$/,
+                      message: 'UPI reference must be exactly 12 digits'
+                    }
+                  })}
                 />
                 {errors.upiReference && <span className="error">{errors.upiReference.message}</span>}
+                <small style={{ color: '#666', display: 'block', marginTop: '0.5rem' }}>Enter the 12-digit transaction reference number from your UPI payment</small>
               </div>
 
               <div className="form-group">
