@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 
 const Donate = () => {
   const [loading, setLoading] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState('');
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
+  const navigate = useNavigate();
 
   const predefinedAmounts = [100, 500, 1000, 2000, 5000, 10000];
 
@@ -34,10 +36,10 @@ const Donate = () => {
       });
       
       if (response.data.success) {
-        toast.success('Donation submitted successfully! You will receive receipt after payment verification.');
+        toast.success('Donation submitted successfully!');
         reset();
         setSelectedAmount('');
-        window.location.href = `/thank-you?type=donation&donationId=${response.data.donationId}&amount=${data.amount}&name=${encodeURIComponent(data.donorName)}`;
+        navigate(`/thank-you?type=donation&donationId=${response.data.donationId}&amount=${data.amount}&name=${encodeURIComponent(data.donorName)}`);
       }
     } catch (error) {
       toast.error('Failed to submit donation. Please try again.');

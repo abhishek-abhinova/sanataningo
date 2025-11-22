@@ -35,12 +35,17 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://sarboshaktisonatanisangathan.org',
-    'https://www.sarboshaktisonatanisangathan.org',
-    process.env.FRONTEND_URL
-  ].filter(Boolean),
+  origin: process.env.NODE_ENV === 'production' 
+    ? [
+        'https://sarboshaktisonatanisangathan.org',
+        'https://www.sarboshaktisonatanisangathan.org',
+        process.env.FRONTEND_URL
+      ].filter(Boolean)
+    : [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        process.env.FRONTEND_URL
+      ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -162,8 +167,10 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🔗 API Base: http://localhost:${PORT}/api`);
-  console.log(`🛡️ Health Check: http://localhost:${PORT}/api/health`);
+  console.log(`🔗 API Base: ${process.env.NODE_ENV === 'production' ? `https://your-app.onrender.com/api` : `http://localhost:${PORT}/api`}`);
+  console.log(`🛡️ Health Check: ${process.env.NODE_ENV === 'production' ? `https://your-app.onrender.com/api/health` : `http://localhost:${PORT}/api/health`}`);
+  console.log(`📧 Email Service: ${process.env.SMTP_HOST ? '✅ Configured' : '❌ Not Configured'}`);
+  console.log(`💾 Database: ${mongoose.connection.readyState === 1 ? '✅ Connected' : '❌ Disconnected'}`);
 });
 
 module.exports = app;

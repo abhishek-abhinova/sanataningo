@@ -17,7 +17,7 @@ import Admin from './pages/Admin';
 
 function App() {
   return (
-    <Router future={{ v7_startTransition: true }}>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="App">
         <Navbar />
         <Routes>
@@ -40,7 +40,7 @@ function App() {
           closeOnClick
           rtl={false}
           pauseOnFocusLoss
-          draggable
+          draggable={false}
           pauseOnHover
         />
       </div>

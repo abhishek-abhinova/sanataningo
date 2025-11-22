@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 
 const Membership = () => {
   const [loading, setLoading] = useState(false);
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
+  const navigate = useNavigate();
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -26,9 +28,9 @@ const Membership = () => {
       });
       
       if (response.data.success) {
-        toast.success('Membership application submitted successfully! You will receive confirmation after payment verification.');
+        toast.success('Membership application submitted successfully!');
         reset();
-        window.location.href = `/thank-you?type=membership&membershipId=${response.data.memberId}&name=${encodeURIComponent(data.fullName)}`;
+        navigate(`/thank-you?type=membership&memberId=${response.data.memberId}&name=${encodeURIComponent(data.fullName)}`);
       }
     } catch (error) {
       toast.error('Failed to submit membership application. Please try again.');

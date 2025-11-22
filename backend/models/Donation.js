@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const donationSchema = new mongoose.Schema({
   donationId: {
     type: String,
-    unique: true,
-    required: true
+    unique: true
   },
   donorName: {
     type: String,
@@ -79,8 +78,13 @@ const donationSchema = new mongoose.Schema({
 
 donationSchema.pre('save', async function(next) {
   if (!this.donationId) {
-    const count = await mongoose.model('Donation').countDocuments();
-    this.donationId = `DON${String(count + 1).padStart(6, '0')}`;
+    try {
+      const count = await mongoose.model('Donation').countDocuments();
+      this.donationId = `DON${String(count + 1).padStart(6, '0')}`;
+    } catch (error) {
+      // Fallback to timestamp-based ID if count fails
+      this.donationId = `DON${Date.now()}`;
+    }
   }
   next();
 });

@@ -1,246 +1,127 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const ThankYou = () => {
+  const [searchParams] = useSearchParams();
+  const [details, setDetails] = useState({});
+
+  useEffect(() => {
+    const type = searchParams.get('type');
+    const name = searchParams.get('name');
+    const amount = searchParams.get('amount');
+    const id = searchParams.get('donationId') || searchParams.get('memberId');
+
+    setDetails({ type, name, amount, id });
+  }, [searchParams]);
+
+  const isDonation = details.type === 'donation';
+  const isMembership = details.type === 'membership';
+
   return (
-    <div>
-      {/* Thank You Section */}
-      <section style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        textAlign: 'center',
-        padding: '2rem',
-        marginTop: '80px'
-      }}>
-        <div className="container">
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)', paddingTop: '90px' }}>
+      <div className="container" style={{ padding: '4rem 0', textAlign: 'center' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          style={{ maxWidth: '600px', margin: '0 auto', background: 'white', padding: '3rem', borderRadius: '20px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
+        >
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            style={{ maxWidth: '600px', margin: '0 auto' }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            style={{ fontSize: '4rem', marginBottom: '1rem' }}
           >
+            🙏
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            style={{ color: '#28a745', marginBottom: '1rem', fontSize: '2.5rem' }}
+          >
+            Thank You!
+          </motion.h1>
+
+          {isDonation && (
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.5, type: 'spring', stiffness: 200 }}
-              style={{
-                width: '120px',
-                height: '120px',
-                background: 'rgba(255, 255, 255, 0.2)',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 2rem',
-                backdropFilter: 'blur(10px)',
-                border: '2px solid rgba(255, 255, 255, 0.3)'
-              }}
-            >
-              <i className="fas fa-check" style={{ fontSize: '3rem', color: '#4ade80' }}></i>
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
-              style={{ fontSize: '3rem', marginBottom: '1rem', fontWeight: '800' }}
+              transition={{ duration: 0.8, delay: 0.7 }}
             >
-              Thank You!
-            </motion.h1>
-
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.8 }}
-              style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: '400', opacity: 0.9 }}
-            >
-              Your contribution has been received successfully
-            </motion.h2>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9, duration: 0.8 }}
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                padding: '2rem',
-                borderRadius: '20px',
-                marginBottom: '2rem',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
-              }}
-            >
-              <p style={{ fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '1rem' }}>
-                We are deeply grateful for your support. Your contribution will help us continue our mission of serving humanity through the principles of Sanatan Dharma.
+              <h2 style={{ color: '#333', marginBottom: '1.5rem' }}>Your Donation Has Been Submitted</h2>
+              <p style={{ color: '#666', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '2rem' }}>
+                Dear {details.name}, thank you for your generous donation of <strong>₹{details.amount}</strong>. 
+                Your contribution will help us continue our mission of serving humanity through Sanatan Dharma values.
               </p>
-              
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <i className="fas fa-envelope" style={{ fontSize: '2rem', color: '#ffd700', marginBottom: '0.5rem' }}></i>
-                  <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>Receipt sent to your email</p>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <i className="fas fa-shield-alt" style={{ fontSize: '2rem', color: '#4ade80', marginBottom: '0.5rem' }}></i>
-                  <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>Secure transaction</p>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <i className="fas fa-certificate" style={{ fontSize: '2rem', color: '#f59e0b', marginBottom: '0.5rem' }}></i>
-                  <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>Tax benefits available</p>
-                </div>
+              <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '10px', marginBottom: '2rem' }}>
+                <p style={{ margin: 0, color: '#495057' }}>
+                  <strong>Donation ID:</strong> {details.id}<br/>
+                  Your donation is being verified. You will receive a receipt via email once approved.
+                </p>
               </div>
             </motion.div>
+          )}
 
+          {isMembership && (
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.1, duration: 0.8 }}
-              style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}
+              transition={{ duration: 0.8, delay: 0.7 }}
             >
+              <h2 style={{ color: '#333', marginBottom: '1.5rem' }}>Welcome to Our Family!</h2>
+              <p style={{ color: '#666', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '2rem' }}>
+                Dear {details.name}, thank you for becoming a member of Sarboshakti Sanatani Sangathan. 
+                Your membership application has been submitted successfully.
+              </p>
+              <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '10px', marginBottom: '2rem' }}>
+                <p style={{ margin: 0, color: '#495057' }}>
+                  <strong>Member ID:</strong> {details.id}<br/>
+                  Your membership is being processed. You will receive confirmation and digital membership card via email once approved.
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+            style={{ marginTop: '2rem' }}
+          >
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link 
                 to="/" 
                 className="btn btn-primary"
-                style={{ 
-                  padding: '1rem 2rem', 
-                  fontSize: '1.1rem', 
-                  textDecoration: 'none',
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  border: '2px solid white',
-                  color: 'white',
-                  borderRadius: '50px',
-                  transition: 'all 0.3s ease'
-                }}
+                style={{ minWidth: '150px' }}
               >
-                <i className="fas fa-home"></i> Back to Home
+                <i className="fas fa-home"></i> Go Home
               </Link>
-              
               <Link 
-                to="/activities" 
+                to="/contact" 
                 className="btn btn-secondary"
-                style={{ 
-                  padding: '1rem 2rem', 
-                  fontSize: '1.1rem', 
-                  textDecoration: 'none',
-                  background: 'white',
-                  color: '#667eea',
-                  borderRadius: '50px',
-                  transition: 'all 0.3s ease',
-                  border: 'none'
-                }}
+                style={{ minWidth: '150px' }}
               >
-                <i className="fas fa-eye"></i> View Our Work
+                <i className="fas fa-envelope"></i> Contact Us
               </Link>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.3, duration: 0.8 }}
-              style={{ marginTop: '3rem', fontSize: '0.9rem', opacity: 0.7 }}
-            >
-              <p>🙏 May you be blessed with prosperity and happiness</p>
-              <p style={{ marginTop: '0.5rem' }}>
-                <strong>Sarboshakti Sanatani Sangathan</strong><br />
-                Serving Humanity through Sanatan Dharma
-              </p>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Next Steps Section */}
-      <section style={{ padding: '80px 0', background: 'linear-gradient(135deg, #FFFBF0, #FFF8E7)' }}>
-        <div className="container">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            style={{ textAlign: 'center' }}
-          >
-            <h2 style={{ color: '#8B4513', marginBottom: '2rem' }}>What Happens Next?</h2>
-            
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-              gap: '2rem', 
-              marginTop: '3rem' 
-            }}>
-              {[
-                {
-                  step: '1',
-                  title: 'Email Confirmation',
-                  description: 'You will receive a confirmation email with your receipt and transaction details.',
-                  icon: 'fas fa-envelope-open'
-                },
-                {
-                  step: '2',
-                  title: 'Tax Receipt',
-                  description: 'An official tax receipt will be sent for claiming 80G tax benefits.',
-                  icon: 'fas fa-file-invoice'
-                },
-                {
-                  step: '3',
-                  title: 'Updates',
-                  description: 'Stay connected with us to receive updates about our programs and activities.',
-                  icon: 'fas fa-bell'
-                },
-                {
-                  step: '4',
-                  title: 'Join Community',
-                  description: 'Consider becoming a member to actively participate in our mission.',
-                  icon: 'fas fa-users'
-                }
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.2 }}
-                  viewport={{ once: true }}
-                  style={{
-                    background: 'white',
-                    padding: '2rem',
-                    borderRadius: '15px',
-                    textAlign: 'center',
-                    boxShadow: '0 8px 25px rgba(139, 69, 19, 0.15)',
-                    border: '1px solid #FFD700',
-                    position: 'relative'
-                  }}
-                >
-                  <div style={{
-                    position: 'absolute',
-                    top: '-15px',
-                    left: '20px',
-                    width: '30px',
-                    height: '30px',
-                    background: 'linear-gradient(135deg, #d2691e, #ff8c00)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '0.8rem',
-                    fontWeight: 'bold'
-                  }}>
-                    {item.step}
-                  </div>
-                  
-                  <i className={item.icon} style={{ fontSize: '2.5rem', color: '#d2691e', marginBottom: '1rem' }}></i>
-                  <h3 style={{ color: '#333', marginBottom: '1rem' }}>{item.title}</h3>
-                  <p style={{ color: '#666', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                    {item.description}
-                  </p>
-                </motion.div>
-              ))}
             </div>
           </motion.div>
-        </div>
-      </section>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 1.1 }}
+            style={{ marginTop: '2rem', padding: '1rem', background: 'linear-gradient(135deg, #fff3cd, #ffeaa7)', borderRadius: '10px' }}
+          >
+            <p style={{ margin: 0, color: '#856404', fontSize: '0.9rem' }}>
+              <strong>🕉️ Dharma • Seva • Sanskriti • Samaj 🕉️</strong><br/>
+              Together, we serve humanity through eternal values
+            </p>
+          </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };
