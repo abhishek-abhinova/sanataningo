@@ -13,9 +13,20 @@ router.get('/info', (req, res) => {
 });
 
 // Team members data
-router.get('/team', (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  const teamMembers = [
+router.get('/team', async (req, res) => {
+  try {
+    const Team = require('../models/Team');
+    const { homepage, about } = req.query;
+    const filter = { active: true };
+    
+    if (homepage === 'true') filter.showOnHomepage = true;
+    if (about === 'true') filter.showOnAbout = true;
+    
+    const team = await Team.find(filter).sort({ order: 1, createdAt: -1 });
+    
+    // Fallback to static data if no team members in database
+    if (team.length === 0) {
+      const teamMembers = [
     // Founder
     {
       id: 1,
@@ -166,23 +177,43 @@ router.get('/team', (req, res) => {
       image: '/images/aleep-biswas.jpeg',
       description: 'Committed to educational initiatives and skill development programs.'
     }
-  ];
-  
-  res.json(teamMembers);
+      ];
+      return res.json(teamMembers);
+    }
+    
+    res.json(team);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch team data' });
+  }
 });
 
 // Gallery images
-router.get('/gallery', (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  const galleryImages = [
-    { id: 1, url: '/images/photo1.jpeg', caption: 'Community Service Program' },
-    { id: 2, url: '/images/photo2.jpeg', caption: 'Cultural Event' },
-    { id: 3, url: '/images/photo3.jpeg', caption: 'Educational Initiative' },
-    { id: 4, url: '/images/photo4.jpeg', caption: 'Spiritual Gathering' },
-    { id: 5, url: '/images/photo5.jpeg', caption: 'Charity Drive' }
-  ];
-  
-  res.json(galleryImages);
+router.get('/gallery', async (req, res) => {
+  try {
+    const Gallery = require('../models/Gallery');
+    const { homepage } = req.query;
+    const filter = { published: true };
+    
+    if (homepage === 'true') filter.showOnHomepage = true;
+    
+    const images = await Gallery.find(filter).sort({ createdAt: -1 });
+    
+    // Fallback to static data if no images in database
+    if (images.length === 0) {
+      const galleryImages = [
+        { id: 1, url: '/images/photo1.jpeg', caption: 'Community Service Program' },
+        { id: 2, url: '/images/photo2.jpeg', caption: 'Cultural Event' },
+        { id: 3, url: '/images/photo3.jpeg', caption: 'Educational Initiative' },
+        { id: 4, url: '/images/photo4.jpeg', caption: 'Spiritual Gathering' },
+        { id: 5, url: '/images/photo5.jpeg', caption: 'Charity Drive' }
+      ];
+      return res.json(galleryImages);
+    }
+    
+    res.json({ images });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch gallery images' });
+  }
 });
 
 // Trustees data

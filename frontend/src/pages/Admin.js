@@ -443,6 +443,288 @@ const TransactionManagement = () => {
   );
 };
 
+const GalleryManagement = () => {
+  const [images, setImages] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [formData, setFormData] = useState({ title: '', description: '', category: 'general', showOnHomepage: false });
+
+  const fetchImages = async () => {
+    try {
+      const response = await api.get('/gallery');
+      setImages(response.data.images);
+    } catch (error) {
+      toast.error('Failed to fetch images');
+    }
+  };
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    const fileInput = document.getElementById('imageFile');
+    if (!fileInput.files[0]) return;
+
+    setUploading(true);
+    const data = new FormData();
+    data.append('image', fileInput.files[0]);
+    data.append('title', formData.title);
+    data.append('description', formData.description);
+    data.append('category', formData.category);
+    data.append('showOnHomepage', formData.showOnHomepage);
+
+    try {
+      await api.post('/gallery', data);
+      toast.success('Image uploaded successfully');
+      setFormData({ title: '', description: '', category: 'general', showOnHomepage: false });
+      fileInput.value = '';
+      fetchImages();
+    } catch (error) {
+      toast.error('Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const deleteImage = async (id) => {
+    if (!window.confirm('Delete this image?')) return;
+    try {
+      await api.delete(`/gallery/${id}`);
+      toast.success('Image deleted');
+      fetchImages();
+    } catch (error) {
+      toast.error('Delete failed');
+    }
+  };
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
+
+  return (
+    <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
+      <h3>🖼️ Gallery Management</h3>
+      
+      <form onSubmit={handleUpload} style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+          <input type="text" placeholder="Image Title" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
+          <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}>
+            <option value="general">General</option>
+            <option value="events">Events</option>
+            <option value="activities">Activities</option>
+            <option value="ceremonies">Ceremonies</option>
+          </select>
+        </div>
+        <textarea placeholder="Description" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', marginBottom: '1rem' }} />
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+          <input type="file" id="imageFile" accept="image/*" required style={{ padding: '10px' }} />
+          <label><input type="checkbox" checked={formData.showOnHomepage} onChange={(e) => setFormData({...formData, showOnHomepage: e.target.checked})} /> Show on Homepage</label>
+        </div>
+        <button type="submit" disabled={uploading} style={{ background: '#28a745', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '4px' }}>
+          {uploading ? 'Uploading...' : 'Upload Image'}
+        </button>
+      </form>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+        {images.map(image => (
+          <div key={image._id} style={{ border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden' }}>
+            <img src={`https://sanataningo.onrender.com${image.image}`} alt={image.title} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
+            <div style={{ padding: '10px' }}>
+              <h5 style={{ margin: '0 0 5px 0' }}>{image.title}</h5>
+              <p style={{ fontSize: '12px', color: '#666', margin: '0 0 10px 0' }}>{image.category}</p>
+              {image.showOnHomepage && <span style={{ background: '#28a745', color: 'white', padding: '2px 6px', borderRadius: '3px', fontSize: '10px' }}>Homepage</span>}
+              <button onClick={() => deleteImage(image._id)} style={{ background: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', fontSize: '12px', marginTop: '10px', width: '100%' }}>Delete</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const TeamManagement = () => {
+  const [team, setTeam] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [formData, setFormData] = useState({ name: '', position: '', bio: '', email: '', phone: '', showOnHomepage: true, showOnAbout: true });
+
+  const fetchTeam = async () => {
+    try {
+      const response = await api.get('/team');
+      setTeam(response.data.team);
+    } catch (error) {
+      toast.error('Failed to fetch team');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const fileInput = document.getElementById('photoFile');
+    
+    setUploading(true);
+    const data = new FormData();
+    if (fileInput.files[0]) data.append('photo', fileInput.files[0]);
+    Object.keys(formData).forEach(key => data.append(key, formData[key]));
+
+    try {
+      await api.post('/team', data);
+      toast.success('Team member added successfully');
+      setFormData({ name: '', position: '', bio: '', email: '', phone: '', showOnHomepage: true, showOnAbout: true });
+      if (fileInput) fileInput.value = '';
+      fetchTeam();
+    } catch (error) {
+      toast.error('Failed to add team member');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const deleteMember = async (id) => {
+    if (!window.confirm('Delete this team member?')) return;
+    try {
+      await api.delete(`/team/${id}`);
+      toast.success('Team member deleted');
+      fetchTeam();
+    } catch (error) {
+      toast.error('Delete failed');
+    }
+  };
+
+  useEffect(() => {
+    fetchTeam();
+  }, []);
+
+  return (
+    <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
+      <h3>👥 Team Management</h3>
+      
+      <form onSubmit={handleSubmit} style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+          <input type="text" placeholder="Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
+          <input type="text" placeholder="Position" value={formData.position} onChange={(e) => setFormData({...formData, position: e.target.value})} required style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+          <input type="email" placeholder="Email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
+          <input type="tel" placeholder="Phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
+        </div>
+        <textarea placeholder="Bio" value={formData.bio} onChange={(e) => setFormData({...formData, bio: e.target.value})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', marginBottom: '1rem' }} />
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+          <input type="file" id="photoFile" accept="image/*" style={{ padding: '10px' }} />
+          <label><input type="checkbox" checked={formData.showOnHomepage} onChange={(e) => setFormData({...formData, showOnHomepage: e.target.checked})} /> Homepage</label>
+          <label><input type="checkbox" checked={formData.showOnAbout} onChange={(e) => setFormData({...formData, showOnAbout: e.target.checked})} /> About Page</label>
+        </div>
+        <button type="submit" disabled={uploading} style={{ background: '#28a745', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '4px' }}>
+          {uploading ? 'Adding...' : 'Add Team Member'}
+        </button>
+      </form>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
+        {team.map(member => (
+          <div key={member._id} style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px' }}>
+            {member.photo && <img src={`https://sanataningo.onrender.com${member.photo}`} alt={member.name} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', marginBottom: '10px' }} />}
+            <h5 style={{ margin: '0 0 5px 0' }}>{member.name}</h5>
+            <p style={{ color: '#666', margin: '0 0 5px 0', fontSize: '14px' }}>{member.position}</p>
+            <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
+              {member.showOnHomepage && <span style={{ background: '#007bff', color: 'white', padding: '2px 6px', borderRadius: '3px', fontSize: '10px' }}>Home</span>}
+              {member.showOnAbout && <span style={{ background: '#28a745', color: 'white', padding: '2px 6px', borderRadius: '3px', fontSize: '10px' }}>About</span>}
+            </div>
+            <button onClick={() => deleteMember(member._id)} style={{ background: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', fontSize: '12px', width: '100%' }}>Delete</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const EventsManagement = () => {
+  const [events, setEvents] = useState([]);
+  const [formData, setFormData] = useState({ title: '', description: '', venue: '', eventDate: '', status: 'upcoming' });
+
+  const fetchEvents = async () => {
+    try {
+      const response = await api.get('/events');
+      setEvents(response.data.events);
+    } catch (error) {
+      toast.error('Failed to fetch events');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/events', formData);
+      toast.success('Event created successfully');
+      setFormData({ title: '', description: '', venue: '', eventDate: '', status: 'upcoming' });
+      fetchEvents();
+    } catch (error) {
+      toast.error('Failed to create event');
+    }
+  };
+
+  const deleteEvent = async (id) => {
+    if (!window.confirm('Delete this event?')) return;
+    try {
+      await api.delete(`/events/${id}`);
+      toast.success('Event deleted');
+      fetchEvents();
+    } catch (error) {
+      toast.error('Delete failed');
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  return (
+    <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
+      <h3>🎉 Events Management</h3>
+      
+      <form onSubmit={handleSubmit} style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+          <input type="text" placeholder="Event Title" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
+          <input type="text" placeholder="Venue" value={formData.venue} onChange={(e) => setFormData({...formData, venue: e.target.value})} style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+          <input type="datetime-local" value={formData.eventDate} onChange={(e) => setFormData({...formData, eventDate: e.target.value})} required style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
+          <select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})} style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}>
+            <option value="upcoming">Upcoming</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <textarea placeholder="Event Description" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', marginBottom: '1rem' }} />
+        <button type="submit" style={{ background: '#28a745', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '4px' }}>Create Event</button>
+      </form>
+
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: '#f8f9fa' }}>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Title</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Date</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Venue</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Status</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {events.map(event => (
+              <tr key={event._id}>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{event.title}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{new Date(event.eventDate).toLocaleDateString()}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{event.venue}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  <span style={{ background: event.status === 'completed' ? '#28a745' : event.status === 'ongoing' ? '#ffc107' : '#007bff', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>{event.status}</span>
+                </td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  <button onClick={() => deleteEvent(event._id)} style={{ background: '#dc3545', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', fontSize: '0.8rem' }}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
 const Admin = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -553,7 +835,7 @@ const Admin = () => {
 
       <div className="container" style={{ padding: '2rem 0' }}>
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-          {['dashboard', 'members', 'donations', 'transactions', 'contacts'].map(tab => (
+          {['dashboard', 'members', 'donations', 'transactions', 'contacts', 'gallery', 'team', 'events'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -648,6 +930,9 @@ const Admin = () => {
         {activeTab === 'donations' && <DonationManagement />}
         {activeTab === 'transactions' && <TransactionManagement />}
         {activeTab === 'contacts' && <ContactManagement />}
+        {activeTab === 'gallery' && <GalleryManagement />}
+        {activeTab === 'team' && <TeamManagement />}
+        {activeTab === 'events' && <EventsManagement />}
       </div>
     </div>
   );

@@ -17,6 +17,8 @@ const transactionRoutes = require('./routes/transactions');
 const mediaRoutes = require('./routes/media');
 const eventRoutes = require('./routes/events');
 const settingsRoutes = require('./routes/settings');
+const galleryRoutes = require('./routes/gallery');
+const teamRoutes = require('./routes/team');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -101,6 +103,8 @@ try {
   app.use('/api/media', mediaRoutes);
   app.use('/api/events', eventRoutes);
   app.use('/api/settings', settingsRoutes);
+  app.use('/api/gallery', galleryRoutes);
+  app.use('/api/team', teamRoutes);
   console.log('✅ All routes loaded successfully');
 } catch (error) {
   console.error('❌ Route loading error:', error);
