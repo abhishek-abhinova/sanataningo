@@ -4,6 +4,7 @@ const path = require('path');
 const Member = require('../models/Member');
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
+const { sendAdminMemberNotification, sendMemberApprovalEmail } = require('../utils/emailService');
 
 const router = express.Router();
 
@@ -62,6 +63,13 @@ router.post('/register', upload.single('paymentScreenshot'), async (req, res) =>
     });
 
     await transaction.save();
+
+    // Send admin notification
+    try {
+      await sendAdminMemberNotification(member);
+    } catch (emailError) {
+      console.error('Email notification failed:', emailError);
+    }
 
     res.json({ 
       success: true, 
@@ -154,6 +162,13 @@ router.put('/approve/:id', auth, async (req, res) => {
         verifiedAt: new Date()
       }
     );
+
+    // Send approval email
+    try {
+      await sendMemberApprovalEmail(member);
+    } catch (emailError) {
+      console.error('Approval email failed:', emailError);
+    }
 
     res.json({ success: true, message: 'Member approved successfully' });
   } catch (error) {

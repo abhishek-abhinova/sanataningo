@@ -101,21 +101,34 @@ const DonationManagement = () => {
 
   const fetchDonations = async () => {
     try {
-      const response = await api.get('/admin/donations');
+      const response = await api.get('/donations/list');
       setDonations(response.data.donations);
     } catch (error) {
       toast.error('Failed to fetch donations');
     }
   };
 
-  const verifyDonation = async (donationId) => {
+  const approveDonation = async (donationId) => {
     setLoading(true);
     try {
-      await api.post(`/admin/donations/${donationId}/verify`);
-      toast.success('Donation verified successfully!');
+      await api.put(`/donations/approve/${donationId}`);
+      toast.success('Donation approved and receipt sent!');
       fetchDonations();
     } catch (error) {
-      toast.error('Failed to verify donation');
+      toast.error('Failed to approve donation');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const rejectDonation = async (donationId, reason) => {
+    setLoading(true);
+    try {
+      await api.put(`/donations/reject/${donationId}`, { reason });
+      toast.success('Donation rejected');
+      fetchDonations();
+    } catch (error) {
+      toast.error('Failed to reject donation');
     } finally {
       setLoading(false);
     }
@@ -129,10 +142,10 @@ const DonationManagement = () => {
           <thead>
             <tr style={{ background: '#f8f9fa' }}>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Donor</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Email</th>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Amount</th>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Purpose</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Reference</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>UPI Ref</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Screenshot</th>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Status</th>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Action</th>
             </tr>
@@ -140,19 +153,25 @@ const DonationManagement = () => {
           <tbody>
             {donations.map(donation => (
               <tr key={donation._id}>
-                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{donation.donorName}</td>
-                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{donation.email}</td>
-                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>₹{donation.amount}</td>
                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-                  <span style={{ background: '#f3e5f5', color: '#7b1fa2', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>
-                    {donation.purpose}
-                  </span>
+                  <div>
+                    <strong>{donation.donorName}</strong><br/>
+                    <small>{donation.email}</small>
+                  </div>
                 </td>
-                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{donation.paymentReference || 'N/A'}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>₹{donation.amount}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{donation.purpose}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{donation.paymentReference}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  {donation.paymentScreenshot && (
+                    <a href={`/${donation.paymentScreenshot}`} target="_blank" rel="noopener noreferrer" 
+                       style={{ color: '#007bff', textDecoration: 'none' }}>View</a>
+                  )}
+                </td>
                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
                   <span style={{ 
-                    background: donation.paymentStatus === 'completed' ? '#e8f5e8' : '#fff3cd', 
-                    color: donation.paymentStatus === 'completed' ? '#28a745' : '#856404',
+                    background: donation.paymentStatus === 'approved' ? '#e8f5e8' : '#fff3cd', 
+                    color: donation.paymentStatus === 'approved' ? '#28a745' : '#856404',
                     padding: '4px 8px', 
                     borderRadius: '4px', 
                     fontSize: '0.8rem' 
@@ -162,13 +181,25 @@ const DonationManagement = () => {
                 </td>
                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
                   {donation.paymentStatus === 'pending' && (
-                    <button
-                      onClick={() => verifyDonation(donation._id)}
-                      disabled={loading}
-                      style={{ background: '#ff8c00', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
-                    >
-                      Verify
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => approveDonation(donation._id)}
+                        disabled={loading}
+                        style={{ background: '#28a745', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => {
+                          const reason = prompt('Rejection reason:');
+                          if (reason) rejectDonation(donation._id, reason);
+                        }}
+                        disabled={loading}
+                        style={{ background: '#dc3545', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        Reject
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>

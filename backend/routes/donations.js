@@ -3,7 +3,7 @@ const multer = require('multer');
 const Donation = require('../models/Donation');
 const Transaction = require('../models/Transaction');
 const { generateDonationReceipt } = require('../utils/pdfGenerator');
-const { sendEmail } = require('../utils/emailService');
+const { sendAdminDonationNotification, sendDonationReceiptEmail } = require('../utils/emailService');
 const { donationValidation, handleValidationErrors } = require('../middleware/validation');
 const router = express.Router();
 
@@ -53,6 +53,13 @@ router.post('/create', upload.single('paymentScreenshot'), async (req, res) => {
     });
 
     await donation.save();
+
+    // Send admin notification
+    try {
+      await sendAdminDonationNotification(donation);
+    } catch (emailError) {
+      console.error('Email notification failed:', emailError);
+    }
     
     res.json({ 
       success: true, 
@@ -108,6 +115,86 @@ router.get('/:id', async (req, res) => {
     res.json(donation);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch donation' });
+  }
+});
+
+// Approve donation
+router.put('/approve/:id', auth, async (req, res) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) {
+      return res.status(404).json({ error: 'Donation not found' });
+    }
+
+    donation.paymentStatus = 'approved';
+    donation.approvedBy = req.user.id;
+    donation.approvedAt = new Date();
+    await donation.save();
+
+    // Send receipt email
+    try {
+      await sendDonationReceiptEmail(donation);
+    } catch (emailError) {
+      console.error('Receipt email failed:', emailError);
+    }
+
+    res.json({ success: true, message: 'Donation approved and receipt sent' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Reject donation
+router.put('/reject/:id', auth, async (req, res) => {
+  try {
+    const { reason } = req.body;
+    
+    const donation = await Donation.findByIdAndUpdate(
+      req.params.id,
+      {
+        paymentStatus: 'rejected',
+        approvedBy: req.user.id,
+        approvedAt: new Date(),
+        rejectionReason: reason
+      },
+      { new: true }
+    );
+
+    if (!donation) {
+      return res.status(404).json({ error: 'Donation not found' });
+    }
+
+    res.json({ success: true, message: 'Donation rejected' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all donations (Admin)
+router.get('/list', auth, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 10 } = req.query;
+    
+    let query = {};
+    if (status) query.paymentStatus = status;
+
+    const donations = await Donation.find(query)
+      .populate('approvedBy', 'name')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Donation.countDocuments(query);
+
+    res.json({
+      success: true,
+      donations,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
