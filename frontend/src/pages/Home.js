@@ -40,28 +40,31 @@ const Home = () => {
 
   const fetchGalleryImages = async () => {
     try {
-      const response = await api.get('/gallery?homepage=true');
+      const response = await api.get('/admin/gallery?homepage=true');
       setGalleryImages(response.data.images || []);
     } catch (error) {
       console.error('Failed to fetch gallery images:', error);
+      setGalleryImages([]); // Set empty array on error
     }
   };
 
   const fetchTeamMembers = async () => {
     try {
-      const response = await api.get('/team?homepage=true');
+      const response = await api.get('/admin/team?homepage=true');
       setTeamMembers(response.data.team || []);
     } catch (error) {
       console.error('Failed to fetch team members:', error);
+      setTeamMembers([]); // Set empty array on error
     }
   };
 
   const fetchEvents = async () => {
     try {
-      const response = await api.get('/events?published=true');
+      const response = await api.get('/admin/events?published=true');
       setEvents(response.data.events || []);
     } catch (error) {
       console.error('Failed to fetch events:', error);
+      setEvents([]); // Set empty array on error
     }
   };
 

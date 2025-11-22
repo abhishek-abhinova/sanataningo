@@ -234,4 +234,123 @@ router.get('/reports/daily', auth, async (req, res) => {
   }
 });
 
+// Gallery routes
+router.post('/gallery', auth, async (req, res) => {
+  try {
+    const Gallery = require('../models/Gallery');
+    const gallery = new Gallery({
+      title: req.body.title,
+      description: req.body.description,
+      image: req.body.image || '/uploads/gallery/default.jpg',
+      category: req.body.category || 'general',
+      showOnHomepage: req.body.showOnHomepage === 'true'
+    });
+    await gallery.save();
+    res.json({ success: true, gallery });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/gallery', async (req, res) => {
+  try {
+    const Gallery = require('../models/Gallery');
+    const images = await Gallery.find({ published: true }).sort({ createdAt: -1 });
+    res.json({ images });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Team routes
+router.post('/team', auth, async (req, res) => {
+  try {
+    const Team = require('../models/Team');
+    const team = new Team({
+      name: req.body.name,
+      position: req.body.position,
+      bio: req.body.bio,
+      email: req.body.email,
+      phone: req.body.phone,
+      showOnHomepage: req.body.showOnHomepage !== 'false',
+      showOnAbout: req.body.showOnAbout !== 'false'
+    });
+    await team.save();
+    res.json({ success: true, team });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/team', async (req, res) => {
+  try {
+    const Team = require('../models/Team');
+    const team = await Team.find({ active: true }).sort({ order: 1, createdAt: -1 });
+    res.json({ team });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Events routes
+router.post('/events', auth, async (req, res) => {
+  try {
+    const Event = require('../models/Event');
+    const event = new Event({
+      title: req.body.title,
+      description: req.body.description,
+      venue: req.body.venue,
+      eventDate: req.body.eventDate,
+      status: req.body.status || 'upcoming',
+      published: true,
+      createdBy: req.user._id
+    });
+    await event.save();
+    res.json({ success: true, event });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/events', async (req, res) => {
+  try {
+    const Event = require('../models/Event');
+    const events = await Event.find({ published: true }).sort({ eventDate: -1 });
+    res.json({ events });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete routes
+router.delete('/gallery/:id', auth, async (req, res) => {
+  try {
+    const Gallery = require('../models/Gallery');
+    await Gallery.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/team/:id', auth, async (req, res) => {
+  try {
+    const Team = require('../models/Team');
+    await Team.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/events/:id', auth, async (req, res) => {
+  try {
+    const Event = require('../models/Event');
+    await Event.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

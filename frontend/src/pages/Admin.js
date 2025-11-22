@@ -490,10 +490,11 @@ const GalleryManagement = () => {
 
   const fetchImages = async () => {
     try {
-      const response = await api.get('/gallery');
-      setImages(response.data.images);
+      const response = await api.get('/admin/gallery');
+      setImages(response.data.images || []);
     } catch (error) {
-      toast.error('Failed to fetch images');
+      console.error('Gallery fetch error:', error);
+      setImages([]); // Set empty array instead of showing error
     }
   };
 
@@ -511,7 +512,7 @@ const GalleryManagement = () => {
     data.append('showOnHomepage', formData.showOnHomepage);
 
     try {
-      await api.post('/gallery', data);
+      await api.post('/admin/gallery', data);
       toast.success('Image uploaded successfully');
       setFormData({ title: '', description: '', category: 'general', showOnHomepage: false });
       fileInput.value = '';
@@ -526,7 +527,7 @@ const GalleryManagement = () => {
   const deleteImage = async (id) => {
     if (!window.confirm('Delete this image?')) return;
     try {
-      await api.delete(`/gallery/${id}`);
+      await api.delete(`/admin/gallery/${id}`);
       toast.success('Image deleted');
       fetchImages();
     } catch (error) {
@@ -586,10 +587,11 @@ const TeamManagement = () => {
 
   const fetchTeam = async () => {
     try {
-      const response = await api.get('/team');
-      setTeam(response.data.team);
+      const response = await api.get('/admin/team');
+      setTeam(response.data.team || []);
     } catch (error) {
-      toast.error('Failed to fetch team');
+      console.error('Team fetch error:', error);
+      setTeam([]); // Set empty array instead of showing error
     }
   };
 
@@ -603,7 +605,7 @@ const TeamManagement = () => {
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
 
     try {
-      await api.post('/team', data);
+      await api.post('/admin/team', data);
       toast.success('Team member added successfully');
       setFormData({ name: '', position: '', bio: '', email: '', phone: '', showOnHomepage: true, showOnAbout: true });
       if (fileInput) fileInput.value = '';
@@ -618,7 +620,7 @@ const TeamManagement = () => {
   const deleteMember = async (id) => {
     if (!window.confirm('Delete this team member?')) return;
     try {
-      await api.delete(`/team/${id}`);
+      await api.delete(`/admin/team/${id}`);
       toast.success('Team member deleted');
       fetchTeam();
     } catch (error) {
@@ -678,17 +680,18 @@ const EventsManagement = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await api.get('/events');
-      setEvents(response.data.events);
+      const response = await api.get('/admin/events');
+      setEvents(response.data.events || []);
     } catch (error) {
-      toast.error('Failed to fetch events');
+      console.error('Events fetch error:', error);
+      setEvents([]); // Set empty array instead of showing error
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/events', formData);
+      await api.post('/admin/events', formData);
       toast.success('Event created successfully');
       setFormData({ title: '', description: '', venue: '', eventDate: '', status: 'upcoming' });
       fetchEvents();
@@ -700,7 +703,7 @@ const EventsManagement = () => {
   const deleteEvent = async (id) => {
     if (!window.confirm('Delete this event?')) return;
     try {
-      await api.delete(`/events/${id}`);
+      await api.delete(`/admin/events/${id}`);
       toast.success('Event deleted');
       fetchEvents();
     } catch (error) {

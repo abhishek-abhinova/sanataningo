@@ -40,20 +40,17 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? [
-        'https://sarboshaktisonatanisangathan.org',
-        'https://www.sarboshaktisonatanisangathan.org',
-        process.env.FRONTEND_URL
-      ].filter(Boolean)
-    : [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        process.env.FRONTEND_URL
-      ].filter(Boolean),
+  origin: [
+    'https://sarboshaktisonatanisangathan.org',
+    'https://www.sarboshaktisonatanisangathan.org',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 }));
 
 // Rate limiting
