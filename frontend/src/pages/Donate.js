@@ -81,6 +81,7 @@ const Donate = () => {
                 <input
                   type="text"
                   id="donorName"
+                  autoComplete="name"
                   {...register('donorName', { required: 'Full name is required' })}
                 />
                 {errors.donorName && <span className="error">{errors.donorName.message}</span>}
@@ -91,6 +92,7 @@ const Donate = () => {
                 <input
                   type="email"
                   id="email"
+                  autoComplete="email"
                   {...register('email', { 
                     required: 'Email is required',
                     pattern: {
@@ -107,6 +109,7 @@ const Donate = () => {
                 <input
                   type="tel"
                   id="phone"
+                  autoComplete="tel"
                   {...register('phone', { 
                     required: 'Phone number is required',
                     pattern: {
@@ -122,6 +125,7 @@ const Donate = () => {
                 <label htmlFor="address">Address *</label>
                 <textarea
                   id="address"
+                  autoComplete="street-address"
                   {...register('address', { required: 'Address is required' })}
                 />
                 {errors.address && <span className="error">{errors.address.message}</span>}

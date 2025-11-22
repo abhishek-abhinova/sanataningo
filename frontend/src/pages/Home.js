@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import api from '../utils/api';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [events, setEvents] = useState([]);
   
   const slides = [
     'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1920&h=1080&fit=crop',
@@ -26,8 +30,40 @@ const Home = () => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 4000);
 
+    // Fetch dynamic content
+    fetchGalleryImages();
+    fetchTeamMembers();
+    fetchEvents();
+
     return () => clearInterval(interval);
   }, [slides.length]);
+
+  const fetchGalleryImages = async () => {
+    try {
+      const response = await api.get('/gallery?homepage=true');
+      setGalleryImages(response.data.images || []);
+    } catch (error) {
+      console.error('Failed to fetch gallery images:', error);
+    }
+  };
+
+  const fetchTeamMembers = async () => {
+    try {
+      const response = await api.get('/team?homepage=true');
+      setTeamMembers(response.data.team || []);
+    } catch (error) {
+      console.error('Failed to fetch team members:', error);
+    }
+  };
+
+  const fetchEvents = async () => {
+    try {
+      const response = await api.get('/events?published=true');
+      setEvents(response.data.events || []);
+    } catch (error) {
+      console.error('Failed to fetch events:', error);
+    }
+  };
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
@@ -185,7 +221,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Team Members Section */}
+      {/* Dynamic Team Members Section */}
       <section className="content-section" style={{ padding: '80px 0', background: '#f8f9fa' }}>
         <div className="container">
           <motion.h2
@@ -195,28 +231,28 @@ const Home = () => {
             viewport={{ once: true }}
             style={{ textAlign: 'center', color: '#ff6b35', marginBottom: '3rem' }}
           >
-            Our Team (21 Members)
+            Our Team ({teamMembers.length > 0 ? teamMembers.length : '21'} Members)
           </motion.h2>
           <div className="team-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
-            {[
-              { name: 'Aleep Biswas', image: 'images/aleep-biswas.jpeg' },
-              { name: 'Amiyo Govinda Biswas', image: 'images/amiyo-govinda-biswas.jpeg' },
-              { name: 'Arun Kumar Biswas', image: 'images/arun-kumar-biswas.jpeg' },
-              { name: 'Bijan Biswas', image: 'images/bijan-biswas.jpeg' },
-              { name: 'Bijon Kumar Biswas', image: 'images/bijon-kumar-biswas-delhi.jpeg' },
-              { name: 'Dr. Uttam Kumar Biswas', image: 'images/dr.-uttam-kumar-biswas.jpeg' },
-              { name: 'Mr. Somenath Biswas', image: 'images/mr-somenath-biswas.jpeg' },
-              { name: 'Mr. Deepu Sarkar', image: 'images/mr.-deepu-sarkar.jpeg' },
-              { name: 'Mrinal Kanti Biswas', image: 'images/mrinal-kanti-biswas.jpeg' },
-              { name: 'Neuton Roy', image: 'images/neuton-roy.jpeg' },
-              { name: 'Pratap Malik', image: 'images/pratap-malik.jpeg' },
-              { name: 'Pronit Roy', image: 'images/pronit-roy.jpeg' },
-              { name: 'Robin Kumar Ranjit Biswas', image: 'images/robin-kumar-ranjit-biswas.jpeg' },
-              { name: 'Somendra Srivastava', image: 'images/somendra-srivastava.jpeg' },
-              { name: 'Tarak Chandra Pal', image: 'images/tarak-chandra-pal.jpeg' },
-              { name: 'Subhash Kumar', image: 'images/subhash-kumar.jpeg' },
-              { name: 'Sudin Biswas', image: 'images/sudin-biswas-noida.jpeg' }
-            ].map((member, index) => (
+            {(teamMembers.length > 0 ? teamMembers : [
+              { name: 'Aleep Biswas', photo: 'images/aleep-biswas.jpeg' },
+              { name: 'Amiyo Govinda Biswas', photo: 'images/amiyo-govinda-biswas.jpeg' },
+              { name: 'Arun Kumar Biswas', photo: 'images/arun-kumar-biswas.jpeg' },
+              { name: 'Bijan Biswas', photo: 'images/bijan-biswas.jpeg' },
+              { name: 'Bijon Kumar Biswas', photo: 'images/bijon-kumar-biswas-delhi.jpeg' },
+              { name: 'Dr. Uttam Kumar Biswas', photo: 'images/dr.-uttam-kumar-biswas.jpeg' },
+              { name: 'Mr. Somenath Biswas', photo: 'images/mr-somenath-biswas.jpeg' },
+              { name: 'Mr. Deepu Sarkar', photo: 'images/mr.-deepu-sarkar.jpeg' },
+              { name: 'Mrinal Kanti Biswas', photo: 'images/mrinal-kanti-biswas.jpeg' },
+              { name: 'Neuton Roy', photo: 'images/neuton-roy.jpeg' },
+              { name: 'Pratap Malik', photo: 'images/pratap-malik.jpeg' },
+              { name: 'Pronit Roy', photo: 'images/pronit-roy.jpeg' },
+              { name: 'Robin Kumar Ranjit Biswas', photo: 'images/robin-kumar-ranjit-biswas.jpeg' },
+              { name: 'Somendra Srivastava', photo: 'images/somendra-srivastava.jpeg' },
+              { name: 'Tarak Chandra Pal', photo: 'images/tarak-chandra-pal.jpeg' },
+              { name: 'Subhash Kumar', photo: 'images/subhash-kumar.jpeg' },
+              { name: 'Sudin Biswas', photo: 'images/sudin-biswas-noida.jpeg' }
+            ]).map((member, index) => (
               <motion.div
                 key={index}
                 className="team-member"
@@ -227,17 +263,92 @@ const Home = () => {
                 style={{ textAlign: 'center', padding: '1rem', background: 'white', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}
               >
                 <img 
-                  src={member.image} 
-                  alt={`Executive Member ${index + 1}`} 
+                  src={member.photo?.startsWith('http') ? member.photo : member.photo?.startsWith('/uploads') ? `https://sanataningo.onrender.com${member.photo}` : member.photo} 
+                  alt={member.name} 
                   style={{ width: '80px', height: '80px', borderRadius: '50%', marginBottom: '10px', objectFit: 'cover' }}
                 />
                 <h4 style={{ margin: '0.5rem 0', color: '#333' }}>{member.name}</h4>
-                <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>Executive Member</p>
+                <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>{member.position || 'Executive Member'}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Dynamic Gallery Section */}
+      {galleryImages.length > 0 && (
+        <section className="content-section" style={{ padding: '80px 0' }}>
+          <div className="container">
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              style={{ textAlign: 'center', color: '#ff6b35', marginBottom: '3rem' }}
+            >
+              Recent Activities
+            </motion.h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
+              {galleryImages.slice(0, 6).map((image, index) => (
+                <motion.div
+                  key={image._id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  style={{ borderRadius: '10px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}
+                >
+                  <img 
+                    src={`https://sanataningo.onrender.com${image.image}`} 
+                    alt={image.title}
+                    style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+                  />
+                  <div style={{ padding: '1rem', background: 'white' }}>
+                    <h4 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>{image.title}</h4>
+                    <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>{image.description}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Dynamic Events Section */}
+      {events.length > 0 && (
+        <section className="content-section" style={{ padding: '80px 0', background: '#f8f9fa' }}>
+          <div className="container">
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              style={{ textAlign: 'center', color: '#ff6b35', marginBottom: '3rem' }}
+            >
+              Upcoming Events
+            </motion.h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+              {events.filter(event => event.status === 'upcoming').slice(0, 3).map((event, index) => (
+                <motion.div
+                  key={event._id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  style={{ padding: '2rem', background: 'white', borderRadius: '10px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}
+                >
+                  <h4 style={{ margin: '0 0 1rem 0', color: '#ff6b35' }}>{event.title}</h4>
+                  <p style={{ margin: '0 0 1rem 0', color: '#666' }}>{event.description}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem', color: '#999' }}>
+                    <span>📅 {new Date(event.eventDate).toLocaleDateString()}</span>
+                    <span>📍 {event.venue}</span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Sanatan Dharma Foundation */}
       <section className="dharma-foundation">
