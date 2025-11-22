@@ -29,17 +29,9 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sarboshak
     process.exit(1);
   });
 
-// Security middleware
+// Security middleware - simplified to avoid conflicts
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      scriptSrc: ["'self'", "https://checkout.razorpay.com"]
-    }
-  }
+  contentSecurityPolicy: false // Disable CSP to avoid HTML injection issues
 }));
 
 app.use(cors({
@@ -66,12 +58,27 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// Request logging middleware
+app.use((req, res, next) => {
+  // Only log API requests to avoid HTML content
+  if (req.url.startsWith('/api/')) {
+    console.log(`🔍 ${req.method} ${req.url}`);
+  }
+  next();
+});
+
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static files - ensure proper content types
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.jpeg') || path.endsWith('.jpg') || path.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    }
+  }
+}));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Routes with error handling
@@ -90,6 +97,7 @@ try {
 
 // Health check
 app.get('/api/health', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
@@ -116,14 +124,26 @@ app.get('/', (req, res) => {
   });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error details:', {
-    message: err.message,
-    stack: err.stack,
-    url: req.url,
+// Catch-all for undefined routes
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    error: 'Route not found',
+    path: req.originalUrl,
     method: req.method
   });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  // Prevent HTML output in console
+  const errorInfo = {
+    message: err.message,
+    url: req.url,
+    method: req.method,
+    timestamp: new Date().toISOString()
+  };
+  
+  console.error('❌ Server Error:', errorInfo);
   
   if (err.name === 'ValidationError') {
     return res.status(400).json({ error: 'Validation error', details: err.message });

@@ -12,21 +12,34 @@ const MemberManagement = () => {
 
   const fetchMembers = async () => {
     try {
-      const response = await api.get('/admin/members');
+      const response = await api.get('/members/list?status=pending');
       setMembers(response.data.members);
     } catch (error) {
       toast.error('Failed to fetch members');
     }
   };
 
-  const verifyMember = async (memberId) => {
+  const approveMember = async (memberId) => {
     setLoading(true);
     try {
-      await api.post(`/admin/members/${memberId}/verify`);
-      toast.success('Member verified successfully!');
+      await api.put(`/members/approve/${memberId}`);
+      toast.success('Member approved successfully!');
       fetchMembers();
     } catch (error) {
-      toast.error('Failed to verify member');
+      toast.error('Failed to approve member');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const rejectMember = async (memberId, reason) => {
+    setLoading(true);
+    try {
+      await api.put(`/members/reject/${memberId}`, { reason });
+      toast.success('Member rejected');
+      fetchMembers();
+    } catch (error) {
+      toast.error('Failed to reject member');
     } finally {
       setLoading(false);
     }
@@ -39,11 +52,11 @@ const MemberManagement = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#f8f9fa' }}>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Name</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Email</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Type</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Member</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Phone</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Plan</th>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Amount</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Reference</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>UPI Ref</th>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Status</th>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Action</th>
             </tr>
@@ -51,35 +64,52 @@ const MemberManagement = () => {
           <tbody>
             {members.map(member => (
               <tr key={member._id}>
-                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{member.fullName}</td>
-                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{member.email}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  <div>
+                    <strong>{member.fullName}</strong><br/>
+                    <small>{member.email}</small>
+                  </div>
+                </td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{member.phone}</td>
                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
                   <span style={{ background: '#e3f2fd', color: '#1976d2', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>
-                    {member.membershipType}
+                    {member.membershipPlan}
                   </span>
                 </td>
                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>₹{member.amount}</td>
-                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{member.paymentReference || 'N/A'}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{member.upiReference || 'N/A'}</td>
                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
                   <span style={{ 
-                    background: member.paymentStatus === 'completed' ? '#e8f5e8' : '#fff3cd', 
-                    color: member.paymentStatus === 'completed' ? '#28a745' : '#856404',
+                    background: member.status === 'approved' ? '#e8f5e8' : '#fff3cd', 
+                    color: member.status === 'approved' ? '#28a745' : '#856404',
                     padding: '4px 8px', 
                     borderRadius: '4px', 
                     fontSize: '0.8rem' 
                   }}>
-                    {member.paymentStatus}
+                    {member.status}
                   </span>
                 </td>
                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-                  {member.paymentStatus === 'pending' && (
-                    <button
-                      onClick={() => verifyMember(member._id)}
-                      disabled={loading}
-                      style={{ background: '#28a745', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
-                    >
-                      Verify
-                    </button>
+                  {member.status === 'pending' && (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => approveMember(member._id)}
+                        disabled={loading}
+                        style={{ background: '#28a745', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => {
+                          const reason = prompt('Rejection reason:');
+                          if (reason) rejectMember(member._id, reason);
+                        }}
+                        disabled={loading}
+                        style={{ background: '#dc3545', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        Reject
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>
@@ -101,7 +131,7 @@ const DonationManagement = () => {
 
   const fetchDonations = async () => {
     try {
-      const response = await api.get('/donations/list');
+      const response = await api.get('/donations?status=pending');
       setDonations(response.data.donations);
     } catch (error) {
       toast.error('Failed to fetch donations');
@@ -111,7 +141,7 @@ const DonationManagement = () => {
   const approveDonation = async (donationId) => {
     setLoading(true);
     try {
-      await api.put(`/donations/approve/${donationId}`);
+      await api.put(`/donations/${donationId}/approve`);
       toast.success('Donation approved and receipt sent!');
       fetchDonations();
     } catch (error) {
@@ -124,7 +154,7 @@ const DonationManagement = () => {
   const rejectDonation = async (donationId, reason) => {
     setLoading(true);
     try {
-      await api.put(`/donations/reject/${donationId}`, { reason });
+      await api.put(`/donations/${donationId}/reject`, { reason });
       toast.success('Donation rejected');
       fetchDonations();
     } catch (error) {
@@ -211,6 +241,102 @@ const DonationManagement = () => {
   );
 };
 
+const ContactManagement = () => {
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchContacts();
+  }, []);
+
+  const fetchContacts = async () => {
+    try {
+      const response = await api.get('/contact');
+      setContacts(response.data.contacts);
+    } catch (error) {
+      toast.error('Failed to fetch contacts');
+    }
+  };
+
+  const resolveContact = async (contactId) => {
+    setLoading(true);
+    try {
+      await api.put(`/contact/${contactId}/resolve`);
+      toast.success('Contact marked as resolved!');
+      fetchContacts();
+    } catch (error) {
+      toast.error('Failed to resolve contact');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
+      <h3 style={{ marginBottom: '2rem' }}>📧 Contact Management</h3>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: '#f8f9fa' }}>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Name</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Email</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Subject</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Message</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Date</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Status</th>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {contacts.map(contact => (
+              <tr key={contact._id}>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  <div>
+                    <strong>{contact.name}</strong><br/>
+                    <small>{contact.phone || 'N/A'}</small>
+                  </div>
+                </td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{contact.email}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>{contact.subject}</td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  <div style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {contact.message.substring(0, 100)}{contact.message.length > 100 ? '...' : ''}
+                  </div>
+                </td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  {new Date(contact.createdAt).toLocaleDateString()}
+                </td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  <span style={{ 
+                    background: contact.status === 'resolved' ? '#e8f5e8' : '#fff3cd', 
+                    color: contact.status === 'resolved' ? '#28a745' : '#856404',
+                    padding: '4px 8px', 
+                    borderRadius: '4px', 
+                    fontSize: '0.8rem' 
+                  }}>
+                    {contact.status}
+                  </span>
+                </td>
+                <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
+                  {contact.status !== 'resolved' && (
+                    <button
+                      onClick={() => resolveContact(contact._id)}
+                      disabled={loading}
+                      style={{ background: '#28a745', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                    >
+                      Resolve
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
 const TransactionManagement = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -221,7 +347,7 @@ const TransactionManagement = () => {
 
   const fetchTransactions = async () => {
     try {
-      const response = await api.get('/transactions/pending');
+      const response = await api.get('/admin/transactions/pending');
       setTransactions(response.data.transactions);
     } catch (error) {
       toast.error('Failed to fetch transactions');
@@ -231,7 +357,7 @@ const TransactionManagement = () => {
   const approveTransaction = async (transactionId) => {
     setLoading(true);
     try {
-      await api.put(`/transactions/approve/${transactionId}`);
+      await api.put(`/admin/transactions/approve/${transactionId}`);
       toast.success('Transaction approved successfully!');
       fetchTransactions();
     } catch (error) {
@@ -244,7 +370,7 @@ const TransactionManagement = () => {
   const rejectTransaction = async (transactionId, reason) => {
     setLoading(true);
     try {
-      await api.put(`/transactions/reject/${transactionId}`, { reason });
+      await api.put(`/admin/transactions/reject/${transactionId}`, { reason });
       toast.success('Transaction rejected');
       fetchTransactions();
     } catch (error) {
@@ -513,12 +639,7 @@ const Admin = () => {
         {activeTab === 'members' && <MemberManagement />}
         {activeTab === 'donations' && <DonationManagement />}
         {activeTab === 'transactions' && <TransactionManagement />}
-        {activeTab === 'contacts' && (
-          <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', textAlign: 'center' }}>
-            <h3>📧 Contact Management</h3>
-            <p style={{ color: '#666' }}>Contact management interface will be implemented here.</p>
-          </div>
-        )}
+        {activeTab === 'contacts' && <ContactManagement />}
       </div>
     </div>
   );

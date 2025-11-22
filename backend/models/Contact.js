@@ -27,7 +27,7 @@ const contactSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['new', 'read', 'replied', 'closed'],
+    enum: ['new', 'read', 'replied', 'resolved', 'closed'],
     default: 'new'
   },
   adminReply: String,
@@ -35,6 +35,16 @@ const contactSchema = new mongoose.Schema({
   repliedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },
+  resolvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  resolvedAt: Date,
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high', 'urgent'],
+    default: 'medium'
   }
 }, {
   timestamps: true

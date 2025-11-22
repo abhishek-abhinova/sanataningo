@@ -121,6 +121,87 @@ router.put('/transactions/approve/:id', auth, async (req, res) => {
   }
 });
 
+// Get all members with pagination
+router.get('/members', auth, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 10 } = req.query;
+    
+    let query = {};
+    if (status) query.status = status;
+
+    const members = await Member.find(query)
+      .populate('approvedBy', 'name')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Member.countDocuments(query);
+
+    res.json({
+      success: true,
+      members,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all donations with pagination
+router.get('/donations', auth, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 10 } = req.query;
+    
+    let query = {};
+    if (status) query.paymentStatus = status;
+
+    const donations = await Donation.find(query)
+      .populate('approvedBy', 'name')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Donation.countDocuments(query);
+
+    res.json({
+      success: true,
+      donations,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get pending approvals
+router.get('/pending', auth, async (req, res) => {
+  try {
+    const pendingMembers = await Member.find({ status: 'pending' })
+      .sort({ createdAt: -1 })
+      .limit(20);
+    
+    const pendingDonations = await Donation.find({ paymentStatus: 'pending' })
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    res.json({
+      success: true,
+      pendingMembers,
+      pendingDonations,
+      counts: {
+        members: pendingMembers.length,
+        donations: pendingDonations.length
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Reports
 router.get('/reports/daily', auth, async (req, res) => {
   try {

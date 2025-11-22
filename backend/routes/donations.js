@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const Donation = require('../models/Donation');
 const Transaction = require('../models/Transaction');
+const auth = require('../middleware/auth');
 const { sendAdminDonationNotification, sendDonationReceiptEmail } = require('../utils/emailService');
 const router = express.Router();
 
@@ -32,6 +33,11 @@ router.post('/create', upload.single('paymentScreenshot'), async (req, res) => {
   try {
     const { donorName, email, phone, address, amount, purpose, panNumber, upiReference, isAnonymous } = req.body;
     
+    // Validate required fields
+    if (!donorName || !email || !phone || !address || !amount) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
     if (!req.file) {
       return res.status(400).json({ error: 'Payment screenshot is required' });
     }
@@ -41,12 +47,12 @@ router.post('/create', upload.single('paymentScreenshot'), async (req, res) => {
       email,
       phone,
       address,
-      amount,
+      amount: parseFloat(amount),
       purpose: purpose || 'general',
       panNumber,
       paymentReference: upiReference,
       paymentScreenshot: req.file.path,
-      isAnonymous: isAnonymous === 'true',
+      isAnonymous: isAnonymous === 'true' || isAnonymous === true,
       paymentStatus: 'pending'
     });
 
@@ -70,29 +76,46 @@ router.post('/create', upload.single('paymentScreenshot'), async (req, res) => {
   }
 });
 
-// Legacy route for backward compatibility
-router.post('/', async (req, res) => {
+// Main donation route (handles both with and without file)
+router.post('/', upload.single('paymentScreenshot'), async (req, res) => {
   try {
-    const { donorName, email, phone, address, amount, purpose, isAnonymous, panNumber, paymentReference } = req.body;
+    const { donorName, email, phone, address, amount, purpose, isAnonymous, panNumber, upiReference, paymentReference } = req.body;
     
-    const donation = new Donation({
+    // Validate required fields
+    if (!donorName || !email || !phone || !address || !amount) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    const donationData = {
       donorName,
       email,
       phone,
       address,
-      amount,
-      purpose,
-      isAnonymous,
+      amount: parseFloat(amount),
+      purpose: purpose || 'general',
+      isAnonymous: isAnonymous === 'true' || isAnonymous === true,
       panNumber,
-      paymentReference,
+      paymentReference: upiReference || paymentReference, // Handle both field names
       paymentStatus: 'pending'
-    });
+    };
+
+    if (req.file) {
+      donationData.paymentScreenshot = req.file.path;
+    }
     
+    const donation = new Donation(donationData);
     await donation.save();
+
+    // Send admin notification
+    try {
+      await sendAdminDonationNotification(donation);
+    } catch (emailError) {
+      console.error('Email notification failed:', emailError);
+    }
     
     res.json({
       success: true,
-      message: 'Donation submitted. Payment verification pending.',
+      message: 'Donation submitted successfully. Payment verification pending.',
       donationId: donation.donationId || donation._id
     });
   } catch (error) {
@@ -116,8 +139,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Approve donation
-router.put('/approve/:id', auth, async (req, res) => {
+// Approve donation (Admin only)
+router.put('/:id/approve', auth, async (req, res) => {
   try {
     const donation = await Donation.findById(req.params.id);
     if (!donation) {
@@ -127,6 +150,7 @@ router.put('/approve/:id', auth, async (req, res) => {
     donation.paymentStatus = 'approved';
     donation.approvedBy = req.user.id;
     donation.approvedAt = new Date();
+    donation.receiptGenerated = true;
     await donation.save();
 
     // Send receipt email
@@ -142,8 +166,8 @@ router.put('/approve/:id', auth, async (req, res) => {
   }
 });
 
-// Reject donation
-router.put('/reject/:id', auth, async (req, res) => {
+// Reject donation (Admin only)
+router.put('/:id/reject', auth, async (req, res) => {
   try {
     const { reason } = req.body;
     
@@ -168,8 +192,8 @@ router.put('/reject/:id', auth, async (req, res) => {
   }
 });
 
-// Get all donations (Admin)
-router.get('/list', auth, async (req, res) => {
+// Get all donations (Admin only)
+router.get('/', auth, async (req, res) => {
   try {
     const { status, page = 1, limit = 10 } = req.query;
     
@@ -191,6 +215,19 @@ router.get('/list', auth, async (req, res) => {
       currentPage: page,
       total
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get pending donations for admin
+router.get('/pending', auth, async (req, res) => {
+  try {
+    const donations = await Donation.find({ paymentStatus: 'pending' })
+      .sort({ createdAt: -1 })
+      .limit(50);
+    
+    res.json({ success: true, donations });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
