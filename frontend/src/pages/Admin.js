@@ -451,11 +451,18 @@ const Admin = () => {
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('token');
     if (token) {
-      localStorage.setItem('token', token);
-      setIsLoggedIn(true);
-      fetchDashboardData();
+      // Verify token is still valid
+      api.get('/auth/me')
+        .then(() => {
+          setIsLoggedIn(true);
+          fetchDashboardData();
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+          setIsLoggedIn(false);
+        });
     }
   }, []);
 
@@ -481,6 +488,7 @@ const Admin = () => {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
     setDashboardData(null);
+    setActiveTab('dashboard');
     toast.success('Logged out successfully!');
   };
 

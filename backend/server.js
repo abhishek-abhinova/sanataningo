@@ -14,6 +14,9 @@ const adminRoutes = require('./routes/admin');
 const publicRoutes = require('./routes/public');
 const contactRoutes = require('./routes/contact');
 const transactionRoutes = require('./routes/transactions');
+const mediaRoutes = require('./routes/media');
+const eventRoutes = require('./routes/events');
+const settingsRoutes = require('./routes/settings');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -95,6 +98,9 @@ try {
   app.use('/api/public', publicRoutes);
   app.use('/api/contact', contactRoutes);
   app.use('/api/transactions', transactionRoutes);
+  app.use('/api/media', mediaRoutes);
+  app.use('/api/events', eventRoutes);
+  app.use('/api/settings', settingsRoutes);
   console.log('✅ All routes loaded successfully');
 } catch (error) {
   console.error('❌ Route loading error:', error);

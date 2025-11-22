@@ -14,6 +14,7 @@ import Donate from './pages/Donate';
 import Contact from './pages/Contact';
 import ThankYou from './pages/ThankYou';
 import Admin from './pages/Admin';
+import AdminPanel from './pages/AdminPanel';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin-panel" element={<AdminPanel />} />
         </Routes>
         <Footer />
         <ToastContainer

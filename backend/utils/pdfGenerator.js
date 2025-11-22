@@ -1,12 +1,14 @@
-const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs').promises;
 
+// Lightweight PDF generator without puppeteer
 const generateMembershipCard = async (member) => {
   try {
-    const browser = await puppeteer.launch({ headless: 'new' });
-    const page = await browser.newPage();
+    // Ensure uploads directory exists
+    const uploadsDir = path.join(__dirname, '../uploads/cards');
+    await fs.mkdir(uploadsDir, { recursive: true });
     
+    // Generate HTML content for membership card
     const html = `
       <!DOCTYPE html>
       <html>
@@ -44,35 +46,24 @@ const generateMembershipCard = async (member) => {
       </html>
     `;
     
-    await page.setContent(html);
-    
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(__dirname, '../uploads/cards');
-    await fs.mkdir(uploadsDir, { recursive: true });
-    
-    const filename = `membership_card_${member.membershipId}.pdf`;
+    const filename = `membership_card_${member.membershipId}.html`;
     const filepath = path.join(uploadsDir, filename);
     
-    await page.pdf({
-      path: filepath,
-      width: '400px',
-      height: '250px',
-      printBackground: true
-    });
-    
-    await browser.close();
+    await fs.writeFile(filepath, html);
     return filepath;
   } catch (error) {
-    console.error('PDF generation error:', error);
+    console.error('Card generation error:', error);
     throw error;
   }
 };
 
 const generateDonationReceipt = async (donation) => {
   try {
-    const browser = await puppeteer.launch({ headless: 'new' });
-    const page = await browser.newPage();
+    // Ensure uploads directory exists
+    const uploadsDir = path.join(__dirname, '../uploads/receipts');
+    await fs.mkdir(uploadsDir, { recursive: true });
     
+    // Generate HTML content for donation receipt
     const html = `
       <!DOCTYPE html>
       <html>
@@ -136,25 +127,13 @@ const generateDonationReceipt = async (donation) => {
       </html>
     `;
     
-    await page.setContent(html);
-    
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(__dirname, '../uploads/receipts');
-    await fs.mkdir(uploadsDir, { recursive: true });
-    
-    const filename = `donation_receipt_${donation.donationId}.pdf`;
+    const filename = `donation_receipt_${donation.donationId}.html`;
     const filepath = path.join(uploadsDir, filename);
     
-    await page.pdf({
-      path: filepath,
-      format: 'A4',
-      printBackground: true
-    });
-    
-    await browser.close();
+    await fs.writeFile(filepath, html);
     return filepath;
   } catch (error) {
-    console.error('PDF generation error:', error);
+    console.error('Receipt generation error:', error);
     throw error;
   }
 };
