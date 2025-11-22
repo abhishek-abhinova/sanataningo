@@ -11,6 +11,22 @@ const Membership = () => {
 
   const onSubmit = async (data) => {
     setLoading(true);
+    
+    // Show thank you page immediately
+    const memberData = {
+      fullName: data.fullName,
+      email: data.email,
+      phone: data.phone,
+      membershipPlan: data.membershipType,
+      amount: data.membershipType === 'basic' ? 100 : data.membershipType === 'premium' ? 500 : 2000,
+      upiReference: data.upiReference,
+      memberId: 'Processing...'
+    };
+    
+    navigate('/thank-you-member', { 
+      state: { memberData } 
+    });
+    
     try {
       const formData = new FormData();
       Object.keys(data).forEach(key => {
@@ -21,21 +37,15 @@ const Membership = () => {
         }
       });
       
-      const response = await api.post('/members/register', formData, {
+      await api.post('/members/register', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       
-      if (response.data.success) {
-        toast.success('Membership application submitted successfully!');
-        reset();
-        navigate('/thank-you-member', { 
-          state: { memberData: response.data.member } 
-        });
-      }
+      reset();
     } catch (error) {
-      toast.error('Failed to submit membership application. Please try again.');
+      console.error('Membership submission error:', error);
     } finally {
       setLoading(false);
     }

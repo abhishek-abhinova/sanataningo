@@ -19,6 +19,20 @@ const Donate = () => {
 
   const onSubmit = async (data) => {
     setLoading(true);
+    
+    // Show thank you page immediately
+    const donationData = {
+      donorName: data.donorName,
+      amount: data.amount,
+      purpose: data.purpose || 'general',
+      paymentReference: data.upiReference,
+      donationId: 'Processing...'
+    };
+    
+    navigate('/thank-you-donation', { 
+      state: { donationData } 
+    });
+    
     try {
       const formData = new FormData();
       Object.keys(data).forEach(key => {
@@ -29,22 +43,16 @@ const Donate = () => {
         }
       });
       
-      const response = await api.post('/donations/create', formData, {
+      await api.post('/donations/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       
-      if (response.data.success) {
-        toast.success('Donation submitted successfully!');
-        reset();
-        setSelectedAmount('');
-        navigate('/thank-you-donation', { 
-          state: { donationData: response.data.donation } 
-        });
-      }
+      reset();
+      setSelectedAmount('');
     } catch (error) {
-      toast.error('Failed to submit donation. Please try again.');
+      console.error('Donation submission error:', error);
     } finally {
       setLoading(false);
     }

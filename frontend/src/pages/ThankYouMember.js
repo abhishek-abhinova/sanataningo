@@ -1,9 +1,25 @@
-import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 
 const ThankYouMember = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const memberData = location.state?.memberData;
+  const [countdown, setCountdown] = useState(30);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          navigate('/');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [navigate]);
 
   return (
     <div style={{ marginTop: '90px', minHeight: '100vh', background: 'linear-gradient(135deg, #667eea, #764ba2)', padding: '2rem 0' }}>
@@ -36,11 +52,18 @@ const ThankYouMember = () => {
           <div style={{ background: '#e7e3ff', padding: '1.5rem', borderRadius: '10px', marginBottom: '2rem' }}>
             <h4 style={{ color: '#5a2d82', marginBottom: '0.5rem' }}>✅ What happens next?</h4>
             <ul style={{ textAlign: 'left', color: '#5a2d82', margin: 0, paddingLeft: '1.5rem' }}>
-              <li>Our team will verify your payment within 24-48 hours</li>
-              <li>You'll receive membership approval email</li>
-              <li>Digital membership card will be sent to your email</li>
-              <li>Access to all member benefits and programs</li>
+              <li><strong>Wait for 24 hours</strong> - Our team will verify your payment</li>
+              <li><strong>Membership approval email automatically</strong> - You'll receive confirmation in your email</li>
+              <li><strong>Digital membership card</strong> will be sent to your email</li>
+              <li><strong>Access to all member benefits</strong> and programs</li>
             </ul>
+          </div>
+
+          <div style={{ background: '#fff3cd', padding: '1.5rem', borderRadius: '10px', marginBottom: '2rem', textAlign: 'center' }}>
+            <h4 style={{ color: '#856404', marginBottom: '0.5rem' }}>⏰ Auto Redirect</h4>
+            <p style={{ color: '#856404', margin: 0, fontSize: '1.1rem' }}>
+              Redirecting to home page in <strong>{countdown} seconds</strong>
+            </p>
           </div>
 
           <div style={{ background: '#fff3cd', padding: '1.5rem', borderRadius: '10px', marginBottom: '2rem' }}>

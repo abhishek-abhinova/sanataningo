@@ -1,9 +1,25 @@
-import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 
 const ThankYouDonation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const donationData = location.state?.donationData;
+  const [countdown, setCountdown] = useState(30);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          navigate('/');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [navigate]);
 
   return (
     <div style={{ marginTop: '90px', minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa, #c3cfe2)', padding: '2rem 0' }}>
@@ -34,11 +50,18 @@ const ThankYouDonation = () => {
           <div style={{ background: '#e8f5e8', padding: '1.5rem', borderRadius: '10px', marginBottom: '2rem' }}>
             <h4 style={{ color: '#155724', marginBottom: '0.5rem' }}>✅ What happens next?</h4>
             <ul style={{ textAlign: 'left', color: '#155724', margin: 0, paddingLeft: '1.5rem' }}>
-              <li>Our team will verify your payment within 24-48 hours</li>
-              <li>You'll receive a donation receipt via email</li>
-              <li>Tax exemption certificate (80G) will be included</li>
-              <li>Thank you email with impact details</li>
+              <li><strong>Wait for 24 hours</strong> - Our team will verify your payment</li>
+              <li><strong>Email receipt automatically</strong> - You'll receive donation receipt in your email</li>
+              <li><strong>Tax exemption certificate (80G)</strong> will be included</li>
+              <li><strong>Thank you email</strong> with impact details</li>
             </ul>
+          </div>
+
+          <div style={{ background: '#fff3cd', padding: '1.5rem', borderRadius: '10px', marginBottom: '2rem', textAlign: 'center' }}>
+            <h4 style={{ color: '#856404', marginBottom: '0.5rem' }}>⏰ Auto Redirect</h4>
+            <p style={{ color: '#856404', margin: 0, fontSize: '1.1rem' }}>
+              Redirecting to home page in <strong>{countdown} seconds</strong>
+            </p>
           </div>
 
           <div style={{ background: '#fff3cd', padding: '1.5rem', borderRadius: '10px', marginBottom: '2rem' }}>
