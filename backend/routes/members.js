@@ -4,7 +4,7 @@ const path = require('path');
 const Member = require('../models/Member');
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
-const { sendAdminMemberNotification, sendMemberApprovalEmail } = require('../utils/emailService');
+const { sendAdminMemberNotification, sendMemberApprovalEmail, sendMembershipCardEmail } = require('../utils/emailService');
 
 const router = express.Router();
 
@@ -246,6 +246,21 @@ router.put('/extend/:id', auth, async (req, res) => {
     await member.save();
 
     res.json({ success: true, message: `Membership extended by ${months} months` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Send membership card
+router.post('/:id/send-card', auth, async (req, res) => {
+  try {
+    const member = await Member.findById(req.params.id);
+    if (!member) {
+      return res.status(404).json({ error: 'Member not found' });
+    }
+    
+    await sendMembershipCardEmail(member);
+    res.json({ success: true, message: 'Membership card sent successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -3,7 +3,7 @@ const multer = require('multer');
 const Donation = require('../models/Donation');
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
-const { sendAdminDonationNotification, sendDonationReceiptEmail } = require('../utils/emailService');
+const { sendAdminDonationNotification, sendDonationReceiptEmail, sendThankYouWithReceipt } = require('../utils/emailService');
 const router = express.Router();
 
 // Configure multer for file uploads
@@ -228,6 +228,21 @@ router.get('/pending', auth, async (req, res) => {
       .limit(50);
     
     res.json({ success: true, donations });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Send thank you email
+router.post('/:id/send-thank-you', auth, async (req, res) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) {
+      return res.status(404).json({ error: 'Donation not found' });
+    }
+    
+    await sendThankYouWithReceipt(donation);
+    res.json({ success: true, message: 'Thank you email sent successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

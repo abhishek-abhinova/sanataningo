@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { generateMembershipCardHTML, generateDonationReceiptHTML, generateThankYouEmailHTML } = require('./emailTemplates');
 
 // Create transporter with better error handling
 const transporter = nodemailer.createTransport({
@@ -300,11 +301,71 @@ const sendContactConfirmation = async (contact) => {
   }
 };
 
+// Send membership card email
+const sendMembershipCardEmail = async (member) => {
+  try {
+    const cardHTML = generateMembershipCardHTML(member);
+    
+    const mailOptions = {
+      from: process.env.ORG_EMAIL,
+      to: member.email,
+      subject: '🎫 Your Digital Membership Card - Sarboshakti Sanatani Sangathan',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #D2691E, #FF8C00); padding: 20px; text-align: center; color: white;">
+            <h2>🎫 Your Digital Membership Card</h2>
+          </div>
+          <div style="padding: 20px; text-align: center;">
+            <p>Dear ${member.fullName},</p>
+            <p>Please find your digital membership card below:</p>
+            ${cardHTML}
+            <p style="margin-top: 20px; color: #666;">Please save this card for your records.</p>
+          </div>
+        </div>
+      `
+    };
+    
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Membership card email sent');
+  } catch (error) {
+    console.error('❌ Failed to send membership card:', error);
+    throw error;
+  }
+};
+
+// Send thank you email with receipt
+const sendThankYouWithReceipt = async (donation) => {
+  try {
+    const thankYouHTML = generateThankYouEmailHTML(donation);
+    const receiptHTML = generateDonationReceiptHTML(donation);
+    
+    const mailOptions = {
+      from: process.env.ORG_EMAIL,
+      to: donation.email,
+      subject: '🙏 Thank You for Your Generous Donation - Sarboshakti Sanatani Sangathan',
+      html: thankYouHTML,
+      attachments: [{
+        filename: `donation-receipt-${donation.donationId}.html`,
+        content: receiptHTML,
+        contentType: 'text/html'
+      }]
+    };
+    
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Thank you email with receipt sent');
+  } catch (error) {
+    console.error('❌ Failed to send thank you email:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendAdminMemberNotification,
   sendAdminDonationNotification,
   sendMemberApprovalEmail,
   sendDonationReceiptEmail,
   sendContactNotification,
-  sendContactConfirmation
+  sendContactConfirmation,
+  sendMembershipCardEmail,
+  sendThankYouWithReceipt
 };

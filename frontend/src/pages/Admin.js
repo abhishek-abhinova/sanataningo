@@ -45,6 +45,18 @@ const MemberManagement = () => {
     }
   };
 
+  const sendMembershipCard = async (memberId) => {
+    setLoading(true);
+    try {
+      await api.post(`/members/${memberId}/send-card`);
+      toast.success('Membership card sent successfully!');
+    } catch (error) {
+      toast.error('Failed to send membership card');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
       <h3 style={{ marginBottom: '2rem' }}>👥 Member Management</h3>
@@ -90,7 +102,7 @@ const MemberManagement = () => {
                   </span>
                 </td>
                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-                  {member.status === 'pending' && (
+                  {member.status === 'pending' ? (
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button
                         onClick={() => approveMember(member._id)}
@@ -110,7 +122,15 @@ const MemberManagement = () => {
                         Reject
                       </button>
                     </div>
-                  )}
+                  ) : member.status === 'approved' ? (
+                    <button
+                      onClick={() => sendMembershipCard(member._id)}
+                      disabled={loading}
+                      style={{ background: '#007bff', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                    >
+                      Send ID Card
+                    </button>
+                  ) : null}
                 </td>
               </tr>
             ))}
@@ -164,6 +184,18 @@ const DonationManagement = () => {
     }
   };
 
+  const sendThankYouEmail = async (donationId) => {
+    setLoading(true);
+    try {
+      await api.post(`/donations/${donationId}/send-thank-you`);
+      toast.success('Thank you email sent successfully!');
+    } catch (error) {
+      toast.error('Failed to send thank you email');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
       <h3 style={{ marginBottom: '2rem' }}>💰 Donation Management</h3>
@@ -210,7 +242,7 @@ const DonationManagement = () => {
                   </span>
                 </td>
                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-                  {donation.paymentStatus === 'pending' && (
+                  {donation.paymentStatus === 'pending' ? (
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button
                         onClick={() => approveDonation(donation._id)}
@@ -230,6 +262,14 @@ const DonationManagement = () => {
                         Reject
                       </button>
                     </div>
+                  ) : (
+                    <button
+                      onClick={() => sendThankYouEmail(donation._id)}
+                      disabled={loading}
+                      style={{ background: '#007bff', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                    >
+                      Send Thank You
+                    </button>
                   )}
                 </td>
               </tr>
