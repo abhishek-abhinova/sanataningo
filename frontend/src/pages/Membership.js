@@ -118,6 +118,23 @@ const Membership = () => {
               </div>
 
               <div className="form-group">
+                <label htmlFor="aadhaarNumber">Aadhaar Number *</label>
+                <input
+                  type="text"
+                  id="aadhaarNumber"
+                  placeholder="Enter 12-digit Aadhaar number"
+                  {...register('aadhaarNumber', { 
+                    required: 'Aadhaar number is required',
+                    pattern: {
+                      value: /^[0-9]{12}$/,
+                      message: 'Please enter a valid 12-digit Aadhaar number'
+                    }
+                  })}
+                />
+                {errors.aadhaarNumber && <span className="error">{errors.aadhaarNumber.message}</span>}
+              </div>
+
+              <div className="form-group">
                 <label htmlFor="membershipType">Membership Type *</label>
                 <select
                   id="membershipType"
@@ -143,11 +160,29 @@ const Membership = () => {
               </div>
 
               <div style={{ background: '#e8f5e8', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #90ee90' }}>
-                <h4 style={{ color: '#228b22', marginBottom: '0.5rem' }}>Payment Instructions:</h4>
-                <p style={{ margin: 0, fontSize: '0.9rem', color: '#333' }}>
-                  Please make payment to our account and enter the transaction reference number above. 
-                  Your membership will be activated after payment verification by our admin team.
-                </p>
+                <h4 style={{ color: '#228b22', marginBottom: '1rem' }}>Payment Instructions:</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '1rem', alignItems: 'center' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <img 
+                      src="/images/scanner.jpeg" 
+                      alt="Payment QR Code" 
+                      style={{ width: '120px', height: '120px', border: '2px solid #228b22', borderRadius: '8px' }}
+                    />
+                    <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#228b22', fontWeight: 'bold' }}>Scan to Pay</p>
+                  </div>
+                  <div>
+                    <p style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#333' }}>
+                      <strong>Bank Details:</strong><br/>
+                      Account Name: Sarboshakti Sanatani Sangathan<br/>
+                      Account No: XXXX-XXXX-XXXX<br/>
+                      IFSC: XXXXXXXX
+                    </p>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#333' }}>
+                      Please make payment and enter the transaction reference number above. 
+                      Your membership will be activated after payment verification.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <button 

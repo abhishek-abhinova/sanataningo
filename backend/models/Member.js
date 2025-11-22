@@ -42,6 +42,11 @@ const memberSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  aadhaarNumber: {
+    type: String,
+    required: true,
+    match: /^[0-9]{12}$/
+  },
   paymentStatus: {
     type: String,
     enum: ['pending', 'completed', 'failed'],

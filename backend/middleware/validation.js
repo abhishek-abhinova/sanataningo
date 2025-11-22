@@ -20,7 +20,8 @@ const memberValidation = [
   body('address').trim().isLength({ min: 10 }).withMessage('Address must be at least 10 characters'),
   body('dateOfBirth').isISO8601().withMessage('Valid date of birth is required'),
   body('occupation').trim().isLength({ min: 2 }).withMessage('Occupation is required'),
-  body('membershipType').isIn(['basic', 'premium', 'lifetime']).withMessage('Invalid membership type')
+  body('membershipType').isIn(['basic', 'premium', 'lifetime']).withMessage('Invalid membership type'),
+  body('aadhaarNumber').matches(/^[0-9]{12}$/).withMessage('Valid 12-digit Aadhaar number is required')
 ];
 
 // Donation validation rules

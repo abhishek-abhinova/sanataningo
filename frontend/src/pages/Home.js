@@ -16,25 +16,25 @@ const Home = () => {
   const founders = [
     {
       name: 'Shri Ajit Ray',
-      position: 'Founder',
+      position: 'Trustee',
       image: '/images/p1.jpeg',
       description: 'A devoted follower of Sanatan Sanskriti committed to serving society through dharma, awareness, and compassion. Leading the organization with spiritual wisdom and social vision.'
     },
     {
       name: 'Shri Dinesh Bairagi',
-      position: 'Founder',
+      position: 'Trustee',
       image: '/images/p2.jpeg',
       description: 'A spiritual thinker and scholar guiding the Sangathan\'s cultural preservation and Sanatan awareness programs with deep knowledge of ancient scriptures.'
     },
     {
       name: 'Shri Shreebash Halder',
-      position: 'Founder',
+      position: 'Trustee',
       image: '/images/p3.jpeg',
       description: 'Dedicated to executing social welfare activities, charity drives, and community upliftment programs with hands-on approach to serving the needy.'
     },
     {
       name: 'Shri Goutam Chandra Biswas',
-      position: 'Founder',
+      position: 'Trustee',
       image: '/images/p4.jpeg',
       description: 'Works closely with the next generation to promote dharmic values, leadership development, and moral responsibility among youth and students.'
     }
@@ -153,7 +153,7 @@ const Home = () => {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            Our Founders
+            Our Trustees
           </motion.h2>
           <div className="founders-grid">
             {founders.map((founder, index) => (

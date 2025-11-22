@@ -892,7 +892,8 @@ section {
     }
     
     .nav-logo span {
-        display: none;
+        display: block;
+        font-size: 0.8rem;
     }
     
     .logo-img {
@@ -1226,5 +1227,19 @@ section {
     
     .social-links {
         justify-content: center;
+    }
+}
+
+/* QR Code Responsive */
+@media (max-width: 600px) {
+    .form-group div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+        text-align: center;
+        gap: 1rem !important;
+    }
+    
+    .form-group img[alt="Payment QR Code"] {
+        width: 100px !important;
+        height: 100px !important;
     }
 }

@@ -8,7 +8,7 @@ const router = express.Router();
 // Create membership
 router.post('/', memberValidation, handleValidationErrors, async (req, res) => {
   try {
-    const { fullName, email, phone, address, dateOfBirth, occupation, membershipType, paymentReference } = req.body;
+    const { fullName, email, phone, address, dateOfBirth, occupation, membershipType, paymentReference, aadhaarNumber } = req.body;
     
     // Determine amount based on membership type
     const amounts = {
@@ -29,6 +29,7 @@ router.post('/', memberValidation, handleValidationErrors, async (req, res) => {
       membershipType,
       amount,
       paymentReference,
+      aadhaarNumber,
       paymentStatus: 'pending'
     });
     
