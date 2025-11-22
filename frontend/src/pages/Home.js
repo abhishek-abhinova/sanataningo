@@ -1,0 +1,216 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+
+const Home = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  
+  const slides = [
+    'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1920&h=1080&fit=crop',
+    'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1920&h=1080&fit=crop',
+    'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=1920&h=1080&fit=crop',
+    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop',
+    'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&h=1080&fit=crop'
+  ];
+
+  const founders = [
+    {
+      name: 'Shri Ajit Ray',
+      position: 'Founder',
+      image: '/images/p1.jpeg',
+      description: 'A devoted follower of Sanatan Sanskriti committed to serving society through dharma, awareness, and compassion. Leading the organization with spiritual wisdom and social vision.'
+    },
+    {
+      name: 'Shri Dinesh Bairagi',
+      position: 'Founder',
+      image: '/images/p2.jpeg',
+      description: 'A spiritual thinker and scholar guiding the Sangathan\'s cultural preservation and Sanatan awareness programs with deep knowledge of ancient scriptures.'
+    },
+    {
+      name: 'Shri Shreebash Halder',
+      position: 'Founder',
+      image: '/images/p3.jpeg',
+      description: 'Dedicated to executing social welfare activities, charity drives, and community upliftment programs with hands-on approach to serving the needy.'
+    },
+    {
+      name: 'Shri Goutam Chandra Biswas',
+      position: 'Founder',
+      image: '/images/p4.jpeg',
+      description: 'Works closely with the next generation to promote dharmic values, leadership development, and moral responsibility among youth and students.'
+    }
+  ];
+
+  const values = [
+    { icon: 'fas fa-om', title: 'Dharma', subtitle: 'Righteousness' },
+    { icon: 'fas fa-praying-hands', title: 'Seva', subtitle: 'Selfless Service' },
+    { icon: 'fas fa-sun', title: 'Satya', subtitle: 'Truth' },
+    { icon: 'fas fa-dove', title: 'Karuna', subtitle: 'Compassion' },
+    { icon: 'fas fa-globe-asia', title: 'Vasudhaiva Kutumbakam', subtitle: 'The World is One Family' }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+  };
+
+  return (
+    <div>
+      {/* Hero Section */}
+      <section className="hero">
+        <div className="slideshow-container">
+          {slides.map((slide, index) => (
+            <div
+              key={index}
+              className={`slide ${index === currentSlide ? 'active' : ''}`}
+              style={{ backgroundImage: `url(${slide})` }}
+            />
+          ))}
+        </div>
+        <div className="hero-overlay"></div>
+        <div className="slide-indicators">
+          {slides.map((_, index) => (
+            <div
+              key={index}
+              className={`indicator ${index === currentSlide ? 'active' : ''}`}
+              onClick={() => goToSlide(index)}
+            />
+          ))}
+        </div>
+        <motion.div 
+          className="hero-content"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+        >
+          <div className="hero-badge">
+            <i className="fas fa-om"></i>
+            <span>Established with Divine Purpose</span>
+          </div>
+          <h1>Sarboshakti Sanatani Sangathan</h1>
+          <h2>Serving Humanity through the Light of Sanatan Dharma</h2>
+          <p>A divine movement dedicated to Dharma, Seva, Sanskriti, and Samaj.<br />
+          Join us in preserving the eternal values of Sanatan culture and uplifting every life with compassion and duty.</p>
+          <div className="hero-stats">
+            <div className="stat-item">
+              <div className="stat-number">1200+</div>
+              <div className="stat-label">Active Members</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">75+</div>
+              <div className="stat-label">Programs</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">12+</div>
+              <div className="stat-label">Years Serving</div>
+            </div>
+          </div>
+          <div className="hero-buttons">
+            <Link to="/membership" className="btn btn-primary">
+              <i className="fas fa-users"></i>
+              Become a Member
+            </Link>
+            <Link to="/donate" className="btn btn-secondary">
+              <i className="fas fa-heart"></i>
+              Donate Now
+            </Link>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* About Section */}
+      <section className="about-intro">
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2>About the Organization</h2>
+            <p>Sarboshakti Sanatani Sangathan is a non-profit, socio-spiritual organization devoted to the service of humanity based on the eternal principles of Sanatan Dharma. We conduct welfare activities, spiritual programs, cultural preservation initiatives, education drives, and community upliftment efforts across the country.</p>
+            <div className="mission-quote">
+              <i className="fas fa-quote-left"></i>
+              <p>Serve all, love all, protect dharma, uplift humanity.</p>
+              <i className="fas fa-quote-right"></i>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Founders Section */}
+      <section className="founders">
+        <div className="container">
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            Our Founders
+          </motion.h2>
+          <div className="founders-grid">
+            {founders.map((founder, index) => (
+              <motion.div
+                key={index}
+                className="founder-card"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -10, scale: 1.02 }}
+              >
+                <div className="founder-image">
+                  <img src={founder.image} alt={founder.name} className="founder-photo" />
+                </div>
+                <h3>{founder.name}</h3>
+                <h4><i className="fas fa-crown"></i> {founder.position}</h4>
+                <p>{founder.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Sanatan Dharma Foundation */}
+      <section className="dharma-foundation">
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2>Sanatan Dharma – Our Foundation</h2>
+            <p>Sanatan Dharma is not just a religion—it is a way of life built on truth, purity, compassion, and eternal wisdom.</p>
+            <div className="values-grid">
+              {values.map((value, index) => (
+                <motion.div
+                  key={index}
+                  className="value-item"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <i className={value.icon}></i>
+                  <h3>{value.title}</h3>
+                  <p>{value.subtitle}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Home;
