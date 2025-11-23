@@ -13,10 +13,9 @@ const Footer = () => {
               We work towards cultural preservation, community development, and spiritual upliftment.
             </p>
             <div className="social-links">
-              <a href="#" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a>
-              <a href="#" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
-              <a href="#" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
-              <a href="#" aria-label="YouTube"><i className="fab fa-youtube"></i></a>
+              <a href="https://www.facebook.com/share/1G7CvWCqd8/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <i className="fab fa-facebook-f"></i>
+              </a>
             </div>
           </div>
 
