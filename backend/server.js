@@ -39,19 +39,51 @@ app.use(helmet({
   contentSecurityPolicy: false // Disable CSP to avoid HTML injection issues
 }));
 
+// CORS configuration with explicit preflight handling
 app.use(cors({
-  origin: [
-    'https://sarboshaktisonatanisangathan.org',
-    'https://www.sarboshaktisonatanisangathan.org',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    process.env.FRONTEND_URL
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'https://sarboshaktisonatanisangathan.org',
+      'https://www.sarboshaktisonatanisangathan.org',
+      'http://localhost:3000',
+      'http://localhost:3001',
+      process.env.FRONTEND_URL
+    ].filter(Boolean);
+    
+    // Allow requests with no origin (mobile apps, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('❌ CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'Authorization',
+    'Cache-Control',
+    'X-HTTP-Method-Override'
+  ],
+  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+  optionsSuccessStatus: 200,
+  preflightContinue: false
 }));
+
+// Handle preflight requests explicitly
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
 
 // Rate limiting
 const limiter = rateLimit({
@@ -69,7 +101,7 @@ app.use('/api/', limiter);
 app.use((req, res, next) => {
   // Only log API requests to avoid HTML content
   if (req.url.startsWith('/api/')) {
-    console.log(`🔍 ${req.method} ${req.url}`);
+    console.log(`🔍 ${req.method} ${req.url} - Origin: ${req.headers.origin || 'No origin'}`);
   }
   next();
 });
