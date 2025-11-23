@@ -1,6 +1,6 @@
-# Sarboshakti Sanatani Sangathan - Full Stack React Application
+# Sarbo Shakti Sonatani Sangathan - Full Stack React Application
 
-A complete full-stack web application for Sarboshakti Sanatani Sangathan NGO built with React frontend and Node.js backend with MongoDB database.
+A complete full-stack web application for Sarbo Shakti Sonatani Sangathan NGO built with React frontend and Node.js backend with MongoDB database.
 
 ## 🚀 Features
 
@@ -29,7 +29,8 @@ A complete full-stack web application for Sarboshakti Sanatani Sangathan NGO bui
 - **File Upload** handling with Multer
 
 ### Key Functionalities
-- ✅ **Membership Registration** with payment integration
+- ✅ **Membership Registration** with payment integration and Aadhaar verification
+- ✅ **Aadhaar Card Upload** with front and back image validation
 - ✅ **Donation Processing** with receipt generation
 - ✅ **Contact Form** with email notifications
 - ✅ **Admin Dashboard** for data management
@@ -37,6 +38,7 @@ A complete full-stack web application for Sarboshakti Sanatani Sangathan NGO bui
 - ✅ **Email Automation** with HTML templates
 - ✅ **Payment Verification** with webhooks
 - ✅ **Responsive Gallery** with image optimization
+- ✅ **Mobile-First Design** with enhanced responsive layout
 
 ## 📁 Project Structure
 
@@ -134,7 +136,7 @@ RAZORPAY_KEY_ID=your-razorpay-key-id
 RAZORPAY_KEY_SECRET=your-razorpay-key-secret
 
 # Organization Details
-ORG_NAME=Sarboshakti Sanatani Sangathan
+ORG_NAME=Sarbo Shakti Sonatani Sangathan
 ORG_ADDRESS=K-11, S/F, Gali No. 6, Old Gobind Pura, Delhi — 110051, India
 ORG_EMAIL=info@sarboshakti.org
 ORG_PHONE=+91 XXXXX XXXXX

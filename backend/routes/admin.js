@@ -19,24 +19,31 @@ router.get('/', auth, async (req, res) => {
 // Dashboard statistics
 router.get('/dashboard', auth, async (req, res) => {
   try {
+    const Contact = require('../models/Contact');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    const totalMembers = await Member.countDocuments();
+    const pendingMembers = await Member.countDocuments({ status: 'pending' });
+    const totalContacts = await Contact.countDocuments();
+    
+    // Calculate total donation amount
+    const donationSum = await Donation.aggregate([
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    const totalDonations = donationSum.length > 0 ? donationSum[0].total : 0;
+
     const stats = {
-      totalRegistered: await Member.countDocuments(),
+      totalMembers,
+      pendingMembers,
+      totalContacts,
+      totalDonations,
       activeMembers: await Member.countDocuments({ 
         status: 'approved', 
         validTill: { $gte: new Date() } 
       }),
-      pendingMembers: await Member.countDocuments({ status: 'pending' }),
       approvedMembers: await Member.countDocuments({ status: 'approved' }),
       rejectedMembers: await Member.countDocuments({ status: 'rejected' }),
-      expiredMembers: await Member.countDocuments({ 
-        status: 'approved', 
-        validTill: { $lt: new Date() } 
-      }),
-      totalDonations: await Donation.countDocuments(),
-      approvedDonations: await Donation.countDocuments({ status: 'approved' }),
       todayRegistrations: await Member.countDocuments({ 
         createdAt: { $gte: today } 
       }),
@@ -253,7 +260,8 @@ router.post('/gallery', auth, async (req, res) => {
       description: req.body.description,
       image: req.body.image || '/uploads/gallery/default.jpg',
       category: req.body.category || 'general',
-      showOnHomepage: req.body.showOnHomepage === 'true'
+      showOnHomepage: req.body.showOnHomepage === 'true',
+      published: true
     });
     await gallery.save();
     res.json({ success: true, gallery });
@@ -262,11 +270,21 @@ router.post('/gallery', auth, async (req, res) => {
   }
 });
 
-router.get('/gallery', async (req, res) => {
+router.get('/gallery', auth, async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
     const images = await Gallery.find({ published: true }).sort({ createdAt: -1 });
-    res.json({ images });
+    res.json({ success: true, images });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/gallery/:id', auth, async (req, res) => {
+  try {
+    const Gallery = require('../models/Gallery');
+    const gallery = await Gallery.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json({ success: true, gallery });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -292,11 +310,21 @@ router.post('/team', auth, async (req, res) => {
   }
 });
 
-router.get('/team', async (req, res) => {
+router.get('/team', auth, async (req, res) => {
   try {
     const Team = require('../models/Team');
     const team = await Team.find({ active: true }).sort({ order: 1, createdAt: -1 });
-    res.json({ team });
+    res.json({ success: true, team });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/team/:id', auth, async (req, res) => {
+  try {
+    const Team = require('../models/Team');
+    const team = await Team.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json({ success: true, team });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -313,7 +341,7 @@ router.post('/events', auth, async (req, res) => {
       eventDate: req.body.eventDate,
       status: req.body.status || 'upcoming',
       published: true,
-      createdBy: req.user._id
+      createdBy: req.user.userId
     });
     await event.save();
     res.json({ success: true, event });
@@ -322,11 +350,57 @@ router.post('/events', auth, async (req, res) => {
   }
 });
 
-router.get('/events', async (req, res) => {
+router.get('/events', auth, async (req, res) => {
   try {
     const Event = require('../models/Event');
     const events = await Event.find({ published: true }).sort({ eventDate: -1 });
-    res.json({ events });
+    res.json({ success: true, events });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/events/:id', auth, async (req, res) => {
+  try {
+    const Event = require('../models/Event');
+    const event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json({ success: true, event });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Settings routes
+router.get('/settings', auth, async (req, res) => {
+  try {
+    const Settings = require('../models/Settings');
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = new Settings({
+        organizationName: 'Sarbo Shakti Sonatani Sangathan',
+        email: 'info@sarboshakti.org',
+        phone: '+91 9876543210',
+        address: '19, Kalyan Kunj, Sector 49, Gautam Buddha Nagar, Uttar Pradesh-231301'
+      });
+      await settings.save();
+    }
+    res.json({ success: true, settings });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/settings', auth, async (req, res) => {
+  try {
+    const Settings = require('../models/Settings');
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = new Settings(req.body);
+    } else {
+      Object.assign(settings, req.body);
+    }
+    await settings.save();
+    res.json({ success: true, settings });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -11,7 +11,13 @@ const router = express.Router();
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/screenshots/');
+    if (file.fieldname === 'paymentScreenshot') {
+      cb(null, 'uploads/screenshots/');
+    } else if (file.fieldname === 'aadhaarFront' || file.fieldname === 'aadhaarBack') {
+      cb(null, 'uploads/aadhaar/');
+    } else {
+      cb(null, 'uploads/');
+    }
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -30,13 +36,17 @@ const upload = multer({
   }
 });
 
-// Register new member
-router.post('/register', upload.single('paymentScreenshot'), async (req, res) => {
+// Register new member (PUBLIC - no auth required)
+router.post('/register', upload.fields([
+  { name: 'paymentScreenshot', maxCount: 1 },
+  { name: 'aadhaarFront', maxCount: 1 },
+  { name: 'aadhaarBack', maxCount: 1 }
+]), async (req, res) => {
   try {
-    const { fullName, email, phone, address, state, membershipPlan, amount, upiReference } = req.body;
+    const { fullName, email, phone, address, dateOfBirth, occupation, aadhaarNumber, membershipPlan, amount, upiReference } = req.body;
     
-    if (!req.file) {
-      return res.status(400).json({ error: 'Payment screenshot is required' });
+    if (!req.files || !req.files.paymentScreenshot || !req.files.aadhaarFront || !req.files.aadhaarBack) {
+      return res.status(400).json({ error: 'Payment screenshot and both Aadhaar card images are required' });
     }
     
     // Validate UPI reference format (12 digits)
@@ -55,11 +65,16 @@ router.post('/register', upload.single('paymentScreenshot'), async (req, res) =>
       email,
       phone,
       address,
-      state,
+      dateOfBirth,
+      occupation,
+      aadhaarNumber,
+      aadhaarFront: req.files.aadhaarFront[0].path,
+      aadhaarBack: req.files.aadhaarBack[0].path,
+      state: 'Delhi', // Default state, can be made dynamic
       membershipPlan,
       amount,
       upiReference,
-      paymentScreenshot: req.file.path
+      paymentScreenshot: req.files.paymentScreenshot[0].path
     });
 
     await member.save();
@@ -70,7 +85,7 @@ router.post('/register', upload.single('paymentScreenshot'), async (req, res) =>
       type: 'membership',
       amount,
       upiReference,
-      paymentScreenshot: req.file.path
+      paymentScreenshot: req.files.paymentScreenshot[0].path
     });
 
     await transaction.save();
@@ -152,10 +167,10 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-// Approve member
+// Approve member and send card
 router.put('/approve/:id', auth, async (req, res) => {
   try {
-    const { duration = 12 } = req.body; // Default 12 months
+    const { duration = 12 } = req.body;
     
     const member = await Member.findById(req.params.id);
     if (!member) {
@@ -169,27 +184,114 @@ router.put('/approve/:id', auth, async (req, res) => {
     member.approvedBy = req.user.id;
     member.approvedAt = new Date();
     member.validTill = validTill;
+    member.cardGenerated = true;
 
     await member.save();
 
-    // Update transaction
-    await Transaction.findOneAndUpdate(
-      { memberId: member._id, type: 'membership' },
-      { 
-        status: 'approved',
-        verifiedBy: req.user.id,
-        verifiedAt: new Date()
-      }
-    );
-
-    // Send approval email
+    // Generate and send membership card
     try {
-      await sendMemberApprovalEmail(member);
-    } catch (emailError) {
-      console.error('Approval email failed:', emailError);
+      const { generateMembershipCard } = require('../utils/cardGenerator');
+      const { sendMembershipCardEmail } = require('../utils/emailService');
+      
+      const cardPath = await generateMembershipCard(member);
+      member.cardFile = cardPath;
+      await member.save();
+      
+      const { sendMembershipCardWithPDF } = require('../utils/emailService');
+      await sendMembershipCardWithPDF(member, cardPath);
+    } catch (error) {
+      console.error('Card generation/email failed:', error);
     }
 
-    res.json({ success: true, message: 'Member approved successfully' });
+    res.json({ success: true, message: 'Member approved and card sent successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Send membership card
+router.post('/member/send-card/:id', auth, async (req, res) => {
+  try {
+    const member = await Member.findById(req.params.id);
+    if (!member) {
+      return res.status(404).json({ error: 'Member not found' });
+    }
+    
+    const { generateMembershipCard } = require('../utils/cardGenerator');
+    const { sendMembershipCardEmail } = require('../utils/emailService');
+    
+    const cardPath = await generateMembershipCard(member);
+    member.cardFile = cardPath;
+    member.cardGenerated = true;
+    await member.save();
+    
+    const { sendMembershipCardWithPDF } = require('../utils/emailService');
+    await sendMembershipCardWithPDF(member, cardPath);
+    
+    res.json({ success: true, message: 'Membership card sent successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Approve donation and send receipt
+router.post('/donation/approve/:id', auth, async (req, res) => {
+  try {
+    const Donation = require('../models/Donation');
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) {
+      return res.status(404).json({ error: 'Donation not found' });
+    }
+
+    donation.paymentStatus = 'approved';
+    donation.approvedBy = req.user.userId;
+    donation.approvedAt = new Date();
+    donation.receiptGenerated = true;
+
+    await donation.save();
+
+    // Generate and send receipt
+    try {
+      const { generateDonationReceipt } = require('../utils/cardGenerator');
+      const { sendDonationReceiptEmail } = require('../utils/emailService');
+      
+      const receiptPath = await generateDonationReceipt(donation);
+      donation.receiptFile = receiptPath;
+      await donation.save();
+      
+      const { sendDonationReceiptWithPDF } = require('../utils/emailService');
+      await sendDonationReceiptWithPDF(donation, receiptPath);
+    } catch (error) {
+      console.error('Receipt generation/email failed:', error);
+    }
+
+    res.json({ success: true, message: 'Donation approved and receipt sent successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Send donation receipt
+router.post('/donation/send-receipt/:id', auth, async (req, res) => {
+  try {
+    const Donation = require('../models/Donation');
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) {
+      return res.status(404).json({ error: 'Donation not found' });
+    }
+    
+    const { generateDonationReceipt } = require('../utils/cardGenerator');
+    const { sendDonationReceiptEmail } = require('../utils/emailService');
+    
+    const receiptPath = await generateDonationReceipt(donation);
+    donation.receiptFile = receiptPath;
+    donation.receiptGenerated = true;
+    await donation.save();
+    
+    const { sendDonationReceiptWithPDF } = require('../utils/emailService');
+    await sendDonationReceiptWithPDF(donation, receiptPath);
+    
+    res.json({ success: true, message: 'Receipt sent successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -24,11 +24,37 @@ pids
 # Coverage directory used by tools like istanbul
 coverage/
 
-# Uploads and generated files
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# Uploads (keep structure but ignore files)
+uploads/aadhaar/*
+!uploads/aadhaar/.gitkeep
 uploads/cards/*
-uploads/receipts/*
 !uploads/cards/.gitkeep
+uploads/receipts/*
 !uploads/receipts/.gitkeep
+uploads/screenshots/*
+!uploads/screenshots/.gitkeep
 
 # OS generated files
 .DS_Store
@@ -44,7 +70,8 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+*~
 
-# Temporary files
-tmp/
-temp/
+# Build files
+dist/
+build/

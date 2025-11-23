@@ -211,6 +211,34 @@ router.put('/:id/reject', auth, async (req, res) => {
   }
 });
 
+// Get all donations list (Admin only)
+router.get('/list', auth, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 10 } = req.query;
+    
+    let query = {};
+    if (status) query.paymentStatus = status;
+
+    const donations = await Donation.find(query)
+      .populate('approvedBy', 'name')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Donation.countDocuments(query);
+
+    res.json({
+      success: true,
+      donations,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get all donations (Admin only)
 router.get('/', auth, async (req, res) => {
   try {

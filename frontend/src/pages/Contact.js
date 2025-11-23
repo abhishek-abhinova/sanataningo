@@ -121,14 +121,23 @@ const Contact = () => {
             <div>
               <h2>Contact Information</h2>
               <div style={{ background: 'white', padding: '2rem', borderRadius: '10px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
-                <div style={{ marginBottom: '2rem' }}>
-                  <h3><i className="fas fa-map-marker-alt" style={{ color: '#d2691e', marginRight: '10px' }}></i> Address</h3>
-                  <p>K-11, S/F, Gali No. 6, Old Gobind Pura<br />Delhi — 110051, India</p>
+                <div style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, #fff8f0, #fef6ed)', padding: '1.5rem', borderRadius: '12px', border: '2px solid #ffd700' }}>
+                  <h3><i className="fas fa-map-marker-alt" style={{ color: '#d2691e', marginRight: '10px' }}></i> Registered Office</h3>
+                  <div style={{ background: 'white', padding: '1rem', borderRadius: '8px', marginTop: '1rem', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                    <p style={{ fontWeight: '600', color: '#8b4513', lineHeight: '1.6' }}>
+                      🏢 <strong>Sarbo Shakti Sonatani Sangathan</strong><br/>
+                      19, Kalyan Kunj, Sector 49<br/>
+                      Gautam Buddha Nagar, Uttar Pradesh-231301
+                    </p>
+                  </div>
                 </div>
 
                 <div style={{ marginBottom: '2rem' }}>
-                  <h3><i className="fas fa-phone" style={{ color: '#d2691e', marginRight: '10px' }}></i> Phone</h3>
-                  <p>+91 XXXXX XXXXX</p>
+                  <h3><i className="fas fa-phone" style={{ color: '#d2691e', marginRight: '10px' }}></i> Contact Numbers</h3>
+                  <p><strong>Shri Goutam Chandra Biswas (President):</strong> +91 9876543210<br/>
+                     <strong>Shri Ajit Ray (Secretary):</strong> +91 9876543211<br/>
+                     <strong>Shri Amiyo Govinda Biswas:</strong> +91 9876543212<br/>
+                     <strong>Shri Pratap Malik:</strong> +91 9876543213</p>
                 </div>
 
                 <div style={{ marginBottom: '2rem' }}>
@@ -145,9 +154,35 @@ const Contact = () => {
               </div>
 
               <div style={{ marginTop: '2rem', background: 'white', padding: '2rem', borderRadius: '10px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
+                <h3><i className="fas fa-users" style={{ color: '#d2691e', marginRight: '10px' }}></i> Officials Contact</h3>
+                <div style={{ marginTop: '1rem' }}>
+                  <div style={{ marginBottom: '1rem', padding: '0.8rem', background: '#f8f9fa', borderRadius: '5px' }}>
+                    <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0' }}>Shri Goutam Chandra Biswas</h4>
+                    <p style={{ margin: '0', fontSize: '0.9rem' }}><strong>President & Founder</strong></p>
+                    <p style={{ margin: '0', fontSize: '0.9rem' }}><i className="fas fa-phone" style={{ color: '#d2691e' }}></i> +91 9876543210</p>
+                  </div>
+                  <div style={{ marginBottom: '1rem', padding: '0.8rem', background: '#f8f9fa', borderRadius: '5px' }}>
+                    <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0' }}>Shri Ajit Ray</h4>
+                    <p style={{ margin: '0', fontSize: '0.9rem' }}><strong>Secretary</strong></p>
+                    <p style={{ margin: '0', fontSize: '0.9rem' }}><i className="fas fa-phone" style={{ color: '#d2691e' }}></i> +91 9876543211</p>
+                  </div>
+                  <div style={{ marginBottom: '1rem', padding: '0.8rem', background: '#f8f9fa', borderRadius: '5px' }}>
+                    <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0' }}>Shri Amiyo Govinda Biswas</h4>
+                    <p style={{ margin: '0', fontSize: '0.9rem' }}><strong>Executive Member</strong></p>
+                    <p style={{ margin: '0', fontSize: '0.9rem' }}><i className="fas fa-phone" style={{ color: '#d2691e' }}></i> +91 9876543212</p>
+                  </div>
+                  <div style={{ padding: '0.8rem', background: '#f8f9fa', borderRadius: '5px' }}>
+                    <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0' }}>Shri Pratap Malik</h4>
+                    <p style={{ margin: '0', fontSize: '0.9rem' }}><strong>Executive Member</strong></p>
+                    <p style={{ margin: '0', fontSize: '0.9rem' }}><i className="fas fa-phone" style={{ color: '#d2691e' }}></i> +91 9876543213</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ marginTop: '2rem', background: 'white', padding: '2rem', borderRadius: '10px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
                 <h3>Follow Us</h3>
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <a href="#" className="social-link">
+                  <a href="https://www.facebook.com/share/1G7CvWCqd8/" target="_blank" rel="noopener noreferrer" className="social-link">
                     <i className="fab fa-facebook-f"></i>
                     <span>Facebook</span>
                   </a>

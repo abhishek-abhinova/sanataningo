@@ -62,6 +62,12 @@ const donationSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  receiptFile: {
+    type: String // Path to generated receipt file
+  },
+  receiptCreatedAt: {
+    type: Date
+  },
   receiptPath: String,
   isAnonymous: {
     type: Boolean,

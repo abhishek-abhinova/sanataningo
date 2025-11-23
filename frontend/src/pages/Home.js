@@ -50,8 +50,8 @@ const Home = () => {
 
   const fetchTeamMembers = async () => {
     try {
-      const response = await api.get('/admin/team?homepage=true');
-      setTeamMembers(response.data.team || []);
+      const response = await api.get('/public/team');
+      setTeamMembers(response.data || []);
     } catch (error) {
       console.error('Failed to fetch team members:', error);
       setTeamMembers([]); // Set empty array on error
@@ -97,7 +97,7 @@ const Home = () => {
             <i className="fas fa-om"></i>
             <span>Established with Divine Purpose</span>
           </div>
-          <h1>Sarboshakti Sanatani Sangathan</h1>
+          <h1>Sarbo Shakti Sonatani Sangathan</h1>
           <h2>Serving Humanity through the Light of Sanatan Dharma</h2>
           <p>A divine movement dedicated to Dharma, Seva, Sanskriti, and Samaj.<br />
           Join us in preserving the eternal values of Sanatan culture and uplifting every life with compassion and duty.</p>
@@ -138,7 +138,7 @@ const Home = () => {
             viewport={{ once: true }}
           >
             <h2>About the Organization</h2>
-            <p>Sarboshakti Sanatani Sangathan is a non-profit, socio-spiritual organization devoted to the service of humanity based on the eternal principles of Sanatan Dharma. We conduct welfare activities, spiritual programs, cultural preservation initiatives, education drives, and community upliftment efforts across the country.</p>
+            <p>Sarbo Shakti Sonatani Sangathan is a non-profit, socio-spiritual organization devoted to the service of humanity based on the eternal principles of Sanatan Dharma. We conduct welfare activities, spiritual programs, cultural preservation initiatives, education drives, and community upliftment efforts across the country.</p>
             <div className="mission-quote">
               <i className="fas fa-quote-left"></i>
               <p>Serve all, love all, protect dharma, uplift humanity.</p>
@@ -205,7 +205,7 @@ const Home = () => {
               <h4><i className="fas fa-hands-helping"></i> Trustee</h4>
               <p>Dedicated to executing social welfare activities, charity drives, and community upliftment programs with hands-on approach to serving the needy.</p>
             </motion.div>
-            <motion.div
+            <motion.div 
               className="founder-card"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -237,24 +237,26 @@ const Home = () => {
             Our Team ({teamMembers.length > 0 ? teamMembers.length : '21'} Members)
           </motion.h2>
           <div className="team-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
-            {(teamMembers.length > 0 ? teamMembers : [
-              { name: 'Aleep Biswas', photo: 'images/aleep-biswas.jpeg' },
-              { name: 'Amiyo Govinda Biswas', photo: 'images/amiyo-govinda-biswas.jpeg' },
-              { name: 'Arun Kumar Biswas', photo: 'images/arun-kumar-biswas.jpeg' },
-              { name: 'Bijan Biswas', photo: 'images/bijan-biswas.jpeg' },
-              { name: 'Bijon Kumar Biswas', photo: 'images/bijon-kumar-biswas-delhi.jpeg' },
-              { name: 'Dr. Uttam Kumar Biswas', photo: 'images/dr.-uttam-kumar-biswas.jpeg' },
-              { name: 'Mr. Somenath Biswas', photo: 'images/mr-somenath-biswas.jpeg' },
-              { name: 'Mr. Deepu Sarkar', photo: 'images/mr.-deepu-sarkar.jpeg' },
-              { name: 'Mrinal Kanti Biswas', photo: 'images/mrinal-kanti-biswas.jpeg' },
-              { name: 'Neuton Roy', photo: 'images/neuton-roy.jpeg' },
-              { name: 'Pratap Malik', photo: 'images/pratap-malik.jpeg' },
-              { name: 'Pronit Roy', photo: 'images/pronit-roy.jpeg' },
-              { name: 'Robin Kumar Ranjit Biswas', photo: 'images/robin-kumar-ranjit-biswas.jpeg' },
-              { name: 'Somendra Srivastava', photo: 'images/somendra-srivastava.jpeg' },
-              { name: 'Tarak Chandra Pal', photo: 'images/tarak-chandra-pal.jpeg' },
-              { name: 'Subhash Kumar', photo: 'images/subhash-kumar.jpeg' },
-              { name: 'Sudin Biswas', photo: 'images/sudin-biswas-noida.jpeg' }
+            {(teamMembers.length > 0 ? teamMembers.slice(4) : [
+              { name: 'Shri Amiyo Govinda Biswas', image: '/images/amiyo-govinda-biswas.jpeg' },
+              { name: 'Shri Pratap Malik', image: '/images/pratap-malik.jpeg' },
+              { name: 'Shri Tarak Chandra Pal', image: '/images/tarak-chandra-pal.jpeg' },
+              { name: 'Dr. Uttam Kumar Biswas', image: '/images/dr.-uttam-kumar-biswas.jpeg' },
+              { name: 'Shri Bijon Biswas', image: '/images/bijan-biswas.jpeg' },
+              { name: 'Shri Arun Kumar Biswas', image: '/images/arun-kumar-biswas.jpeg' },
+              { name: 'Shri Sudin Biswas', image: '/images/sudin-biswas-noida.jpeg' },
+              { name: 'Shri Aleep Biswas', image: '/images/aleep-biswas.jpeg' },
+              { name: 'Shri Shyamlal Chaudhary', image: '/images/Shyamlalchaudhary.jpeg' },
+              { name: 'Shri Tapash Biswas', image: '/images/tapash-biswas.jpeg' },
+              { name: 'Shri Pronit Roy', image: '/images/pronit-roy.jpeg' },
+              { name: 'Shri Mrinal Biswas', image: '/images/mrinal-kanti-biswas.jpeg' },
+              { name: 'Shri Deepu Sarkar', image: '/images/mr.-deepu-sarkar.jpeg' },
+              { name: 'Shri Neuton Roy', image: '/images/neuton-roy.jpeg' },
+              { name: 'Shri Somenath Biswas', image: '/images/mr-somenath-biswas.jpeg' },
+              { name: 'Shri Bijon Kumar Biswas', image: '/images/bijon-kumar-biswas-delhi.jpeg' },
+              { name: 'Shri Subash Biswas Somendra', image: '/images/subhash-kumar.jpeg' },
+              { name: 'Shri Somendra Srivastava', image: '/images/somendra-srivastava.jpeg' },
+              { name: 'Dr. Shyama Shree Chaki', image: '/images/drshyamasreechaki.jpeg' },{ name: 'Robin Kumar Ranjit Biswas ', image: 'images/robin-kumar-ranjit-biswas.jpeg' }
             ]).map((member, index) => (
               <motion.div
                 key={index}
@@ -266,9 +268,9 @@ const Home = () => {
                 style={{ textAlign: 'center', padding: '1rem', background: 'white', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}
               >
                 <img 
-                  src={member.photo?.startsWith('http') ? member.photo : member.photo?.startsWith('/uploads') ? `https://sanataningo.onrender.com${member.photo}` : member.photo} 
+                  src={member.image || member.photo} 
                   alt={member.name} 
-                  style={{ width: '80px', height: '80px', borderRadius: '50%', marginBottom: '10px', objectFit: 'cover' }}
+                  style={{ width: '80px', height: '80px', borderRadius: '50%', marginBottom: '10px', objectFit: 'cover', border: '3px solid #d2691e' }}
                 />
                 <h4 style={{ margin: '0.5rem 0', color: '#333' }}>{member.name}</h4>
                 <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>{member.position || 'Executive Member'}</p>

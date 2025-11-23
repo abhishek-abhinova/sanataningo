@@ -17,6 +17,9 @@ import ThankYouDonation from './pages/ThankYouDonation';
 import ThankYouMember from './pages/ThankYouMember';
 import Admin from './pages/Admin';
 import AdminPanel from './pages/AdminPanel';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
+import PremiumAdminDashboard from './pages/PremiumAdminDashboard';
 
 function App() {
   return (
@@ -36,6 +39,9 @@ function App() {
           <Route path="/thank-you-member" element={<ThankYouMember />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin-panel" element={<AdminPanel />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/premium" element={<PremiumAdminDashboard />} />
         </Routes>
         <Footer />
         <ToastContainer

@@ -57,76 +57,76 @@ router.get('/team', async (req, res) => {
       image: '/images/p3.jpeg',
       description: 'Dedicated to executing social welfare activities, charity drives, and community upliftment programs.'
     },
-    // Executive Committee Members
+    // Executive Committee Members (in correct order)
     {
       id: 5,
-      name: 'Dr. Uttam Kumar Biswas',
-      position: 'Executive Member',
-      image: '/images/dr.-uttam-kumar-biswas.jpeg',
-      description: 'Medical professional contributing to healthcare initiatives and community wellness programs.'
-    },
-    {
-      id: 6,
       name: 'Shri Amiyo Govinda Biswas',
       position: 'Executive Member',
       image: '/images/amiyo-govinda-biswas.jpeg',
       description: 'Dedicated to organizational development and strategic planning for community welfare.'
     },
     {
+      id: 6,
+      name: 'Shri Pratap Malik',
+      position: 'Executive Member',
+      image: '/images/pratap-malik.jpeg',
+      description: 'Specialist in event management and cultural program coordination.'
+    },
+    {
       id: 7,
+      name: 'Shri Tarak Chandra Pal',
+      position: 'Executive Member',
+      image: '/images/tarak-chandra-pal.jpeg',
+      description: 'Expert in strategic planning and organizational development.'
+    },
+    {
+      id: 8,
+      name: 'Dr. Uttam Kumar Biswas',
+      position: 'Executive Member',
+      image: '/images/dr.-uttam-kumar-biswas.jpeg',
+      description: 'Medical professional contributing to healthcare initiatives and community wellness programs.'
+    },
+    {
+      id: 9,
+      name: 'Shri Bijon Biswas',
+      position: 'Executive Member',
+      image: '/images/bijan-biswas.jpeg',
+      description: 'Committed to cultural preservation and traditional value promotion.'
+    },
+    {
+      id: 10,
       name: 'Shri Arun Kumar Biswas',
       position: 'Executive Member',
       image: '/images/arun-kumar-biswas.jpeg',
       description: 'Focused on educational initiatives and youth development programs.'
     },
     {
-      id: 8,
-      name: 'Shri Bijan Biswas',
-      position: 'Executive Member',
-      image: '/images/bijan-biswas.jpeg',
-      description: 'Committed to cultural preservation and traditional value promotion.'
-    },
-    {
-      id: 9,
-      name: 'Shri Bijon Kumar Biswas (Delhi)',
-      position: 'Executive Member',
-      image: '/images/bijon-kumar-biswas-delhi.jpeg',
-      description: 'Regional coordinator for Delhi activities and community outreach programs.'
-    },
-    {
-      id: 10,
-      name: 'Shri Somenath Biswas',
-      position: 'Executive Member',
-      image: '/images/mr-somenath-biswas.jpeg',
-      description: 'Specialist in community engagement and social welfare coordination.'
-    },
-    {
       id: 11,
-      name: 'Shri Deepu Sarkar',
+      name: 'Shri Sudin Biswas',
       position: 'Executive Member',
-      image: '/images/mr.-deepu-sarkar.jpeg',
-      description: 'Expert in organizational management and administrative coordination.'
+      image: '/images/sudin-biswas-noida.jpeg',
+      description: 'Regional coordinator for Noida activities and local community programs.'
     },
     {
       id: 12,
-      name: 'Shri Mrinal Kanti Biswas',
+      name: 'Shri Aleep Biswas',
       position: 'Executive Member',
-      image: '/images/mrinal-kanti-biswas.jpeg',
-      description: 'Dedicated to financial management and resource mobilization.'
+      image: '/images/aleep-biswas.jpeg',
+      description: 'Committed to educational initiatives and skill development programs.'
     },
     {
       id: 13,
-      name: 'Shri Neuton Roy',
+      name: 'Shri Shyamlal Chaudhary',
       position: 'Executive Member',
-      image: '/images/neuton-roy.jpeg',
-      description: 'Focused on technology integration and digital outreach initiatives.'
+      image: '/images/Shyamlalchaudhary.jpeg',
+      description: 'Dedicated to community service and social welfare initiatives.'
     },
     {
       id: 14,
-      name: 'Shri Pratap Malik',
+      name: 'Shri Tapash Biswas',
       position: 'Executive Member',
-      image: '/images/pratap-malik.jpeg',
-      description: 'Specialist in event management and cultural program coordination.'
+      image: '/images/tapash-biswas.jpeg',
+      description: 'Expert in community development and outreach programs.'
     },
     {
       id: 15,
@@ -137,45 +137,59 @@ router.get('/team', async (req, res) => {
     },
     {
       id: 16,
-      name: 'Shri Robin Kumar Ranjit Biswas',
+      name: 'Shri Mrinal Biswas',
       position: 'Executive Member',
-      image: '/images/robin-kumar-ranjit-biswas.jpeg',
-      description: 'Committed to youth engagement and leadership development programs.'
+      image: '/images/mrinal-kanti-biswas.jpeg',
+      description: 'Dedicated to financial management and resource mobilization.'
     },
     {
       id: 17,
+      name: 'Shri Deepu Sarkar',
+      position: 'Executive Member',
+      image: '/images/mr.-deepu-sarkar.jpeg',
+      description: 'Expert in organizational management and administrative coordination.'
+    },
+    {
+      id: 18,
+      name: 'Shri Neuton Roy',
+      position: 'Executive Member',
+      image: '/images/neuton-roy.jpeg',
+      description: 'Focused on technology integration and digital outreach initiatives.'
+    },
+    {
+      id: 19,
+      name: 'Shri Somenath Biswas',
+      position: 'Executive Member',
+      image: '/images/mr-somenath-biswas.jpeg',
+      description: 'Specialist in community engagement and social welfare coordination.'
+    },
+    {
+      id: 20,
+      name: 'Shri Bijon Kumar Biswas',
+      position: 'Executive Member',
+      image: '/images/bijon-kumar-biswas-delhi.jpeg',
+      description: 'Regional coordinator for Delhi activities and community outreach programs.'
+    },
+    {
+      id: 21,
+      name: 'Shri Subash Biswas Somendra',
+      position: 'Executive Member',
+      image: '/images/subhash-kumar.jpeg',
+      description: 'Dedicated to community service and volunteer coordination.'
+    },
+    {
+      id: 22,
       name: 'Shri Somendra Srivastava',
       position: 'Executive Member',
       image: '/images/somendra-srivastava.jpeg',
       description: 'Focused on legal affairs and compliance management.'
     },
     {
-      id: 18,
-      name: 'Shri Subhash Kumar',
+      id: 23,
+      name: 'Dr. Shyama Shree Chaki',
       position: 'Executive Member',
-      image: '/images/subhash-kumar.jpeg',
-      description: 'Dedicated to community service and volunteer coordination.'
-    },
-    {
-      id: 19,
-      name: 'Shri Sudin Biswas (Noida)',
-      position: 'Executive Member',
-      image: '/images/sudin-biswas-noida.jpeg',
-      description: 'Regional coordinator for Noida activities and local community programs.'
-    },
-    {
-      id: 20,
-      name: 'Shri Tarak Chandra Pal',
-      position: 'Executive Member',
-      image: '/images/tarak-chandra-pal.jpeg',
-      description: 'Expert in strategic planning and organizational development.'
-    },
-    {
-      id: 21,
-      name: 'Shri Aleep Biswas',
-      position: 'Executive Member',
-      image: '/images/aleep-biswas.jpeg',
-      description: 'Committed to educational initiatives and skill development programs.'
+      image: '/images/drshyamasreechaki.jpeg',
+      description: 'Medical professional dedicated to healthcare and wellness programs.'
     }
       ];
       return res.json(teamMembers);
@@ -259,73 +273,73 @@ router.get('/executives', (req, res) => {
   const executives = [
     {
       id: 5,
-      name: 'Dr. Uttam Kumar Biswas',
-      position: 'Executive Member',
-      image: '/images/dr.-uttam-kumar-biswas.jpeg',
-      description: 'Medical professional contributing to healthcare initiatives and community wellness programs.'
-    },
-    {
-      id: 6,
       name: 'Shri Amiyo Govinda Biswas',
       position: 'Executive Member',
       image: '/images/amiyo-govinda-biswas.jpeg',
       description: 'Dedicated to organizational development and strategic planning for community welfare.'
     },
     {
+      id: 6,
+      name: 'Shri Pratap Malik',
+      position: 'Executive Member',
+      image: '/images/pratap-malik.jpeg',
+      description: 'Specialist in event management and cultural program coordination.'
+    },
+    {
       id: 7,
+      name: 'Shri Tarak Chandra Pal',
+      position: 'Executive Member',
+      image: '/images/tarak-chandra-pal.jpeg',
+      description: 'Expert in strategic planning and organizational development.'
+    },
+    {
+      id: 8,
+      name: 'Dr. Uttam Kumar Biswas',
+      position: 'Executive Member',
+      image: '/images/dr.-uttam-kumar-biswas.jpeg',
+      description: 'Medical professional contributing to healthcare initiatives and community wellness programs.'
+    },
+    {
+      id: 9,
+      name: 'Shri Bijon Biswas',
+      position: 'Executive Member',
+      image: '/images/bijan-biswas.jpeg',
+      description: 'Committed to cultural preservation and traditional value promotion.'
+    },
+    {
+      id: 10,
       name: 'Shri Arun Kumar Biswas',
       position: 'Executive Member',
       image: '/images/arun-kumar-biswas.jpeg',
       description: 'Focused on educational initiatives and youth development programs.'
     },
     {
-      id: 8,
-      name: 'Shri Bijan Biswas',
-      position: 'Executive Member',
-      image: '/images/bijan-biswas.jpeg',
-      description: 'Committed to cultural preservation and traditional value promotion.'
-    },
-    {
-      id: 9,
-      name: 'Shri Bijon Kumar Biswas (Delhi)',
-      position: 'Executive Member',
-      image: '/images/bijon-kumar-biswas-delhi.jpeg',
-      description: 'Regional coordinator for Delhi activities and community outreach programs.'
-    },
-    {
-      id: 10,
-      name: 'Shri Somenath Biswas',
-      position: 'Executive Member',
-      image: '/images/mr-somenath-biswas.jpeg',
-      description: 'Specialist in community engagement and social welfare coordination.'
-    },
-    {
       id: 11,
-      name: 'Shri Deepu Sarkar',
+      name: 'Shri Sudin Biswas',
       position: 'Executive Member',
-      image: '/images/mr.-deepu-sarkar.jpeg',
-      description: 'Expert in organizational management and administrative coordination.'
+      image: '/images/sudin-biswas-noida.jpeg',
+      description: 'Regional coordinator for Noida activities and local community programs.'
     },
     {
       id: 12,
-      name: 'Shri Mrinal Kanti Biswas',
+      name: 'Shri Aleep Biswas',
       position: 'Executive Member',
-      image: '/images/mrinal-kanti-biswas.jpeg',
-      description: 'Dedicated to financial management and resource mobilization.'
+      image: '/images/aleep-biswas.jpeg',
+      description: 'Committed to educational initiatives and skill development programs.'
     },
     {
       id: 13,
-      name: 'Shri Neuton Roy',
+      name: 'Shri Shyamlal Chaudhary',
       position: 'Executive Member',
-      image: '/images/neuton-roy.jpeg',
-      description: 'Focused on technology integration and digital outreach initiatives.'
+      image: '/images/Shyamlalchaudhary.jpeg',
+      description: 'Dedicated to community service and social welfare initiatives.'
     },
     {
       id: 14,
-      name: 'Shri Pratap Malik',
+      name: 'Shri Tapash Biswas',
       position: 'Executive Member',
-      image: '/images/pratap-malik.jpeg',
-      description: 'Specialist in event management and cultural program coordination.'
+      image: '/images/tapash-biswas.jpeg',
+      description: 'Expert in community development and outreach programs.'
     },
     {
       id: 15,
@@ -336,45 +350,59 @@ router.get('/executives', (req, res) => {
     },
     {
       id: 16,
-      name: 'Shri Robin Kumar Ranjit Biswas',
+      name: 'Shri Mrinal Biswas',
       position: 'Executive Member',
-      image: '/images/robin-kumar-ranjit-biswas.jpeg',
-      description: 'Committed to youth engagement and leadership development programs.'
+      image: '/images/mrinal-kanti-biswas.jpeg',
+      description: 'Dedicated to financial management and resource mobilization.'
     },
     {
       id: 17,
+      name: 'Shri Deepu Sarkar',
+      position: 'Executive Member',
+      image: '/images/mr.-deepu-sarkar.jpeg',
+      description: 'Expert in organizational management and administrative coordination.'
+    },
+    {
+      id: 18,
+      name: 'Shri Neuton Roy',
+      position: 'Executive Member',
+      image: '/images/neuton-roy.jpeg',
+      description: 'Focused on technology integration and digital outreach initiatives.'
+    },
+    {
+      id: 19,
+      name: 'Shri Somenath Biswas',
+      position: 'Executive Member',
+      image: '/images/mr-somenath-biswas.jpeg',
+      description: 'Specialist in community engagement and social welfare coordination.'
+    },
+    {
+      id: 20,
+      name: 'Shri Bijon Kumar Biswas',
+      position: 'Executive Member',
+      image: '/images/bijon-kumar-biswas-delhi.jpeg',
+      description: 'Regional coordinator for Delhi activities and community outreach programs.'
+    },
+    {
+      id: 21,
+      name: 'Shri Subash Biswas Somendra',
+      position: 'Executive Member',
+      image: '/images/subhash-kumar.jpeg',
+      description: 'Dedicated to community service and volunteer coordination.'
+    },
+    {
+      id: 22,
       name: 'Shri Somendra Srivastava',
       position: 'Executive Member',
       image: '/images/somendra-srivastava.jpeg',
       description: 'Focused on legal affairs and compliance management.'
     },
     {
-      id: 18,
-      name: 'Shri Subhash Kumar',
+      id: 23,
+      name: 'Dr. Shyama Shree Chaki',
       position: 'Executive Member',
-      image: '/images/subhash-kumar.jpeg',
-      description: 'Dedicated to community service and volunteer coordination.'
-    },
-    {
-      id: 19,
-      name: 'Shri Sudin Biswas (Noida)',
-      position: 'Executive Member',
-      image: '/images/sudin-biswas-noida.jpeg',
-      description: 'Regional coordinator for Noida activities and local community programs.'
-    },
-    {
-      id: 20,
-      name: 'Shri Tarak Chandra Pal',
-      position: 'Executive Member',
-      image: '/images/tarak-chandra-pal.jpeg',
-      description: 'Expert in strategic planning and organizational development.'
-    },
-    {
-      id: 21,
-      name: 'Shri Aleep Biswas',
-      position: 'Executive Member',
-      image: '/images/aleep-biswas.jpeg',
-      description: 'Committed to educational initiatives and skill development programs.'
+      image: '/images/drshyamasreechaki.jpeg',
+      description: 'Medical professional dedicated to healthcare and wellness programs.'
     }
   ];
   

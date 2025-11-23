@@ -22,6 +22,32 @@ const memberSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  dateOfBirth: {
+    type: Date,
+    required: true
+  },
+  occupation: {
+    type: String,
+    required: true
+  },
+  aadhaarNumber: {
+    type: String,
+    required: true,
+    validate: {
+      validator: function(v) {
+        return /^[0-9]{12}$/.test(v);
+      },
+      message: 'Aadhaar number must be 12 digits'
+    }
+  },
+  aadhaarFront: {
+    type: String, // File path for Aadhaar front image
+    required: true
+  },
+  aadhaarBack: {
+    type: String, // File path for Aadhaar back image
+    required: true
+  },
   state: {
     type: String,
     required: true
@@ -68,6 +94,12 @@ const memberSchema = new mongoose.Schema({
   cardGenerated: {
     type: Boolean,
     default: false
+  },
+  cardFile: {
+    type: String // Path to generated card file
+  },
+  cardCreatedAt: {
+    type: Date
   }
 }, {
   timestamps: true

@@ -359,6 +359,124 @@ const sendThankYouWithReceipt = async (donation) => {
   }
 };
 
+// Send membership card with PDF attachment
+const sendMembershipCardWithPDF = async (member, cardPath) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: member.email,
+      subject: 'Your Membership ID Card – Sarbo Shakti Sonatani Sangathan',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #fff8f0, #fef6ed); border-radius: 10px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #8b4513; margin-bottom: 10px;">🕉️ Sarbo Shakti Sonatani Sangathan</h1>
+            <p style="color: #d2691e; font-size: 18px; font-weight: bold;">Membership Confirmation</p>
+          </div>
+          
+          <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <p style="font-size: 16px; color: #333;">Dear <strong>${member.fullName}</strong>,</p>
+            
+            <p style="color: #555; line-height: 1.6;">🎉 <strong>Congratulations!</strong> Your membership application has been approved. We are delighted to welcome you to our spiritual family.</p>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #d2691e;">
+              <h3 style="color: #8b4513; margin-top: 0;">📋 Membership Details:</h3>
+              <ul style="color: #555; line-height: 1.8;">
+                <li><strong>Member ID:</strong> ${member.memberId}</li>
+                <li><strong>Membership Type:</strong> ${member.membershipPlan.toUpperCase()}</li>
+                <li><strong>Issue Date:</strong> ${new Date().toLocaleDateString()}</li>
+                <li><strong>Valid Till:</strong> ${member.validTill ? new Date(member.validTill).toLocaleDateString() : 'Lifetime'}</li>
+              </ul>
+            </div>
+            
+            <p style="color: #555; line-height: 1.6;">📎 Your official membership ID card is attached to this email. Please keep it safe and present it when attending our programs and events.</p>
+            
+            <div style="background: linear-gradient(135deg, #e8f5e8, #f0fff0); padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="color: #228b22; margin: 0; font-weight: bold;">🙏 Thank you for joining our mission to serve humanity through Sanatan Dharma values!</p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #d2691e;">
+              <p style="color: #8b4513; font-weight: bold; margin: 0;">🕉️ Sarbo Shakti Sonatani Sangathan</p>
+              <p style="color: #666; font-size: 14px; margin: 5px 0;">19, Kalyan Kunj, Sector 49, Gautam Buddha Nagar, UP-231301</p>
+              <p style="color: #d2691e; font-style: italic; margin: 10px 0 0 0;">"सर्वे भवन्तु सुखिनः सर्वे सन्तु निरामयाः"</p>
+            </div>
+          </div>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: `membership-card-${member.memberId}.pdf`,
+          path: cardPath
+        }
+      ]
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Membership card email sent successfully');
+  } catch (error) {
+    console.error('❌ Failed to send membership card email:', error);
+    throw error;
+  }
+};
+
+// Send donation receipt with PDF attachment
+const sendDonationReceiptWithPDF = async (donation, receiptPath) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: donation.email,
+      subject: 'Donation Receipt – Sarbo Shakti Sonatani Sangathan',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #fff8f0, #fef6ed); border-radius: 10px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #8b4513; margin-bottom: 10px;">🕉️ Sarbo Shakti Sonatani Sangathan</h1>
+            <p style="color: #d2691e; font-size: 18px; font-weight: bold;">Donation Receipt</p>
+          </div>
+          
+          <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <p style="font-size: 16px; color: #333;">Dear <strong>${donation.donorName}</strong>,</p>
+            
+            <p style="color: #555; line-height: 1.6;">🙏 <strong>Thank you</strong> for your generous donation! Your contribution helps us serve humanity through Sanatan Dharma values.</p>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #d2691e;">
+              <h3 style="color: #8b4513; margin-top: 0;">💰 Donation Details:</h3>
+              <ul style="color: #555; line-height: 1.8;">
+                <li><strong>Amount:</strong> ₹${donation.amount}</li>
+                <li><strong>Purpose:</strong> ${donation.purpose || 'General Donation'}</li>
+                <li><strong>Date:</strong> ${new Date().toLocaleDateString()}</li>
+                <li><strong>Transaction ID:</strong> ${donation.paymentReference}</li>
+              </ul>
+            </div>
+            
+            <p style="color: #555; line-height: 1.6;">📎 Your official donation receipt is attached to this email for your records.</p>
+            
+            <div style="background: linear-gradient(135deg, #e8f5e8, #f0fff0); padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="color: #228b22; margin: 0; font-weight: bold;">🌟 Your donation makes a real difference in the lives of those we serve!</p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #d2691e;">
+              <p style="color: #8b4513; font-weight: bold; margin: 0;">🕉️ Sarbo Shakti Sonatani Sangathan</p>
+              <p style="color: #666; font-size: 14px; margin: 5px 0;">19, Kalyan Kunj, Sector 49, Gautam Buddha Nagar, UP-231301</p>
+              <p style="color: #d2691e; font-style: italic; margin: 10px 0 0 0;">"सर्वे भवन्तु सुखिनः सर्वे सन्तु निरामयाः"</p>
+            </div>
+          </div>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: `donation-receipt-${donation._id}.pdf`,
+          path: receiptPath
+        }
+      ]
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Donation receipt email sent successfully');
+  } catch (error) {
+    console.error('❌ Failed to send donation receipt email:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendAdminMemberNotification,
   sendAdminDonationNotification,
@@ -367,5 +485,7 @@ module.exports = {
   sendContactNotification,
   sendContactConfirmation,
   sendMembershipCardEmail,
-  sendThankYouWithReceipt
+  sendThankYouWithReceipt,
+  sendMembershipCardWithPDF,
+  sendDonationReceiptWithPDF
 };

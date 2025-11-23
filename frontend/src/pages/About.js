@@ -9,7 +9,21 @@ const About = () => {
       {/* Page Header */}
       <section className="page-header">
         <div className="container">
-          <h1><i className="fas fa-info-circle"></i> About Us</h1>
+          <h1><i className="fas fa-om"></i> About Us</h1>
+          <div style={{ textAlign: 'center', margin: '1.5rem 0' }}>
+            <h2 style={{ 
+              fontSize: '2rem', 
+              fontWeight: 'bold', 
+              color: '#FFD700', 
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+              fontFamily: 'serif',
+              letterSpacing: '2px'
+            }}>
+              <i className="fas fa-lotus" style={{ marginRight: '10px', color: '#FFE4B5' }}></i>
+              श्री श्री हरि लीलामृत
+              <i className="fas fa-lotus" style={{ marginLeft: '10px', color: '#FFE4B5' }}></i>
+            </h2>
+          </div>
           <p>Learn about our mission, vision, and the people behind our organization</p>
         </div>
       </section>
@@ -145,23 +159,26 @@ const About = () => {
           </motion.h2>
           <div className="team-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
             {[
-              { name: 'Aleep Biswas', image: 'images/aleep-biswas.jpeg' },
-              { name: 'Amiyo Govinda Biswas', image: 'images/amiyo-govinda-biswas.jpeg' },
-              { name: 'Arun Kumar Biswas', image: 'images/arun-kumar-biswas.jpeg' },
-              { name: 'Bijan Biswas', image: 'images/bijan-biswas.jpeg' },
-              { name: 'Bijon Kumar Biswas', image: 'images/bijon-kumar-biswas-delhi.jpeg' },
+              { name: 'Shri Amiyo Govinda Biswas', image: 'images/amiyo-govinda-biswas.jpeg' },
+              { name: 'Shri Pratap Malik', image: 'images/pratap-malik.jpeg' },
+              { name: 'Shri Tarak Chandra Pal', image: 'images/tarak-chandra-pal.jpeg' },
               { name: 'Dr. Uttam Kumar Biswas', image: 'images/dr.-uttam-kumar-biswas.jpeg' },
-              { name: 'Mr. Somenath Biswas', image: 'images/mr-somenath-biswas.jpeg' },
-              { name: 'Mr. Deepu Sarkar', image: 'images/mr.-deepu-sarkar.jpeg' },
-              { name: 'Mrinal Kanti Biswas', image: 'images/mrinal-kanti-biswas.jpeg' },
-              { name: 'Neuton Roy', image: 'images/neuton-roy.jpeg' },
-              { name: 'Pratap Malik', image: 'images/pratap-malik.jpeg' },
-              { name: 'Pronit Roy', image: 'images/pronit-roy.jpeg' },
-              { name: 'Robin Kumar Ranjit Biswas', image: 'images/robin-kumar-ranjit-biswas.jpeg' },
-              { name: 'Somendra Srivastava', image: 'images/somendra-srivastava.jpeg' },
-              { name: 'Tarak Chandra Pal', image: 'images/tarak-chandra-pal.jpeg' },
-              { name: 'Subhash Kumar', image: 'images/subhash-kumar.jpeg' },
-              { name: 'Sudin Biswas', image: 'images/sudin-biswas-noida.jpeg' }
+              { name: 'Shri Bijon Biswas', image: 'images/bijan-biswas.jpeg' },
+              { name: 'Shri Arun Kumar Biswas', image: 'images/arun-kumar-biswas.jpeg' },
+              { name: 'Shri Sudin Biswas', image: 'images/sudin-biswas-noida.jpeg' },
+              { name: 'Shri Aleep Biswas', image: 'images/aleep-biswas.jpeg' },
+              { name: 'Shri Shyamlal Chaudhary', image: 'images/Shyamlalchaudhary.jpeg' },
+              { name: 'Shri Tapash Biswas', image: 'images/tapash-biswas.jpeg' },
+              { name: 'Shri Pronit Roy', image: 'images/pronit-roy.jpeg' },
+              { name: 'Shri Mrinal Biswas', image: 'images/mrinal-kanti-biswas.jpeg' },
+              { name: 'Shri Deepu Sarkar', image: 'images/mr.-deepu-sarkar.jpeg' },
+              { name: 'Shri Neuton Roy', image: 'images/neuton-roy.jpeg' },
+              { name: 'Shri Somenath Biswas', image: 'images/mr-somenath-biswas.jpeg' },
+              { name: 'Shri Bijon Kumar Biswas', image: 'images/bijon-kumar-biswas-delhi.jpeg' },
+              { name: 'Shri Subash Biswas Somendra', image: 'images/subhash-kumar.jpeg' },
+              { name: 'Shri Somendra Srivastava', image: 'images/somendra-srivastava.jpeg' },
+              { name: 'Dr. Shyama Shree Chaki', image: 'images/drshyamasreechaki.jpeg' },
+              { name: 'Robin Kumar Ranjit Biswas', image: 'images/robin-kumar-ranjit-biswas.jpeg' }
             ].map((member, index) => (
               <motion.div
                 key={index}

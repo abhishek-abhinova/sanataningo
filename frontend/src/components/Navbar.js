@@ -13,6 +13,11 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  const handleNavClick = () => {
+    closeMenu();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
   };
@@ -20,18 +25,18 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <Link to="/" className="nav-logo" onClick={closeMenu}>
-          <img src="/images/logo.jpeg" alt="Sarboshakti Sanatani Sangathan" className="logo-img" />
-          <span>Sarboshakti Sanatani Sangathan</span>
+        <Link to="/" className="nav-logo" onClick={handleNavClick}>
+          <img src="/images/logo.jpeg" alt="Sarbo Shakti Sonatani Sangathan" className="logo-img" />
+          <span>Sarbo Shakti Sonatani Sangathan</span>
         </Link>
         <ul className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
-          <li><Link to="/" className={isActive('/')} onClick={closeMenu}>Home</Link></li>
-          <li><Link to="/about" className={isActive('/about')} onClick={closeMenu}>About Us</Link></li>
-          <li><Link to="/activities" className={isActive('/activities')} onClick={closeMenu}>What We Do</Link></li>
-          <li><Link to="/gallery" className={isActive('/gallery')} onClick={closeMenu}>Gallery</Link></li>
-          <li><Link to="/membership" className={isActive('/membership')} onClick={closeMenu}>Become a Member</Link></li>
-          <li><Link to="/donate" className={isActive('/donate')} onClick={closeMenu}>Donate</Link></li>
-          <li><Link to="/contact" className={isActive('/contact')} onClick={closeMenu}>Contact</Link></li>
+          <li><Link to="/" className={isActive('/')} onClick={handleNavClick}>Home</Link></li>
+          <li><Link to="/about" className={isActive('/about')} onClick={handleNavClick}>About Us</Link></li>
+          <li><Link to="/activities" className={isActive('/activities')} onClick={handleNavClick}>What We Do</Link></li>
+          <li><Link to="/gallery" className={isActive('/gallery')} onClick={handleNavClick}>Gallery</Link></li>
+          <li><Link to="/membership" className={isActive('/membership')} onClick={handleNavClick}>Become a Member</Link></li>
+          <li><Link to="/donate" className={isActive('/donate')} onClick={handleNavClick}>Donate</Link></li>
+          <li><Link to="/contact" className={isActive('/contact')} onClick={handleNavClick}>Contact</Link></li>
         </ul>
         <div className={`hamburger ${isMenuOpen ? 'active' : ''}`} onClick={toggleMenu}>
           <span></span>

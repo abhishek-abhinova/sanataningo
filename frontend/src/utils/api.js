@@ -12,9 +12,12 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Only add auth token for admin routes
+    if (config.url && (config.url.includes('/admin') || config.url.includes('/members/list') || config.url.includes('/donations/list'))) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -30,10 +33,10 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Only redirect if not already on admin page
-      if (!window.location.pathname.includes('/admin')) {
-        localStorage.removeItem('token');
-        window.location.href = '/admin';
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      if (window.location.pathname.includes('/admin/dashboard')) {
+        window.location.href = '/admin/login';
       }
     }
     return Promise.reject(error);

@@ -1,59 +1,69 @@
-# Sarboshakti Backend API
+# Sarboshakti Sanatani Sangathan - Backend API
 
 Backend API for Sarboshakti Sanatani Sangathan NGO built with Node.js, Express, and MongoDB.
 
-## 🚀 Quick Deploy to Render
+## 🚀 Features
 
-### 1. Push to GitHub
-```bash
-git add .
-git commit -m "Backend ready for deployment"
-git push origin main
-```
+- RESTful API with Express.js
+- MongoDB integration with Mongoose
+- JWT authentication for admin panel
+- Payment processing with Razorpay
+- Email service with automated receipts
+- PDF generation for membership cards
+- Security middleware (Helmet, CORS, Rate Limiting)
+- File upload handling with Multer
 
-### 2. Deploy on Render
-1. Go to [Render Dashboard](https://dashboard.render.com)
-2. Click "New +" → "Web Service"
-3. Connect your GitHub repository
-4. Select the backend folder or root directory
-5. Configure:
-   - **Name**: `sarboshakti-backend`
-   - **Environment**: `Node`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
+## 📋 Environment Variables
 
-### 3. Environment Variables
-Add these in Render dashboard:
+Set these environment variables in your deployment platform:
 
 ```env
 NODE_ENV=production
-MONGODB_URI=mongodb+srv://sangathan:abhishek@cluster0.walx5w1.mongodb.net/sarboshakti_ngo
-JWT_SECRET=sarboshakti-jwt-secret-2024-production-key
+PORT=10000
+MONGODB_URI=your-mongodb-connection-string
+JWT_SECRET=your-super-secret-jwt-key
 FRONTEND_URL=https://your-frontend-domain.com
-SMTP_HOST=smtp.hostinger.com
+
+# Email Configuration
+SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=info@sarboshaktisonatanisangathan.org
-SMTP_PASS=Sangathan@123
+SMTP_USER=your-email@domain.com
+SMTP_PASS=your-app-password
+
+# Organization Details
 ORG_NAME=Sarboshakti Sanatani Sangathan
 ORG_ADDRESS=K-11, S/F, Gali No. 6, Old Gobind Pura, Delhi — 110051, India
 ORG_EMAIL=info@sarboshaktisonatanisangathan.org
 ORG_PHONE=+91 9876543210
 ```
 
-## 📡 API Endpoints
+## 🌐 API Endpoints
 
 ### Public APIs
-- `GET /api/health` - Health check
 - `POST /api/members` - Create membership
 - `POST /api/donations` - Create donation
 - `POST /api/contact` - Submit contact form
-- `GET /api/public/*` - Public data
+- `GET /api/public/info` - Get organization info
+- `GET /api/health` - Health check
 
 ### Admin APIs (Authenticated)
 - `POST /api/auth/login` - Admin login
-- `GET /api/admin/dashboard` - Dashboard stats
-- `GET /api/admin/members` - List members
-- `GET /api/admin/donations` - List donations
+- `GET /api/admin/dashboard` - Dashboard statistics
+- `GET /api/admin/members` - List all members
+- `GET /api/admin/donations` - List all donations
+
+## 🚀 Deployment on Render
+
+1. Push your code to GitHub
+2. Connect your GitHub repository to Render
+3. Set environment variables in Render dashboard
+4. Deploy automatically
+
+### Render Configuration
+- **Build Command**: `npm install`
+- **Start Command**: `npm start`
+- **Environment**: Node.js
+- **Plan**: Free tier available
 
 ## 🔧 Local Development
 
@@ -68,19 +78,29 @@ npm run dev
 npm run init-db
 ```
 
-## 🛡️ Security Features
-- JWT Authentication
-- Rate Limiting
-- CORS Protection
-- Helmet Security Headers
-- Input Validation
-- Password Hashing
+## 📁 Project Structure
 
-## 📦 Dependencies
-- Express.js - Web framework
-- Mongoose - MongoDB ODM
-- bcryptjs - Password hashing
-- jsonwebtoken - JWT tokens
-- nodemailer - Email service
-- puppeteer - PDF generation
-- multer - File uploads
+```
+backend/
+├── config/          # Database configuration
+├── middleware/      # Custom middleware
+├── models/          # MongoDB models
+├── routes/          # API routes
+├── utils/           # Utility functions
+├── uploads/         # File uploads
+├── server.js        # Main server file
+└── package.json     # Dependencies
+```
+
+## 🔐 Security Features
+
+- JWT authentication
+- Password hashing with bcrypt
+- Rate limiting
+- CORS protection
+- Helmet security headers
+- Input validation
+
+## 📞 Support
+
+For technical support: info@sarboshaktisonatanisangathan.org

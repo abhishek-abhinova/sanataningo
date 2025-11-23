@@ -6,14 +6,14 @@ const Activities = () => {
     {
       title: 'Educational Programs',
       description: 'Promoting education and literacy in underserved communities through scholarships, free classes, and educational material distribution.',
-      icon: 'fas fa-graduation-cap',
+      icon: 'fas fa-book-open',
       image: '/images/photo1.jpeg',
       stats: '500+ Students Helped'
     },
     {
       title: 'Healthcare Services',
       description: 'Providing medical assistance and health awareness programs including free health camps, medicine distribution, and health education.',
-      icon: 'fas fa-heartbeat',
+      icon: 'fas fa-hand-holding-heart',
       image: '/images/photo2.jpeg',
       stats: '200+ Health Camps'
     },
@@ -27,21 +27,21 @@ const Activities = () => {
     {
       title: 'Community Development',
       description: 'Empowering communities through various development initiatives including skill development, women empowerment, and rural development.',
-      icon: 'fas fa-hands-helping',
+      icon: 'fas fa-people-carry',
       image: '/images/photo4.jpeg',
       stats: '50+ Communities Served'
     },
     {
       title: 'Disaster Relief',
       description: 'Providing immediate relief and rehabilitation support during natural disasters and emergencies across the country.',
-      icon: 'fas fa-life-ring',
+      icon: 'fas fa-hands-helping',
       image: '/images/photo5.jpeg',
       stats: '25+ Relief Operations'
     },
     {
       title: 'Spiritual Guidance',
       description: 'Offering spiritual counseling, meditation sessions, and dharmic teachings to help individuals find inner peace and purpose.',
-      icon: 'fas fa-pray',
+      icon: 'fas fa-praying-hands',
       image: '/images/photo1.jpeg',
       stats: '1000+ Lives Touched'
     }
@@ -52,8 +52,8 @@ const Activities = () => {
       {/* Page Header */}
       <section className="page-header">
         <div className="container">
-          <h1><i className="fas fa-hands-helping"></i> What We Do</h1>
-          <p>Discover our various programs and initiatives serving humanity</p>
+          <h1><i className="fas fa-om"></i> What We Do</h1>
+          <p><i className="fas fa-lotus"></i> Discover our various programs and initiatives serving humanity <i className="fas fa-lotus"></i></p>
         </div>
       </section>
 

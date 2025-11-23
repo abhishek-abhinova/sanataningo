@@ -18,8 +18,8 @@ const Gallery = () => {
       {/* Page Header */}
       <section className="page-header">
         <div className="container">
-          <h1><i className="fas fa-images"></i> Gallery</h1>
-          <p>Glimpses of our activities and events</p>
+          <h1><i className="fas fa-camera-retro"></i> Gallery</h1>
+          <p><i className="fas fa-star-of-david"></i> Glimpses of our activities and events <i className="fas fa-star-of-david"></i></p>
         </div>
       </section>
 
@@ -118,7 +118,7 @@ const Gallery = () => {
               {[
                 { 
                   category: 'Community Service', 
-                  icon: 'fas fa-hands-helping', 
+                  icon: 'fas fa-people-carry', 
                   description: 'Serving communities through various welfare programs',
                   count: '50+ Programs'
                 },
@@ -130,13 +130,13 @@ const Gallery = () => {
                 },
                 { 
                   category: 'Educational Initiatives', 
-                  icon: 'fas fa-graduation-cap', 
+                  icon: 'fas fa-chalkboard-teacher', 
                   description: 'Promoting education and literacy in underserved areas',
                   count: '30+ Programs'
                 },
                 { 
                   category: 'Spiritual Gatherings', 
-                  icon: 'fas fa-pray', 
+                  icon: 'fas fa-praying-hands', 
                   description: 'Organizing spiritual sessions and dharmic teachings',
                   count: '40+ Sessions'
                 }

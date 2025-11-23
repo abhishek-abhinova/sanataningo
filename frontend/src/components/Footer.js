@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="container">
         <div className="footer-content">
           <div className="footer-section">
-            <h3>🕉️ Sarboshakti Sanatani Sangathan</h3>
+            <h3>🕉️ Sarbo Shakti Sonatani Sangathan</h3>
             <p>
               A non-profit organization dedicated to serving humanity through the eternal principles of Sanatan Dharma. 
               We work towards cultural preservation, community development, and spiritual upliftment.
@@ -46,16 +46,29 @@ const Footer = () => {
           </div>
 
           <div className="footer-section">
-            <h3>Contact Info</h3>
-            <p><i className="fas fa-map-marker-alt"></i> K-11, S/F, Gali No. 6, Old Gobind Pura, Delhi — 110051, India</p>
-            <p><i className="fas fa-phone"></i> +91 9876543210</p>
-            <p><i className="fas fa-envelope"></i> info@sarboshaktisonatanisangathan.org</p>
-            <p><i className="fas fa-clock"></i> Mon-Fri: 9AM-6PM, Sat: 9AM-2PM</p>
+            <h3>🏢 Contact Information</h3>
+            <div className="contact-info-premium">
+              <p><i className="fas fa-map-marker-alt"></i> <strong>Registered Office:</strong><br/>
+                 19, Kalyan Kunj, Sector 49<br/>
+                 Gautam Buddha Nagar, Uttar Pradesh-231301</p>
+              
+              <div className="officials-contact">
+                <p><i className="fas fa-phone"></i> <strong>Key Officials:</strong></p>
+                <div className="official-list">
+                  <p>📞 Shri Goutam Chandra Biswas (President): +91 9876543210</p>
+                  <p>📞 Shri Ajit Ray (Secretary): +91 9876543211</p>
+                  <p>📞 Shri Amiyo Govinda Biswas: +91 9876543212</p>
+                  <p>📞 Shri Pratap Malik: +91 9876543213</p>
+                </div>
+              </div>
+              
+              <p><i className="fas fa-envelope"></i> info@sarboshaktisonatanisangathan.org</p>
+            </div>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; 2024 Sarboshakti Sanatani Sangathan. All rights reserved.</p>
+          <p>&copy; 2024 Sarbo Shakti Sonatani Sangathan. All rights reserved.</p>
           <p>🙏 "सर्वे भवन्तु सुखिनः सर्वे सन्तु निरामयाः" - May all beings be happy, may all beings be healthy</p>
         </div>
       </div>

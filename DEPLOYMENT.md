@@ -1,196 +1,135 @@
-# Deployment Guide
+# Deployment Guide - Sarboshakti Sanatani Sangathan
 
-## 🚀 Quick Deployment Steps
+## 🚀 Backend Deployment on Render
 
-### Push to GitHub First
+### Step 1: Prepare Repository
+1. Push backend code to GitHub repository
+2. Ensure all files are committed and pushed
 
-**Windows:**
-```bash
-# Run the deployment script
-deploy-github.bat
+### Step 2: Deploy on Render
+1. Go to [render.com](https://render.com) and sign up/login
+2. Click "New" → "Web Service"
+3. Connect your GitHub repository
+4. Select the `backend` folder as root directory
+5. Configure the following:
+   - **Name**: `sarboshakti-backend`
+   - **Environment**: `Node`
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+   - **Plan**: Free
+
+### Step 3: Environment Variables
+Set these environment variables in Render dashboard:
+
+```env
+NODE_ENV=production
+PORT=10000
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/sarboshakti_ngo
+JWT_SECRET=sarboshakti-jwt-secret-2024-production-key
+FRONTEND_URL=https://your-frontend-domain.netlify.app
+
+# Email Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=info@sarboshaktisonatanisangathan.org
+SMTP_PASS=your-app-password
+
+# Organization Details
+ORG_NAME=Sarboshakti Sanatani Sangathan
+ORG_ADDRESS=K-11, S/F, Gali No. 6, Old Gobind Pura, Delhi — 110051, India
+ORG_EMAIL=info@sarboshaktisonatanisangathan.org
+ORG_PHONE=+91 9876543210
 ```
 
-**Linux/Mac:**
+### Step 4: Deploy
+- Click "Create Web Service"
+- Wait for deployment to complete
+- Your backend will be available at: `https://sarboshakti-backend.onrender.com`
+
+## 🌐 Frontend Deployment on Netlify
+
+### Step 1: Build Frontend
 ```bash
-# Make executable and run
-chmod +x deploy-github.sh
-./deploy-github.sh
+cd frontend
+npm run build
 ```
 
-### Frontend Deployment (Netlify)
+### Step 2: Deploy on Netlify
+1. Go to [netlify.com](https://netlify.com) and sign up/login
+2. Drag and drop the `build` folder to Netlify
+3. Or connect GitHub repository and set:
+   - **Build command**: `cd frontend && npm run build`
+   - **Publish directory**: `frontend/build`
 
-1. **Repository is now on GitHub**
-   - URL: https://github.com/abhishek-abhinova/sanataningo.git
+### Step 3: Environment Variables
+Set in Netlify dashboard:
+```env
+REACT_APP_API_URL=https://sarboshakti-backend.onrender.com
+REACT_APP_RAZORPAY_KEY_ID=your_razorpay_key_id
+```
 
-2. **Deploy on Netlify**
-   - Go to [Netlify](https://netlify.com)
-   - Connect your GitHub repository
-   - Build settings are automatically configured via `netlify.toml`
-   - Set environment variables in Netlify dashboard:
-     - `REACT_APP_RAZORPAY_KEY_ID`: Your Razorpay key
-     - `REACT_APP_API_URL`: Your backend URL (e.g., `https://your-backend.onrender.com/api`)
+### Step 4: Configure Redirects
+Netlify will automatically handle React Router redirects with the `_redirects` file in build folder.
 
-### Backend Deployment (Render)
+## 🔧 Post-Deployment Configuration
 
-1. **Deploy on Render**
-   - Go to [Render](https://render.com)
-   - Create new Web Service
-   - Connect your GitHub repository
-   - Set root directory to `backend`
-   - Build command: `npm install`
-   - Start command: `npm start`
+### Update CORS Settings
+Ensure backend CORS allows your frontend domain:
+```javascript
+const corsOptions = {
+  origin: [
+    'https://your-frontend-domain.netlify.app',
+    'https://sarboshakti.netlify.app'
+  ]
+};
+```
 
-2. **Environment Variables on Render**
-   ```
-   NODE_ENV=production
-   PORT=10000
-   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/sarboshakti_ngo
-   JWT_SECRET=your-super-secret-jwt-key-change-in-production
-   FRONTEND_URL=https://your-frontend.netlify.app
-   
-   # Email Configuration
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   SMTP_USER=your-email@gmail.com
-   SMTP_PASS=your-app-password
-   
-   # Razorpay Configuration
-   RAZORPAY_KEY_ID=your-razorpay-key-id
-   RAZORPAY_KEY_SECRET=your-razorpay-key-secret
-   
-   # Organization Details
-   ORG_NAME=Sarboshakti Sanatani Sangathan
-   ORG_ADDRESS=K-11, S/F, Gali No. 6, Old Gobind Pura, Delhi — 110051, India
-   ORG_EMAIL=info@sarboshakti.org
-   ORG_PHONE=+91 XXXXX XXXXX
-   ```
+### Test Deployment
+1. Visit your frontend URL
+2. Test all functionality:
+   - Membership registration
+   - Donations
+   - Contact form
+   - Admin login
 
-## 🔧 Pre-Deployment Checklist
+## 📋 Deployment Checklist
 
-### Backend Setup
-- [ ] MongoDB Atlas database created
-- [ ] Gmail App Password generated for SMTP
-- [ ] Razorpay account created and keys obtained
-- [ ] All environment variables configured
-- [ ] Database initialized with admin user
+### Backend (Render)
+- ✅ Repository connected
+- ✅ Environment variables set
+- ✅ MongoDB connection string updated
+- ✅ SMTP credentials configured
+- ✅ CORS origins updated
+- ✅ Health check endpoint working
 
-### Frontend Setup
-- [ ] Razorpay key added to environment
-- [ ] API URL configured for production
-- [ ] All forms tested with backend
+### Frontend (Netlify)
+- ✅ Build completed successfully
+- ✅ API URL environment variable set
+- ✅ Razorpay key configured
+- ✅ Redirects working for React Router
+- ✅ All pages loading correctly
 
-### Testing
-- [ ] All API endpoints working
-- [ ] Payment integration tested
-- [ ] Email service working
-- [ ] PDF generation working
-- [ ] Admin panel accessible
-
-## 📧 Email Configuration
-
-1. **Enable 2-Factor Authentication** on your Gmail account
-2. **Generate App Password**:
-   - Go to Google Account settings
-   - Security → 2-Step Verification → App passwords
-   - Generate password for "Mail"
-   - Use this password in `SMTP_PASS`
-
-## 💳 Razorpay Setup
-
-1. **Create Razorpay Account**
-2. **Get API Keys**:
-   - Dashboard → Settings → API Keys
-   - Generate keys for Test/Live mode
-3. **Configure Webhooks** (optional):
-   - Dashboard → Settings → Webhooks
-   - Add webhook URL: `https://your-backend.onrender.com/api/webhooks/razorpay`
-
-## 🗄️ Database Setup
-
-1. **MongoDB Atlas**:
-   - Create free cluster
-   - Create database user
-   - Whitelist IP addresses (0.0.0.0/0 for all)
-   - Get connection string
-
-2. **Initialize Database**:
-   ```bash
-   cd backend
-   npm run init-db
-   ```
-
-## 🔐 Admin Access
-
-Default admin credentials (change after first login):
-- **Email**: admin@sarboshakti.org
-- **Password**: admin123
-
-## 🌐 Domain Configuration
-
-### Custom Domain (Optional)
-1. **Netlify**: Add custom domain in site settings
-2. **SSL**: Automatically provided by Netlify
-3. **DNS**: Point your domain to Netlify
-
-## 📊 Monitoring
-
-### Backend Monitoring
-- Render provides built-in monitoring
-- Check logs in Render dashboard
-- Set up alerts for downtime
-
-### Frontend Monitoring
-- Netlify provides analytics
-- Monitor build logs
-- Set up form notifications
-
-## 🔄 Updates
-
-### Deploying Updates
-1. **Frontend**: Push to GitHub → Auto-deploy on Netlify
-2. **Backend**: Push to GitHub → Auto-deploy on Render
-
-### Database Migrations
-- Run migration scripts manually if needed
-- Backup database before major updates
-
-## 🆘 Troubleshooting
+## 🔍 Troubleshooting
 
 ### Common Issues
+1. **CORS Errors**: Update CORS origins in backend
+2. **API Connection**: Check REACT_APP_API_URL
+3. **Build Failures**: Check for missing dependencies
+4. **Database Connection**: Verify MongoDB URI
 
-1. **CORS Errors**
-   - Check `FRONTEND_URL` in backend environment
-   - Verify allowed origins in server.js
+### Monitoring
+- Backend logs: Available in Render dashboard
+- Frontend errors: Check browser console
+- API health: Visit `/api/health` endpoint
 
-2. **Payment Failures**
-   - Verify Razorpay keys
-   - Check webhook configuration
-   - Test in Razorpay dashboard
+## 🚀 Going Live
 
-3. **Email Not Sending**
-   - Verify Gmail app password
-   - Check SMTP settings
-   - Test email service separately
+1. Update DNS settings to point to Netlify
+2. Configure custom domain in Netlify
+3. Enable HTTPS (automatic with Netlify)
+4. Update environment variables with production domains
+5. Test all functionality thoroughly
 
-4. **Database Connection**
-   - Verify MongoDB URI
-   - Check IP whitelist
-   - Test connection locally
-
-### Logs
-- **Backend**: Check Render service logs
-- **Frontend**: Check browser console
-- **Database**: Check MongoDB Atlas logs
-
-## 📞 Support
-
-For deployment issues:
-1. Check service status pages
-2. Review documentation
-3. Contact support if needed
-
----
-
-**Ready for Production! 🎉**
-
-Your Sarboshakti Sanatani Sangathan application is now ready for deployment with all features activated and properly configured.
+Your application will be live at:
+- **Frontend**: https://your-domain.com
+- **Backend API**: https://sarboshakti-backend.onrender.com

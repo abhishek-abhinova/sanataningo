@@ -30,7 +30,7 @@ const Membership = () => {
     try {
       const formData = new FormData();
       Object.keys(data).forEach(key => {
-        if (key === 'paymentScreenshot') {
+        if (key === 'paymentScreenshot' || key === 'aadhaarFront' || key === 'aadhaarBack') {
           formData.append(key, data[key][0]);
         } else {
           formData.append(key, data[key]);
@@ -56,8 +56,8 @@ const Membership = () => {
       {/* Page Header */}
       <section className="page-header">
         <div className="container">
-          <h1><i className="fas fa-users"></i> Become a Member</h1>
-          <p>Join our spiritual family and be part of the divine mission</p>
+          <h1><i className="fas fa-user-plus"></i> Become a Member</h1>
+          <p><i className="fas fa-hands-praying"></i> Join our spiritual family and be part of the divine mission <i className="fas fa-hands-praying"></i></p>
         </div>
       </section>
 
@@ -161,6 +161,35 @@ const Membership = () => {
                 {errors.aadhaarNumber && <span className="error">{errors.aadhaarNumber.message}</span>}
               </div>
 
+              <div className="aadhaar-section">
+                <h4><i className="fas fa-id-card"></i> Aadhaar Card Upload</h4>
+                <div className="aadhaar-grid">
+                  <div className="form-group">
+                    <label htmlFor="aadhaarFront">Aadhaar Front *</label>
+                    <input
+                      type="file"
+                      id="aadhaarFront"
+                      accept="image/*"
+                      {...register('aadhaarFront', { required: 'Aadhaar front image is required' })}
+                    />
+                    {errors.aadhaarFront && <span className="error">{errors.aadhaarFront.message}</span>}
+                    <small style={{ color: '#666', display: 'block', marginTop: '0.5rem' }}>Front side (Max 5MB)</small>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="aadhaarBack">Aadhaar Back *</label>
+                    <input
+                      type="file"
+                      id="aadhaarBack"
+                      accept="image/*"
+                      {...register('aadhaarBack', { required: 'Aadhaar back image is required' })}
+                    />
+                    {errors.aadhaarBack && <span className="error">{errors.aadhaarBack.message}</span>}
+                    <small style={{ color: '#666', display: 'block', marginTop: '0.5rem' }}>Back side (Max 5MB)</small>
+                  </div>
+                </div>
+              </div>
+
               <div className="form-group">
                 <label htmlFor="membershipType">Membership Type *</label>
                 <select
@@ -205,26 +234,25 @@ const Membership = () => {
                 <small style={{ color: '#666', display: 'block', marginTop: '0.5rem' }}>Upload screenshot of your UPI payment (Max 5MB)</small>
               </div>
 
-              <div style={{ background: '#e8f5e8', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #90ee90' }}>
+              <div className="payment-instructions">
                 <h4 style={{ color: '#228b22', marginBottom: '1rem' }}>Payment Instructions:</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '1rem', alignItems: 'center' }}>
-                  <div style={{ textAlign: 'center' }}>
+                <div className="payment-grid">
+                  <div className="qr-section">
                     <img 
-                      src="/images/scanner.jpeg" 
-                      alt="Payment QR Code" 
-                      style={{ width: '120px', height: '120px', border: '2px solid #228b22', borderRadius: '8px' }}
+                      src="images/scanner.jpeg" 
+                      alt="Payment QR Code"
                     />
                     <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#228b22', fontWeight: 'bold' }}>Scan to Pay</p>
                   </div>
-                  <div>
-                    <p style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#333' }}>
+                  <div className="bank-details">
+                    <p style={{ margin: '0 0 0.5rem' }}>
                       <strong>Bank Details:</strong><br/>
                       Account Name: Sarbo Shakti Sonatani Sangathan<br/>
                       Account No: 43197114593<br/>
                       IFSC: SBIN0032218<br/>
                       Bank: SBI Noida Sector 49
                     </p>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#333' }}>
+                    <p style={{ margin: 0 }}>
                       Please make payment and enter the transaction reference number above. 
                       Your membership will be activated after payment verification.
                     </p>

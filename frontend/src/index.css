@@ -1,3 +1,5 @@
+@import url('./styles/premium.css');
+
 * {
     margin: 0;
     padding: 0;
@@ -934,6 +936,166 @@ section {
     }
 }
 
+/* Enhanced Form Responsiveness */
+@media (max-width: 600px) {
+    .payment-grid {
+        grid-template-columns: 1fr !important;
+        text-align: center;
+        gap: 1rem !important;
+    }
+    
+    .qr-section img {
+        width: 100px !important;
+        height: 100px !important;
+    }
+    
+    .aadhaar-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    
+    .aadhaar-section {
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .aadhaar-section h4 {
+        font-size: 1rem;
+    }
+    
+    .payment-instructions {
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .bank-details {
+        font-size: 0.85rem;
+        padding: 1rem;
+    }
+}
+
+/* Extra Small Mobile Devices */
+@media (max-width: 360px) {
+    .hero-content h1 {
+        font-size: 1.5rem;
+    }
+    
+    .hero-content h2 {
+        font-size: 0.9rem;
+    }
+    
+    .hero-stats {
+        padding: 0.8rem;
+        gap: 0.3rem;
+    }
+    
+    .stat-number {
+        font-size: 1rem;
+    }
+    
+    .stat-label {
+        font-size: 0.55rem;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+        min-width: 140px;
+    }
+    
+    .form-container {
+        margin: 0 0.25rem;
+        padding: 1rem 0.8rem;
+    }
+    
+    .team-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+    }
+    
+    .founder-card {
+        padding: 1rem;
+        margin: 0 0.25rem;
+    }
+    
+    .founder-photo {
+        width: 80px;
+        height: 80px;
+    }
+    
+    h2 {
+        font-size: 1.4rem !important;
+    }
+    
+    .container {
+        padding: 0 10px;
+    }
+}
+
+/* Tablet Responsive */
+@media (min-width: 481px) and (max-width: 768px) {
+    .hero-stats {
+        gap: 1.5rem;
+        padding: 1.5rem 2rem;
+    }
+    
+    .founders-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
+    
+    .team-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+        gap: 1.5rem !important;
+    }
+    
+    .values-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .form-container {
+        margin: 0 1rem;
+        padding: 2rem 1.5rem;
+    }
+    
+    .btn {
+        min-width: 200px;
+    }
+}
+
+/* Large Mobile/Small Tablet */
+@media (min-width: 769px) and (max-width: 992px) {
+    .founders-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2.5rem;
+    }
+    
+    .team-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+        gap: 2rem !important;
+    }
+    
+    .values-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .hero-stats {
+        gap: 2rem;
+        padding: 2rem 3rem;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
     .nav-container {
@@ -1090,6 +1252,17 @@ section {
         padding: 2rem 1.5rem;
     }
     
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    
     .membership-types {
         grid-template-columns: 1fr;
         gap: 1.5rem;
@@ -1226,30 +1399,84 @@ section {
 
 /* Footer */
 .footer {
-    background: linear-gradient(135deg, #8B4513, #D2691E);
+    background: linear-gradient(135deg, #1a1a1a, #2c1810, #8b4513);
     color: white;
     padding: 60px 0 20px;
     margin-top: 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #d2691e, #ff8c00, #ffd700, #ff8c00, #d2691e);
+    background-size: 200% 100%;
+    animation: gradientMove 3s ease-in-out infinite;
 }
 
 .footer-content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 3rem;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 2.5rem;
     margin-bottom: 3rem;
+    align-items: start;
+}
+
+@media (max-width: 1200px) {
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        text-align: center;
+    }
+}
+
+.footer-section {
+    position: relative;
 }
 
 .footer-section h3 {
     color: #FFD700;
-    margin-bottom: 1.5rem;
-    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
     font-weight: 700;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.footer-section h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #d2691e, #ff8c00);
+    border-radius: 2px;
 }
 
 .footer-section p, .footer-section li {
-    line-height: 1.8;
-    margin-bottom: 0.8rem;
+    line-height: 1.6;
+    margin-bottom: 0.6rem;
     opacity: 0.9;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.footer-section p:hover {
+    opacity: 1;
+    transform: translateX(3px);
 }
 
 .footer-section ul {
@@ -1258,8 +1485,14 @@ section {
 }
 
 .footer-section ul li {
-    padding: 0.5rem 0;
+    padding: 0.4rem 0;
     border-bottom: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+}
+
+.footer-section ul li:hover {
+    padding-left: 10px;
+    border-left: 3px solid #ffd700;
 }
 
 .footer-section ul li:last-child {
@@ -1269,72 +1502,352 @@ section {
 .footer-section a {
     color: white;
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .footer-section a:hover {
     color: #FFD700;
+    transform: translateX(5px);
 }
 
 .social-links {
     display: flex;
     gap: 1rem;
     margin-top: 1rem;
+    flex-wrap: wrap;
 }
 
 .social-links a {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     background: rgba(255,255,255,0.1);
     border-radius: 50%;
     transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
 .social-links a:hover {
-    background: #FFD700;
+    background: linear-gradient(135deg, #FFD700, #ff8c00);
     color: #8B4513;
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
 }
 
 .footer-bottom {
-    border-top: 1px solid rgba(255,255,255,0.2);
+    border-top: 2px solid rgba(255,215,0,0.3);
     padding-top: 2rem;
     text-align: center;
-    opacity: 0.8;
+    opacity: 0.9;
+    background: rgba(0,0,0,0.2);
+    margin: 0 -20px -20px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .footer-bottom p {
     margin: 0.5rem 0;
+    font-size: 0.95rem;
 }
 
+/* Contact Info Premium Styling */
+.contact-info-premium {
+    background: rgba(255,255,255,0.05);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255,215,0,0.2);
+}
+
+.contact-info-premium p {
+    margin-bottom: 0.8rem;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    border-left: 3px solid #d2691e;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.contact-info-premium p:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateX(5px);
+    border-left-color: #ffd700;
+    box-shadow: 0 4px 15px rgba(255,215,0,0.2);
+}
+
+.contact-info-premium i {
+    color: #d2691e;
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.officials-contact {
+    background: rgba(139, 69, 19, 0.3);
+    padding: 1.2rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.official-list p {
+    font-size: 0.85rem;
+    margin: 0.6rem 0;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #ff8c00;
+    transition: all 0.3s ease;
+    line-height: 1.4;
+}
+
+.official-list p:hover {
+    background: rgba(255, 215, 0, 0.2);
+    transform: translateX(5px);
+    border-left-width: 5px;
+}
+
+/* Mobile Responsive Footer */
 @media (max-width: 768px) {
     .footer {
         padding: 40px 0 20px;
     }
     
     .footer-content {
-        gap: 2rem;
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
         margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .footer-section h3 {
+        font-size: 1.2rem;
+        text-align: center;
+    }
+    
+    .footer-section h3::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .contact-info-premium {
+        text-align: left;
+    }
+    
+    .officials-contact {
+        padding: 1rem;
+    }
+    
+    .official-list p {
+        font-size: 0.85rem;
+        padding: 8px 12px;
     }
     
     .social-links {
         justify-content: center;
+        gap: 0.8rem;
+    }
+    
+    .social-links a {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .footer-bottom {
+        padding-top: 1.5rem;
+        font-size: 0.9rem;
     }
 }
 
+@media (max-width: 480px) {
+    .footer {
+        padding: 30px 0 15px;
+    }
+    
+    .footer-content {
+        gap: 2rem;
+        padding: 0 1rem;
+    }
+    
+    .footer-section h3 {
+        font-size: 1.1rem;
+    }
+    
+    .contact-info-premium p {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+    
+    .officials-contact {
+        padding: 0.8rem;
+    }
+    
+    .official-list p {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        text-align: center;
+    }
+    
+    .social-links a {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+    
+    .footer-bottom {
+        padding: 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .footer-bottom p {
+        margin: 0.3rem 0;
+    }
+}
+
+/* File Upload Styles */
+.form-group input[type="file"] {
+    padding: 12px;
+    border: 2px dashed #d2691e;
+    border-radius: 10px;
+    background: #fafbfc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-group input[type="file"]:hover {
+    border-color: #ff8c00;
+    background: #fff8f0;
+}
+
+.form-group input[type="file"]:focus {
+    outline: none;
+    border-color: #d2691e;
+    box-shadow: 0 0 0 3px rgba(210, 105, 30, 0.1);
+}
+
+/* Aadhaar Upload Section */
+.aadhaar-section {
+    background: linear-gradient(135deg, #fff8f0, #fef6ed);
+    padding: 1.5rem;
+    border-radius: 15px;
+    border: 2px solid #ffd700;
+    margin: 1rem 0;
+}
+
+.aadhaar-section h4 {
+    color: #8b4513;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.aadhaar-section h4 i {
+    color: #d2691e;
+}
+
+.aadhaar-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* Payment Instructions Responsive */
+.payment-instructions {
+    background: #e8f5e8;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #90ee90;
+}
+
+.payment-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: center;
+}
+
+.qr-section {
+    text-align: center;
+}
+
+.qr-section img {
+    width: 120px;
+    height: 120px;
+    border: 2px solid #228b22;
+    border-radius: 8px;
+}
+
+.bank-details {
+    font-size: 0.9rem;
+    color: #333;
+}
+
 /* QR Code Responsive */
-@media (max-width: 600px) {
-    .form-group div[style*="grid-template-columns"] {
+@media (max-width: 768px) {
+    .payment-grid {
         grid-template-columns: 1fr !important;
         text-align: center;
         gap: 1rem !important;
     }
     
-    .form-group img[alt="Payment QR Code"] {
+    .qr-section img {
         width: 100px !important;
         height: 100px !important;
+    }
+    
+    .aadhaar-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .form-container {
+        padding: 2rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .payment-instructions {
+        padding: 0.8rem;
+    }
+    
+    .bank-details {
+        font-size: 0.8rem;
+    }
+    
+    .qr-section img {
+        width: 80px !important;
+        height: 80px !important;
+    }
+    
+    .form-group small {
+        font-size: 0.75rem;
+    }
+    
+    .aadhaar-section {
+        padding: 1rem;
+    }
+    
+    .aadhaar-section h4 {
+        font-size: 1rem;
     }
 }
