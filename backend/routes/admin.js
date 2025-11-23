@@ -22,34 +22,64 @@ router.get('/dashboard', auth, async (req, res) => {
     const Contact = require('../models/Contact');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
+    // Member statistics
     const totalMembers = await Member.countDocuments();
+    const activeMembers = await Member.countDocuments({ 
+      status: 'approved', 
+      $or: [
+        { validTill: { $gte: new Date() } },
+        { membershipPlan: 'lifetime' }
+      ]
+    });
     const pendingMembers = await Member.countDocuments({ status: 'pending' });
-    const totalContacts = await Contact.countDocuments();
+    const rejectedMembers = await Member.countDocuments({ status: 'rejected' });
+    const expiredMembers = await Member.countDocuments({ 
+      status: 'approved',
+      membershipPlan: { $ne: 'lifetime' },
+      validTill: { $lt: new Date() }
+    });
+    
+    // Today's entries
+    const todayMembers = await Member.countDocuments({ 
+      createdAt: { $gte: today, $lt: tomorrow } 
+    });
+    const todayDonations = await Donation.countDocuments({ 
+      createdAt: { $gte: today, $lt: tomorrow } 
+    });
     
     // Calculate total donation amount
     const donationSum = await Donation.aggregate([
+      { $match: { paymentStatus: 'completed' } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
-    const totalDonations = donationSum.length > 0 ? donationSum[0].total : 0;
+    const totalDonationAmount = donationSum.length > 0 ? donationSum[0].total : 0;
+    
+    // Today's donation amount
+    const todayDonationSum = await Donation.aggregate([
+      { $match: { 
+        createdAt: { $gte: today, $lt: tomorrow },
+        paymentStatus: 'completed'
+      }},
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    const todayDonationAmount = todayDonationSum.length > 0 ? todayDonationSum[0].total : 0;
+
+    const totalContacts = await Contact.countDocuments();
 
     const stats = {
       totalMembers,
+      activeMembers,
       pendingMembers,
+      rejectedMembers,
+      expiredMembers,
       totalContacts,
-      totalDonations,
-      activeMembers: await Member.countDocuments({ 
-        status: 'approved', 
-        validTill: { $gte: new Date() } 
-      }),
-      approvedMembers: await Member.countDocuments({ status: 'approved' }),
-      rejectedMembers: await Member.countDocuments({ status: 'rejected' }),
-      todayRegistrations: await Member.countDocuments({ 
-        createdAt: { $gte: today } 
-      }),
-      todayDonations: await Donation.countDocuments({ 
-        createdAt: { $gte: today } 
-      })
+      totalDonationAmount,
+      todayMembers,
+      todayDonations,
+      todayDonationAmount
     };
 
     // Monthly registration data for graph
