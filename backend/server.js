@@ -1,4 +1,3 @@
-process.noDeprecation = true;
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -14,11 +13,6 @@ const adminRoutes = require('./routes/admin');
 const publicRoutes = require('./routes/public');
 const contactRoutes = require('./routes/contact');
 const transactionRoutes = require('./routes/transactions');
-const mediaRoutes = require('./routes/media');
-const eventRoutes = require('./routes/events');
-const settingsRoutes = require('./routes/settings');
-const galleryRoutes = require('./routes/gallery');
-const teamRoutes = require('./routes/team');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -34,56 +28,19 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sarboshak
     process.exit(1);
   });
 
-// Security middleware - simplified to avoid conflicts
-app.use(helmet({
-  contentSecurityPolicy: false // Disable CSP to avoid HTML injection issues
-}));
+app.use(helmet({ contentSecurityPolicy: false }));
 
-// CORS configuration with explicit preflight handling
 app.use(cors({
-  origin: function (origin, callback) {
-    const allowedOrigins = [
-      'https://sarboshaktisonatanisangathan.org',
-      'https://www.sarboshaktisonatanisangathan.org',
-      'http://localhost:3000',
-      'http://localhost:3001',
-      process.env.FRONTEND_URL
-    ].filter(Boolean);
-    
-    // Allow requests with no origin (mobile apps, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('❌ CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'https://sarboshaktisonatanisangathan.org',
+    'https://www.sarboshaktisonatanisangathan.org',
+    'http://localhost:3000',
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: [
-    'Origin',
-    'X-Requested-With',
-    'Content-Type',
-    'Accept',
-    'Authorization',
-    'Cache-Control',
-    'X-HTTP-Method-Override'
-  ],
-  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
-  optionsSuccessStatus: 200,
-  preflightContinue: false
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-// Handle preflight requests explicitly
-app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.sendStatus(200);
-});
 
 // Rate limiting
 const limiter = rateLimit({
@@ -97,14 +54,7 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Request logging middleware
-app.use((req, res, next) => {
-  // Only log API requests to avoid HTML content
-  if (req.url.startsWith('/api/')) {
-    console.log(`🔍 ${req.method} ${req.url} - Origin: ${req.headers.origin || 'No origin'}`);
-  }
-  next();
-});
+
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -120,24 +70,13 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 }));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// Routes with error handling
-try {
-  app.use('/api/auth', authRoutes);
-  app.use('/api/members', memberRoutes);
-  app.use('/api/donations', donationRoutes);
-  app.use('/api/admin', adminRoutes);
-  app.use('/api/public', publicRoutes);
-  app.use('/api/contact', contactRoutes);
-  app.use('/api/transactions', transactionRoutes);
-  app.use('/api/media', mediaRoutes);
-  app.use('/api/events', eventRoutes);
-  app.use('/api/settings', settingsRoutes);
-  app.use('/api/gallery', galleryRoutes);
-  app.use('/api/team', teamRoutes);
-  console.log('✅ All routes loaded successfully');
-} catch (error) {
-  console.error('❌ Route loading error:', error);
-}
+app.use('/api/auth', authRoutes);
+app.use('/api/members', memberRoutes);
+app.use('/api/donations', donationRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/public', publicRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
