@@ -30,29 +30,26 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sarboshak
 
 app.use(helmet({ contentSecurityPolicy: false }));
 
+// Manual CORS headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://sarboshaktisonatanisangathan.org');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use(cors({
-  origin: [
-    'https://sarboshaktisonatanisangathan.org',
-    'https://www.sarboshaktisonatanisangathan.org',
-    'http://localhost:3000',
-    process.env.FRONTEND_URL
-  ].filter(Boolean),
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: 'https://sarboshaktisonatanisangathan.org',
+  credentials: true
 }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // More restrictive in production
-  message: {
-    error: 'Too many requests from this IP, please try again later.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-app.use('/api/', limiter);
+
 
 
 
