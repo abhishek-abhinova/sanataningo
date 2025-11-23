@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://sarboshakti-backend.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://sarboshakti-backend.onrender.com';
 
 export const API_ENDPOINTS = {
   // Auth endpoints
@@ -7,11 +7,18 @@ export const API_ENDPOINTS = {
   
   // Member endpoints
   MEMBERS: `${API_BASE_URL}/api/members`,
-  VERIFY_MEMBERSHIP: `${API_BASE_URL}/api/members/verify`,
+  MEMBERS_REGISTER: `${API_BASE_URL}/api/members/register`,
+  MEMBERS_LIST: `${API_BASE_URL}/api/members/list`,
+  MEMBERS_APPROVE: (id) => `${API_BASE_URL}/api/members/approve/${id}`,
+  MEMBERS_REJECT: (id) => `${API_BASE_URL}/api/members/reject/${id}`,
+  MEMBERS_SEND_CARD: (id) => `${API_BASE_URL}/api/members/member/send-card/${id}`,
   
   // Donation endpoints
   DONATIONS: `${API_BASE_URL}/api/donations`,
-  VERIFY_DONATION: `${API_BASE_URL}/api/donations/verify`,
+  DONATIONS_REGISTER: `${API_BASE_URL}/api/donations/register`,
+  DONATIONS_LIST: `${API_BASE_URL}/api/donations/list`,
+  DONATIONS_APPROVE: (id) => `${API_BASE_URL}/api/donations/approve/${id}`,
+  DONATIONS_SEND_RECEIPT: (id) => `${API_BASE_URL}/api/donations/send-receipt/${id}`,
   
   // Contact endpoint
   CONTACT: `${API_BASE_URL}/api/contact`,
@@ -32,4 +39,5 @@ export const API_ENDPOINTS = {
   HEALTH: `${API_BASE_URL}/api/health`
 };
 
+export { API_BASE_URL };
 export default API_BASE_URL;

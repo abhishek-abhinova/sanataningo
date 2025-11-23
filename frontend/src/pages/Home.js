@@ -201,7 +201,7 @@ const Home = () => {
               <div className="founder-image">
                 <img src="images/p3.jpeg" alt="Founder 3" className="founder-photo" />
               </div>
-              <h3>Shri Shreebash Halder</h3>
+              <h3>Shri Shriwas Halder</h3>
               <h4><i className="fas fa-hands-helping"></i> Trustee</h4>
               <p>Dedicated to executing social welfare activities, charity drives, and community upliftment programs with hands-on approach to serving the needy.</p>
             </motion.div>

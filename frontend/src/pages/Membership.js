@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import { API_ENDPOINTS } from '../config/api';
 
 const Membership = () => {
   const [loading, setLoading] = useState(false);
@@ -37,11 +37,17 @@ const Membership = () => {
         }
       });
       
-      await api.post('/members/register', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+      const response = await fetch(API_ENDPOINTS.MEMBERS_REGISTER, {
+        method: 'POST',
+        body: formData
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to submit membership application');
+      }
+      
+      const result = await response.json();
+      console.log('Membership submitted successfully:', result);
       
       reset();
     } catch (error) {

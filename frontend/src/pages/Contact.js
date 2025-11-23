@@ -1,22 +1,31 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import api from '../utils/api';
+import { API_ENDPOINTS } from '../config/api';
 
 const Contact = () => {
   const [loading, setLoading] = useState(false);
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
   const onSubmit = async (data) => {
-    setLoading(true);
+    setLoading(true); 
     try {
-      const response = await api.post('/contact', data);
+      const response = await fetch(API_ENDPOINTS.CONTACT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
       
-      if (response.data.success) {
+      const result = await response.json();
+      
+      if (result.success) {
         toast.success('Message sent successfully! We will get back to you soon.');
         reset();
         // Redirect to thank you page
         window.location.href = `/thank-you?type=contact&name=${encodeURIComponent(data.name)}`;
+        console.log('Contact form submitted successfully:', result);
       }
     } catch (error) {
       toast.error('Failed to send message. Please try again.');
@@ -38,7 +47,7 @@ const Contact = () => {
       {/* Contact Form */}
       <section className="content-section">
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '3rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '3rem' }}>
             {/* Contact Form */}
             <div className="form-container">
               <h2>Send us a Message</h2>
@@ -117,14 +126,22 @@ const Contact = () => {
               </form>
             </div>
 
-            {/* Contact Information */}
-            <div>
-              <h2>Contact Information</h2>
-              <div style={{ background: 'white', padding: '2rem', borderRadius: '10px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
-                <div style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, #fff8f0, #fef6ed)', padding: '1.5rem', borderRadius: '12px', border: '2px solid #ffd700' }}>
-                  <h3><i className="fas fa-map-marker-alt" style={{ color: '#d2691e', marginRight: '10px' }}></i> Registered Office</h3>
-                  <div style={{ background: 'white', padding: '1rem', borderRadius: '8px', marginTop: '1rem', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                    <p style={{ fontWeight: '600', color: '#8b4513', lineHeight: '1.6' }}>
+            {/* Contact Information - Two Columns */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+              {/* Official Column */}
+              <div>
+                <h2 style={{ color: '#8b4513', marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
+                  <i className="fas fa-building" style={{ color: '#d2691e', marginRight: '10px' }}></i>
+                  Official
+                </h2>
+                
+                <div style={{ background: 'linear-gradient(135deg, #fff8f0, #fef6ed)', padding: '2rem', borderRadius: '15px', boxShadow: '0 8px 25px rgba(0,0,0,0.1)', border: '2px solid #d2691e', marginBottom: '2rem' }}>
+                  <h3 style={{ color: '#8b4513', marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>
+                    <i className="fas fa-map-marker-alt" style={{ color: '#d2691e', marginRight: '10px' }}></i>
+                    Registered Office
+                  </h3>
+                  <div style={{ background: 'white', padding: '1.5rem', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+                    <p style={{ fontWeight: '600', color: '#8b4513', lineHeight: '1.8', margin: 0 }}>
                       🏢 <strong>Sarbo Shakti Sonatani Sangathan</strong><br/>
                       19, Kalyan Kunj, Sector 49<br/>
                       Gautam Buddha Nagar, Uttar Pradesh-231301
@@ -132,68 +149,121 @@ const Contact = () => {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '2rem' }}>
-                  <h3><i className="fas fa-phone" style={{ color: '#d2691e', marginRight: '10px' }}></i> Contact Numbers</h3>
-                  <p><strong>Shri Goutam Chandra Biswas (President):</strong> +91 9876543210<br/>
-                     <strong>Shri Ajit Ray (Secretary):</strong> +91 9876543211<br/>
-                     <strong>Shri Amiyo Govinda Biswas:</strong> +91 9876543212<br/>
-                     <strong>Shri Pratap Malik:</strong> +91 9876543213</p>
+                <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 8px 25px rgba(0,0,0,0.1)', border: '1px solid #e9ecef', marginBottom: '2rem' }}>
+                  <h3 style={{ color: '#8b4513', marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
+                    <i className="fas fa-users" style={{ color: '#d2691e', marginRight: '10px' }}></i>
+                    Officials Contact
+                  </h3>
+                  <div style={{ display: 'grid', gap: '1rem' }}>
+                    <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
+                      <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Mr. Ajit Kumar Ray</h4>
+                      <p style={{ margin: '0 0 0.3rem 0', fontSize: '0.9rem', color: '#6c757d' }}><strong>Chief General Secretary</strong></p>
+                      <p style={{ margin: '0', fontSize: '0.9rem', color: '#495057' }}><i className="fas fa-phone" style={{ color: '#d2691e', marginRight: '5px' }}></i> +91 9907916429</p>
+                    </div>
+                    <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
+                      <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Shri Goutam Chandra Biswas</h4>
+                      <p style={{ margin: '0 0 0.3rem 0', fontSize: '0.9rem', color: '#6c757d' }}><strong>Cashier</strong></p>
+                      <p style={{ margin: '0', fontSize: '0.9rem', color: '#495057' }}><i className="fas fa-phone" style={{ color: '#d2691e', marginRight: '5px' }}></i> +91 9868362375</p>
+                    </div>
+                    <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
+                      <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Shriwas Halder</h4>
+                      <p style={{ margin: '0 0 0.3rem 0', fontSize: '0.9rem', color: '#6c757d' }}><strong>Official Secretary</strong></p>
+                      <p style={{ margin: '0', fontSize: '0.9rem', color: '#495057' }}><i className="fas fa-phone" style={{ color: '#d2691e', marginRight: '5px' }}></i> +91 9816195600</p>
+                    </div>
+                    <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
+                      <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Mr. Dinesh Bairagi</h4>
+                      <p style={{ margin: '0 0 0.3rem 0', fontSize: '0.9rem', color: '#6c757d' }}><strong>President & Founder</strong></p>
+                      <p style={{ margin: '0', fontSize: '0.9rem', color: '#495057' }}><i className="fas fa-phone" style={{ color: '#d2691e', marginRight: '5px' }}></i> +91 8584871180</p>
+                    </div>
+                  </div>
                 </div>
 
-                <div style={{ marginBottom: '2rem' }}>
-                  <h3><i className="fas fa-envelope" style={{ color: '#d2691e', marginRight: '10px' }}></i> Email</h3>
-                  <p>info@sarboshakti.org</p>
-                </div>
-
-                <div>
-                  <h3><i className="fas fa-clock" style={{ color: '#d2691e', marginRight: '10px' }}></i> Office Hours</h3>
-                  <p>Monday - Friday: 9:00 AM - 6:00 PM<br />
-                     Saturday: 9:00 AM - 2:00 PM<br />
-                     Sunday: Closed</p>
+                <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 8px 25px rgba(0,0,0,0.1)', border: '1px solid #e9ecef' }}>
+                  <h3 style={{ color: '#8b4513', marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>
+                    <i className="fas fa-clock" style={{ color: '#d2691e', marginRight: '10px' }}></i>
+                    Office Hours
+                  </h3>
+                  <div style={{ background: 'linear-gradient(135deg, #e8f5e8, #f0fff0)', padding: '1.5rem', borderRadius: '10px', border: '1px solid #28a745' }}>
+                    <p style={{ margin: 0, color: '#155724', lineHeight: '1.8' }}>
+                      <strong>Monday - Friday:</strong> 9:00 AM - 6:00 PM<br/>
+                      <strong>Saturday:</strong> 9:00 AM - 2:00 PM<br/>
+                      <strong>Sunday:</strong> Closed
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div style={{ marginTop: '2rem', background: 'white', padding: '2rem', borderRadius: '10px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
-                <h3><i className="fas fa-users" style={{ color: '#d2691e', marginRight: '10px' }}></i> Officials Contact</h3>
-                <div style={{ marginTop: '1rem' }}>
-                  <div style={{ marginBottom: '1rem', padding: '0.8rem', background: '#f8f9fa', borderRadius: '5px' }}>
-                    <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0' }}>Shri Goutam Chandra Biswas</h4>
-                    <p style={{ margin: '0', fontSize: '0.9rem' }}><strong>President & Founder</strong></p>
-                    <p style={{ margin: '0', fontSize: '0.9rem' }}><i className="fas fa-phone" style={{ color: '#d2691e' }}></i> +91 9876543210</p>
-                  </div>
-                  <div style={{ marginBottom: '1rem', padding: '0.8rem', background: '#f8f9fa', borderRadius: '5px' }}>
-                    <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0' }}>Shri Ajit Ray</h4>
-                    <p style={{ margin: '0', fontSize: '0.9rem' }}><strong>Secretary</strong></p>
-                    <p style={{ margin: '0', fontSize: '0.9rem' }}><i className="fas fa-phone" style={{ color: '#d2691e' }}></i> +91 9876543211</p>
-                  </div>
-                  <div style={{ marginBottom: '1rem', padding: '0.8rem', background: '#f8f9fa', borderRadius: '5px' }}>
-                    <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0' }}>Shri Amiyo Govinda Biswas</h4>
-                    <p style={{ margin: '0', fontSize: '0.9rem' }}><strong>Executive Member</strong></p>
-                    <p style={{ margin: '0', fontSize: '0.9rem' }}><i className="fas fa-phone" style={{ color: '#d2691e' }}></i> +91 9876543212</p>
-                  </div>
-                  <div style={{ padding: '0.8rem', background: '#f8f9fa', borderRadius: '5px' }}>
-                    <h4 style={{ color: '#8b4513', margin: '0 0 0.5rem 0' }}>Shri Pratap Malik</h4>
-                    <p style={{ margin: '0', fontSize: '0.9rem' }}><strong>Executive Member</strong></p>
-                    <p style={{ margin: '0', fontSize: '0.9rem' }}><i className="fas fa-phone" style={{ color: '#d2691e' }}></i> +91 9876543213</p>
+              {/* Support Column */}
+              <div>
+                <h2 style={{ color: '#8b4513', marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
+                  <i className="fas fa-headset" style={{ color: '#17a2b8', marginRight: '10px' }}></i>
+                  Support
+                </h2>
+                
+                <div style={{ background: 'linear-gradient(135deg, #d1ecf1, #bee5eb)', padding: '2rem', borderRadius: '15px', boxShadow: '0 8px 25px rgba(0,0,0,0.1)', border: '2px solid #17a2b8', marginBottom: '2rem' }}>
+                  <h3 style={{ color: '#0c5460', marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>
+                    <i className="fas fa-envelope" style={{ color: '#17a2b8', marginRight: '10px' }}></i>
+                    Email Support
+                  </h3>
+                  <div style={{ background: 'white', padding: '1.5rem', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+                    <p style={{ margin: '0 0 1rem 0', color: '#495057' }}><strong>General Inquiries:</strong></p>
+                    <p style={{ margin: '0 0 1rem 0', color: '#17a2b8', fontWeight: 'bold' }}>info@sarboshaktisonatanisangathan.org</p>
+                    <p style={{ margin: '0 0 1rem 0', color: '#495057' }}><strong>Membership Support:</strong></p>
+                    <p style={{ margin: '0', color: '#17a2b8', fontWeight: 'bold' }}>info@sarboshaktisonatanisangathan.org</p>
                   </div>
                 </div>
-              </div>
-              
-              <div style={{ marginTop: '2rem', background: 'white', padding: '2rem', borderRadius: '10px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
-                <h3>Follow Us</h3>
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <a href="https://www.facebook.com/share/1G7CvWCqd8/" target="_blank" rel="noopener noreferrer" className="social-link">
-                    <i className="fab fa-facebook-f"></i>
-                    <span>Facebook</span>
-                  </a>
-                  <a href="#" className="social-link">
-                    <i className="fab fa-twitter"></i>
-                    <span>Twitter</span>
-                  </a>
-                  <a href="#" className="social-link">
-                    <i className="fab fa-instagram"></i>
-                    <span>Instagram</span>
-                  </a>
+
+                <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 8px 25px rgba(0,0,0,0.1)', border: '1px solid #e9ecef', marginBottom: '2rem' }}>
+                  <h3 style={{ color: '#8b4513', marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
+                    <i className="fas fa-phone-alt" style={{ color: '#28a745', marginRight: '10px' }}></i>
+                    Support Team
+                  </h3>
+                  <div style={{ display: 'grid', gap: '1rem' }}>
+                    
+                    <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #e8f5e8, #f0fff0)', borderRadius: '10px', border: '1px solid #28a745' }}>
+                      <h4 style={{ color: '#155724', margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Shri Pratap Malik</h4>
+                      <p style={{ margin: '0 0 0.3rem 0', fontSize: '0.9rem', color: '#6c757d' }}><strong> Support</strong></p>
+                      <p style={{ margin: '0', fontSize: '0.9rem', color: '#495057' }}><i className="fas fa-phone" style={{ color: '#28a745', marginRight: '5px' }}></i> +91 7827359897</p>
+                    </div>
+                    <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #e8f5e8, #f0fff0)', borderRadius: '10px', border: '1px solid #28a745' }}>
+                      <h4 style={{ color: '#155724', margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Tarak Chandra Pal</h4>
+                      <p style={{ margin: '0 0 0.3rem 0', fontSize: '0.9rem', color: '#6c757d' }}><strong>Support</strong></p>
+                      <p style={{ margin: '0', fontSize: '0.9rem', color: '#495057' }}><i className="fas fa-phone" style={{ color: '#28a745', marginRight: '5px' }}></i> +91 8826069880</p>
+                    </div>
+                    <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #e8f5e8, #f0fff0)', borderRadius: '10px', border: '1px solid #28a745' }}>
+                      <h4 style={{ color: '#155724', margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Amiyo Biswas</h4>
+                      <p style={{ margin: '0 0 0.3rem 0', fontSize: '0.9rem', color: '#6c757d' }}><strong>Support</strong></p>
+                      <p style={{ margin: '0', fontSize: '0.9rem', color: '#495057' }}><i className="fas fa-phone" style={{ color: '#28a745', marginRight: '5px' }}></i> +91 9765212583</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ background: 'white', padding: '2rem', borderRadius: '15px', boxShadow: '0 8px 25px rgba(0,0,0,0.1)', border: '1px solid #e9ecef' }}>
+                  <h3 style={{ color: '#8b4513', marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>
+                    <i className="fas fa-share-alt" style={{ color: '#6f42c1', marginRight: '10px' }}></i>
+                    Follow Us
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                    <a href="https://www.facebook.com/share/1G7CvWCqd8/" target="_blank" rel="noopener noreferrer" 
+                       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem', background: 'linear-gradient(135deg, #3b5998, #4267B2)', color: 'white', textDecoration: 'none', borderRadius: '10px', transition: 'transform 0.3s ease' }}
+                       onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+                       onMouseOut={(e) => e.target.style.transform = 'scale(1)'}>
+                      <i className="fab fa-facebook-f" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}></i>
+                      <span style={{ fontSize: '0.8rem' }}>Facebook</span>
+                    </a>
+                    <a href="#" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem', background: 'linear-gradient(135deg, #1da1f2, #0d8bd9)', color: 'white', textDecoration: 'none', borderRadius: '10px', transition: 'transform 0.3s ease' }}
+                       onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+                       onMouseOut={(e) => e.target.style.transform = 'scale(1)'}>
+                      <i className="fab fa-twitter" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}></i>
+                      <span style={{ fontSize: '0.8rem' }}>Twitter</span>
+                    </a>
+                    <a href="#" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem', background: 'linear-gradient(135deg, #e4405f, #c13584)', color: 'white', textDecoration: 'none', borderRadius: '10px', transition: 'transform 0.3s ease' }}
+                       onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+                       onMouseOut={(e) => e.target.style.transform = 'scale(1)'}>
+                      <i className="fab fa-instagram" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}></i>
+                      <span style={{ fontSize: '0.8rem' }}>Instagram</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

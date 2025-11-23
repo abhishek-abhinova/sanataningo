@@ -118,7 +118,58 @@ const generateDonationReceipt = async (donation) => {
   }
 };
 
+// Generate membership card HTML for email
+const generateMembershipCardHTML = (member) => {
+  return `
+    <div style="width: 350px; height: 220px; background: linear-gradient(135deg, #8b4513, #d2691e); border-radius: 15px; padding: 3px; margin: 20px auto; box-shadow: 0 8px 25px rgba(0,0,0,0.3);">
+      <div style="width: 100%; height: 100%; background: #fff8f0; border-radius: 12px; padding: 15px; position: relative; overflow: hidden;">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #d2691e, #ff8c00); color: white; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; text-align: center;">
+          <div style="font-size: 14px; font-weight: bold; margin-bottom: 2px;">🕉️ SARBO SHAKTI SONATANI SANGATHAN</div>
+          <div style="font-size: 9px; color: #ffd700;">MEMBERSHIP IDENTITY CARD</div>
+        </div>
+        
+        <!-- Content -->
+        <div style="display: flex; gap: 10px;">
+          <!-- Photo placeholder -->
+          <div style="width: 60px; height: 75px; border: 2px solid #d2691e; border-radius: 5px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #666; text-align: center; line-height: 1.2;">MEMBER<br>PHOTO</div>
+          
+          <!-- Details -->
+          <div style="flex: 1; font-size: 9px; line-height: 1.4;">
+            <div style="font-size: 11px; font-weight: bold; color: #8b4513; margin-bottom: 3px;">${member.fullName}</div>
+            <div><strong>ID:</strong> ${member.memberId}</div>
+            <div><strong>DOB:</strong> ${new Date(member.dateOfBirth).toLocaleDateString('en-IN')}</div>
+            <div><strong>Phone:</strong> ${member.phone}</div>
+            <div><strong>Email:</strong> ${member.email}</div>
+            <div><strong>Aadhaar:</strong> ${'*'.repeat(8)}${member.aadhaarNumber.slice(-4)}</div>
+          </div>
+          
+          <!-- QR Code placeholder -->
+          <div style="width: 50px; height: 50px; border: 1px solid #d2691e; border-radius: 3px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #666; text-align: center;">QR<br>CODE</div>
+        </div>
+        
+        <!-- Membership info -->
+        <div style="background: linear-gradient(135deg, #e8f5e8, #f0fff0); padding: 6px 8px; border-radius: 5px; margin-top: 8px; border-left: 3px solid #228b22;">
+          <div style="font-size: 9px; font-weight: bold; color: #228b22;">Membership: ${member.membershipPlan.toUpperCase()}</div>
+          <div style="font-size: 8px; color: #666;">Valid Till: ${member.validTill ? new Date(member.validTill).toLocaleDateString('en-IN') : 'LIFETIME'} | Issue: ${new Date().toLocaleDateString('en-IN')}</div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="position: absolute; bottom: 5px; left: 15px; right: 15px; font-size: 6px; color: #666; text-align: center; line-height: 1.2;">
+          19, Kalyan Kunj, Sector 49, Gautam Buddha Nagar, UP-231301<br>
+          This card is property of Sarbo Shakti Sonatani Sangathan
+        </div>
+        
+        <!-- Decorative elements -->
+        <div style="position: absolute; top: 60px; right: 15px; font-size: 12px; color: #d2691e; opacity: 0.7;">🕉️</div>
+        <div style="position: absolute; top: 80px; right: 15px; font-size: 12px; color: #d2691e; opacity: 0.7;">🕉️</div>
+      </div>
+    </div>
+  `;
+};
+
 module.exports = {
   generateMembershipCard,
-  generateDonationReceipt
+  generateDonationReceipt,
+  generateMembershipCardHTML
 };

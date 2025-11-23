@@ -188,23 +188,27 @@ router.put('/approve/:id', auth, async (req, res) => {
 
     await member.save();
 
-    // Generate and send membership card
+    // Generate and send membership card automatically
     try {
       const { generateMembershipCard } = require('../utils/cardGenerator');
-      const { sendMembershipCardEmail } = require('../utils/emailService');
+      const { sendMembershipCardWithPDF } = require('../utils/emailService');
       
+      console.log('🎫 Generating membership card for:', member.fullName);
       const cardPath = await generateMembershipCard(member);
       member.cardFile = cardPath;
       await member.save();
       
-      const { sendMembershipCardWithPDF } = require('../utils/emailService');
+      console.log('📧 Sending membership card email to:', member.email);
       await sendMembershipCardWithPDF(member, cardPath);
+      console.log('✅ Membership card sent successfully');
     } catch (error) {
-      console.error('Card generation/email failed:', error);
+      console.error('❌ Card generation/email failed:', error);
+      // Don't fail the approval if card sending fails
     }
 
-    res.json({ success: true, message: 'Member approved and card sent successfully' });
+    res.json({ success: true, message: 'Member approved and ID card sent to email successfully' });
   } catch (error) {
+    console.error('❌ Member approval failed:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -244,29 +248,33 @@ router.post('/donation/approve/:id', auth, async (req, res) => {
     }
 
     donation.paymentStatus = 'approved';
-    donation.approvedBy = req.user.userId;
+    donation.approvedBy = req.user.id;
     donation.approvedAt = new Date();
     donation.receiptGenerated = true;
 
     await donation.save();
 
-    // Generate and send receipt
+    // Generate and send receipt automatically
     try {
       const { generateDonationReceipt } = require('../utils/cardGenerator');
-      const { sendDonationReceiptEmail } = require('../utils/emailService');
+      const { sendDonationReceiptWithPDF } = require('../utils/emailService');
       
+      console.log('🧾 Generating donation receipt for:', donation.donorName);
       const receiptPath = await generateDonationReceipt(donation);
       donation.receiptFile = receiptPath;
       await donation.save();
       
-      const { sendDonationReceiptWithPDF } = require('../utils/emailService');
+      console.log('📧 Sending donation receipt email to:', donation.email);
       await sendDonationReceiptWithPDF(donation, receiptPath);
+      console.log('✅ Donation receipt sent successfully');
     } catch (error) {
-      console.error('Receipt generation/email failed:', error);
+      console.error('❌ Receipt generation/email failed:', error);
+      // Don't fail the approval if receipt sending fails
     }
 
-    res.json({ success: true, message: 'Donation approved and receipt sent successfully' });
+    res.json({ success: true, message: 'Donation approved and receipt sent to email successfully' });
   } catch (error) {
+    console.error('❌ Donation approval failed:', error);
     res.status(500).json({ error: error.message });
   }
 });

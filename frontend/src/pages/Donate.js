@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import { API_ENDPOINTS } from '../config/api';
 
 const Donate = () => {
   const [loading, setLoading] = useState(false);
@@ -43,11 +43,17 @@ const Donate = () => {
         }
       });
       
-      await api.post('/donations/create', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+      const response = await fetch(API_ENDPOINTS.DONATIONS, {
+        method: 'POST',
+        body: formData
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to submit donation');
+      }
+      
+      const result = await response.json();
+      console.log('Donation submitted successfully:', result);
       
       reset();
       setSelectedAmount('');

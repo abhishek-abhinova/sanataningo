@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import { API_ENDPOINTS } from '../config/api';
 
 const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
@@ -12,16 +12,27 @@ const AdminLogin = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', data);
+      const response = await fetch(API_ENDPOINTS.LOGIN, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
       
-      if (response.data.success) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      const result = await response.json();
+      
+      if (result.success) {
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
         toast.success('Login successful!');
         navigate('/admin/premium');
+      } else {
+        toast.error(result.error || 'Login failed');
       }
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Login failed');
+      console.error('Login error:', error);
+      toast.error('Login failed. Please check your connection.');
     } finally {
       setLoading(false);
     }

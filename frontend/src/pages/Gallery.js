@@ -49,9 +49,17 @@ const Gallery = () => {
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -5, scale: 1.02 }}
+                onMouseEnter={(e) => {
+                  const overlay = e.currentTarget.querySelector('.gallery-overlay');
+                  if (overlay) overlay.style.opacity = '1';
+                }}
+                onMouseLeave={(e) => {
+                  const overlay = e.currentTarget.querySelector('.gallery-overlay');
+                  if (overlay) overlay.style.opacity = '0';
+                }}
                 style={{
                   position: 'relative',
-                  height: '250px',
+                  height: 'auto',
                   borderRadius: '15px',
                   overflow: 'hidden',
                   boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
@@ -64,9 +72,10 @@ const Gallery = () => {
                   alt={image.caption}
                   style={{
                     width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    transition: 'transform 0.3s ease'
+                    height: 'auto',
+                    objectFit: 'contain',
+                    transition: 'transform 0.3s ease',
+                    display: 'block'
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.transform = 'scale(1.05)';
@@ -83,9 +92,9 @@ const Gallery = () => {
                   right: 0,
                   background: 'linear-gradient(transparent, rgba(0, 0, 0, 0.8))',
                   color: 'white',
-                  padding: '2rem 1.5rem 1.5rem',
-                  transform: 'translateY(100%)',
-                  transition: 'transform 0.3s ease'
+                  padding: '1.5rem',
+                  opacity: 0,
+                  transition: 'opacity 0.3s ease'
                 }}
                 className="gallery-overlay"
                 >

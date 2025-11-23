@@ -1,4 +1,5 @@
 @import url('./styles/premium.css');
+@import url('./styles/responsive.css');
 
 * {
     margin: 0;
