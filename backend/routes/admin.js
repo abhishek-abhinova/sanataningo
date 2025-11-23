@@ -6,6 +6,16 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+// Root admin route
+router.get('/', auth, async (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Admin panel access granted',
+    user: req.user,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Dashboard statistics
 router.get('/dashboard', auth, async (req, res) => {
   try {
