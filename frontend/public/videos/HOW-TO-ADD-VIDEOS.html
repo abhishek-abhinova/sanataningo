@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Add Videos to Gallery</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #fff8f0, #fef6ed);
+        }
+        .header {
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #D2691E;
+        }
+        .file-list {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            border: 1px solid #dee2e6;
+        }
+        .step {
+            background: linear-gradient(135deg, #e8f5e8, #f0fff0);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid #28a745;
+        }
+        .warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 1rem 0;
+        }
+        .success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+        code {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #d73a49;
+        }
+        .icon {
+            color: #D2691E;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎥 Video Gallery Setup Guide</h1>
+        <p>Complete instructions for adding videos with sound to your gallery</p>
+    </div>
+
+    <div class="section">
+        <h2><span class="icon">📁</span>Required Video Files</h2>
+        <p>Add these MP4 video files to the <code>/public/videos/</code> directory:</p>
+        <div class="file-list">
+community-service.mp4       (Community service activities)
+cultural-event.mp4          (Cultural events and festivals)  
+educational-program.mp4     (Educational initiatives)
+spiritual-gathering.mp4     (Spiritual sessions)
+featured-documentary.mp4    (Main featured video)
+        </div>
+    </div>
+
+    <div class="section">
+        <h2><span class="icon">🖼️</span>Video Poster Images</h2>
+        <p>The following poster images are already created in <code>/public/images/</code>:</p>
+        <div class="file-list">
+video-poster1.jpg          (Community service poster)
+video-poster2.jpg          (Cultural event poster)
+video-poster3.jpg          (Educational program poster)
+video-poster4.jpg          (Spiritual gathering poster)
+featured-video-poster.jpg  (Featured video poster)
+        </div>
+    </div>
+
+    <div class="section">
+        <h2><span class="icon">⚙️</span>Video Requirements</h2>
+        <div class="step">
+            <strong>Format:</strong> MP4 (H.264 codec recommended)
+        </div>
+        <div class="step">
+            <strong>Resolution:</strong> 1280x720 (HD) or higher
+        </div>
+        <div class="step">
+            <strong>File Size:</strong> Under 50MB for optimal loading
+        </div>
+        <div class="step">
+            <strong>Audio:</strong> Include audio tracks for full experience
+        </div>
+        <div class="step">
+            <strong>Duration:</strong> 3-10 minutes recommended
+        </div>
+    </div>
+
+    <div class="section">
+        <h2><span class="icon">🎮</span>Video Features</h2>
+        <p>The gallery includes these video controls:</p>
+        <ul>
+            <li>✅ Play/Pause controls</li>
+            <li>✅ Volume control with sound</li>
+            <li>✅ Fullscreen option</li>
+            <li>✅ Progress bar with seeking</li>
+            <li>✅ Duration display</li>
+            <li>✅ Poster image preview</li>
+            <li>✅ Responsive design</li>
+            <li>✅ Mobile-friendly controls</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2><span class="icon">📱</span>How It Works</h2>
+        <div class="step">
+            <strong>Step 1:</strong> Users can switch between Photos and Videos tabs
+        </div>
+        <div class="step">
+            <strong>Step 2:</strong> Videos display with poster images as thumbnails
+        </div>
+        <div class="step">
+            <strong>Step 3:</strong> Click play to start video with full audio
+        </div>
+        <div class="step">
+            <strong>Step 4:</strong> All standard video controls are available
+        </div>
+        <div class="step">
+            <strong>Step 5:</strong> Featured video section shows main documentary
+        </div>
+    </div>
+
+    <div class="warning">
+        <strong>⚠️ Important:</strong> If video files are not available, the gallery will show "Video Coming Soon" placeholders with attractive animations.
+    </div>
+
+    <div class="success">
+        <strong>✅ Ready to Use:</strong> Simply drop your MP4 files in the videos folder and refresh the website to see them in action!
+    </div>
+
+    <div class="section">
+        <h2><span class="icon">🔧</span>Testing</h2>
+        <p>To test the video functionality:</p>
+        <ol>
+            <li>Add at least one MP4 file to <code>/public/videos/</code></li>
+            <li>Navigate to the Gallery page</li>
+            <li>Click the "Videos" tab</li>
+            <li>Your video should appear with full controls</li>
+            <li>Test play, pause, volume, and fullscreen</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h2><span class="icon">📞</span>Support</h2>
+        <p>If you need help adding videos or encounter any issues:</p>
+        <ul>
+            <li>Check that video files are in MP4 format</li>
+            <li>Ensure file names match exactly (case-sensitive)</li>
+            <li>Verify file sizes are reasonable (&lt;50MB)</li>
+            <li>Test videos play in a regular browser first</li>
+        </ul>
+    </div>
+</body>
+</html>

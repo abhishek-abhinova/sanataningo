@@ -3,15 +3,42 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { API_ENDPOINTS } from '../config/api';
+import ConnectionTest from '../components/ConnectionTest';
 
 const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
+  const [backendStatus, setBackendStatus] = useState('checking');
   const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    checkBackendStatus();
+  }, []);
+
+  const checkBackendStatus = async () => {
+    try {
+      const response = await fetch(API_ENDPOINTS.HEALTH, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        setBackendStatus('online');
+      } else {
+        setBackendStatus('error');
+      }
+    } catch (error) {
+      console.error('Backend status check failed:', error);
+      setBackendStatus('offline');
+    }
+  };
 
   const onSubmit = async (data) => {
     setLoading(true);
     try {
+      console.log('Attempting login to:', API_ENDPOINTS.LOGIN);
+      console.log('Login data:', { email: data.email, password: '***' });
+      
       const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: 'POST',
         headers: {
@@ -20,7 +47,16 @@ const AdminLogin = () => {
         body: JSON.stringify(data)
       });
       
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+      
       const result = await response.json();
+      console.log('Login result:', result);
       
       if (result.success) {
         localStorage.setItem('token', result.token);
@@ -32,7 +68,11 @@ const AdminLogin = () => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      toast.error('Login failed. Please check your connection.');
+      if (error.message.includes('Failed to fetch')) {
+        toast.error('Cannot connect to server. Please check if backend is running.');
+      } else {
+        toast.error(error.message || 'Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -47,6 +87,7 @@ const AdminLogin = () => {
       background: 'linear-gradient(135deg, #8B4513, #D2691E)',
       padding: '2rem'
     }}>
+      <ConnectionTest />
       <div style={{
         background: 'white',
         padding: '3rem',
@@ -63,6 +104,40 @@ const AdminLogin = () => {
           />
           <h2 style={{ color: '#8b4513', marginBottom: '0.5rem' }}>Admin Login</h2>
           <p style={{ color: '#666' }}>Sarbo Shakti Sonatani Sangathan</p>
+          
+          {/* Backend Status */}
+          <div style={{ 
+            padding: '0.5rem', 
+            borderRadius: '5px', 
+            fontSize: '0.8rem',
+            marginTop: '1rem',
+            background: backendStatus === 'online' ? '#d4edda' : 
+                       backendStatus === 'offline' ? '#f8d7da' : '#fff3cd',
+            color: backendStatus === 'online' ? '#155724' : 
+                   backendStatus === 'offline' ? '#721c24' : '#856404'
+          }}>
+            Backend: {backendStatus === 'checking' ? '🔄 Checking...' : 
+                     backendStatus === 'online' ? '✅ Online' : 
+                     backendStatus === 'offline' ? '❌ Offline' : '⚠️ Error'}
+            {backendStatus === 'offline' && (
+              <div style={{ marginTop: '0.5rem' }}>
+                <button 
+                  onClick={checkBackendStatus}
+                  style={{
+                    padding: '2px 6px',
+                    fontSize: '0.7rem',
+                    background: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '3px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -140,8 +215,11 @@ const AdminLogin = () => {
 
         <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.9rem', color: '#666' }}>
           <p>Default credentials:</p>
-          <p>Email: admin@sarboshakti.org</p>
-          <p>Password: admin123</p>
+          <p><strong>Email:</strong> admin@sarboshakti.org</p>
+          <p><strong>Password:</strong> admin123</p>
+          <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#f8f9fa', borderRadius: '5px', fontSize: '0.8rem' }}>
+            Backend: {API_ENDPOINTS.LOGIN}
+          </div>
         </div>
       </div>
     </div>

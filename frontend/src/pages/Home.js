@@ -242,12 +242,12 @@ const Home = () => {
               { name: 'Shri Pratap Malik', image: '/images/pratap-malik.jpeg' },
               { name: 'Shri Tarak Chandra Pal', image: '/images/tarak-chandra-pal.jpeg' },
               { name: 'Dr. Uttam Kumar Biswas', image: '/images/dr.-uttam-kumar-biswas.jpeg' },
-              { name: 'Shri Bijon Biswas', image: '/images/bijan-biswas.jpeg' },
+              { name: 'Shri Bijan Biswas', image: '/images/bijan-biswas.jpeg' },
               { name: 'Shri Arun Kumar Biswas', image: '/images/arun-kumar-biswas.jpeg' },
               { name: 'Shri Sudin Biswas', image: '/images/sudin-biswas-noida.jpeg' },
               { name: 'Shri Aleep Biswas', image: '/images/aleep-biswas.jpeg' },
               { name: 'Shri Shyamlal Chaudhary', image: '/images/Shyamlalchaudhary.jpeg' },
-              { name: 'Shri Tapash Biswas', image: '/images/tapash-biswas.jpeg' },
+              { name: 'Dr. Shyama Shree Chaki', image: 'images/drshyamasreechaki.jpeg' },
               { name: 'Shri Pronit Roy', image: '/images/pronit-roy.jpeg' },
               { name: 'Shri Mrinal Biswas', image: '/images/mrinal-kanti-biswas.jpeg' },
               { name: 'Shri Deepu Sarkar', image: '/images/mr.-deepu-sarkar.jpeg' },
@@ -256,7 +256,7 @@ const Home = () => {
               { name: 'Shri Bijon Kumar Biswas', image: '/images/bijon-kumar-biswas-delhi.jpeg' },
               { name: 'Shri Subash Biswas Somendra', image: '/images/subhash-kumar.jpeg' },
               { name: 'Shri Somendra Srivastava', image: '/images/somendra-srivastava.jpeg' },
-              { name: 'Dr. Shyama Shree Chaki', image: '/images/drshyamasreechaki.jpeg' },{ name: 'Robin Kumar Ranjit Biswas ', image: 'images/robin-kumar-ranjit-biswas.jpeg' }
+              { name: 'Robin Kumar Ranjit Biswas ', image: 'images/robin-kumar-ranjit-biswas.jpeg' }
             ]).map((member, index) => (
               <motion.div
                 key={index}
