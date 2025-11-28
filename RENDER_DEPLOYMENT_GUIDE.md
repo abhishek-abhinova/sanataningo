@@ -109,7 +109,7 @@ https://your-app-name.onrender.com/api/admin/init
 ### 4.3 Update Frontend
 Update frontend `.env.production`:
 ```env
-REACT_APP_API_URL=https://your-app-name.onrender.com/api
+REACT_APP_BACKEND_URL=https://sarboshakti-backend.onrender.com
 ```
 
 ## Step 5: Continuous Deployment
@@ -160,4 +160,4 @@ npm install
 - ✅ Mobile-optimized hero section
 - ✅ Flexible image galleries
 
-Your backend will be live at: `https://your-app-name.onrender.com`
+Your backend will be live at: `https://sarboshakti-backend.onrender.com`

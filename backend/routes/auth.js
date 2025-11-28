@@ -8,7 +8,7 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    console.log('Login attempt:', { email, password: '***' });
+    console.log('Login attempt for email:', email);
     
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
@@ -41,7 +41,7 @@ router.post('/login', async (req, res) => {
     // Generate JWT token
     const token = jwt.sign(
       { userId: user._id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'fallback-secret',
+      process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
     

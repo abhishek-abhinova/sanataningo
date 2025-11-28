@@ -58,16 +58,17 @@ router.post('/create', upload.single('paymentScreenshot'), async (req, res) => {
 
     await donation.save();
 
-    // Send admin notification
+    // Send admin notification and thank you email
     try {
       await sendAdminDonationNotification(donation);
+      await sendThankYouWithReceipt(donation);
     } catch (emailError) {
       console.error('Email notification failed:', emailError);
     }
     
     res.json({ 
       success: true, 
-      message: 'Donation submitted successfully',
+      message: 'Donation submitted successfully. Thank you email sent!',
       donationId: donation.donationId || donation._id
     });
   } catch (error) {
@@ -119,16 +120,17 @@ router.post('/', upload.single('paymentScreenshot'), async (req, res) => {
     const donation = new Donation(donationData);
     await donation.save();
 
-    // Send admin notification
+    // Send admin notification and thank you email
     try {
       await sendAdminDonationNotification(donation);
+      await sendThankYouWithReceipt(donation);
     } catch (emailError) {
       console.error('Email notification failed:', emailError);
     }
     
     res.json({
       success: true,
-      message: 'Donation submitted successfully. Payment verification pending.',
+      message: 'Donation submitted successfully. Thank you email sent! Payment verification pending.',
       donation: {
         donationId: donation.donationId,
         donorName: donation.donorName,

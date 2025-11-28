@@ -45,7 +45,14 @@ const generateMembershipCardHTML = (member) => {
         <div class="footer">
           <div><strong>Dharma • Seva • Sanskriti • Samaj</strong></div>
           <div>${process.env.ORG_ADDRESS}</div>
-          <div>📧 ${process.env.ORG_EMAIL} | 📞 ${process.env.ORG_PHONE}</div>
+          <div>📧 ${process.env.ORG_EMAIL}</div>
+          <div style="margin-top: 10px; font-size: 10px; line-height: 1.4;">
+            <strong>Key Officials:</strong><br>
+            Mr. Ajit Kumar Ray - Chief General Secretary: +91 9907916429<br>
+            Shri Goutam Chandra Biswas - Cashier: +91 9868362375<br>
+            Shriwas Halder - Official Secretary: +91 9816195600<br>
+            Mr. Dinesh Bairagi - President & Founder: +91 8584871180
+          </div>
         </div>
       </div>
     </body>
@@ -136,7 +143,14 @@ const generateDonationReceiptHTML = (donation) => {
           <div style="margin-top: 20px; font-size: 14px; color: #666;">
             <div><strong>${process.env.ORG_NAME}</strong></div>
             <div>${process.env.ORG_ADDRESS}</div>
-            <div>📧 ${process.env.ORG_EMAIL} | 📞 ${process.env.ORG_PHONE}</div>
+            <div>📧 ${process.env.ORG_EMAIL}</div>
+            <div style="margin-top: 10px; font-size: 12px; line-height: 1.4;">
+              <strong>Key Officials:</strong><br>
+              Mr. Ajit Kumar Ray - Chief General Secretary: +91 9907916429<br>
+              Shri Goutam Chandra Biswas - Cashier: +91 9868362375<br>
+              Shriwas Halder - Official Secretary: +91 9816195600<br>
+              Mr. Dinesh Bairagi - President & Founder: +91 8584871180
+            </div>
           </div>
         </div>
         
@@ -205,7 +219,14 @@ const generateThankYouEmailHTML = (donation) => {
         <div class="footer">
           <p><strong>Dharma • Seva • Sanskriti • Samaj</strong></p>
           <p>${process.env.ORG_ADDRESS}</p>
-          <p>📧 ${process.env.ORG_EMAIL} | 📞 ${process.env.ORG_PHONE}</p>
+          <p>📧 ${process.env.ORG_EMAIL}</p>
+          <div style="margin-top: 15px; font-size: 12px; line-height: 1.4;">
+            <strong>Key Officials:</strong><br>
+            Mr. Ajit Kumar Ray - Chief General Secretary: +91 9907916429<br>
+            Shri Goutam Chandra Biswas - Cashier: +91 9868362375<br>
+            Shriwas Halder - Official Secretary: +91 9816195600<br>
+            Mr. Dinesh Bairagi - President & Founder: +91 8584871180
+          </div>
         </div>
       </div>
     </body>

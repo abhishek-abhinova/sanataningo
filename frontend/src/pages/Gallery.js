@@ -1,34 +1,58 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import api from '../utils/api';
 
 const Gallery = () => {
-  const [activeTab, setActiveTab] = React.useState('photos');
+  const [activeTab, setActiveTab] = useState('photos');
+  const [galleryData, setGalleryData] = useState({ photos: [], videos: [] });
+  const [loading, setLoading] = useState(true);
 
-  const galleryImages = [
-    { id: 1, url: '/images/photo1.jpeg', caption: 'Community Service Program', category: 'service' },
-    { id: 2, url: '/images/photo2.jpeg', caption: 'Cultural Event', category: 'cultural' },
-    { id: 3, url: '/images/photo3.jpeg', caption: 'Educational Initiative', category: 'education' },
-    { id: 4, url: '/images/photo4.jpeg', caption: 'Spiritual Gathering', category: 'spiritual' },
-    { id: 5, url: '/images/photo5.jpeg', caption: 'Charity Drive', category: 'charity' },
-    { id: 6, url: '/images/p1.jpeg', caption: 'Founder Meeting', category: 'leadership' },
-    { id: 7, url: '/images/p2.jpeg', caption: 'Team Discussion', category: 'leadership' },
-    { id: 8, url: '/images/p3.jpeg', caption: 'Planning Session', category: 'leadership' },
-    { id: 9, url: '/images/p4.jpeg', caption: 'Leadership Meeting', category: 'leadership' }
+  // Fallback data
+  const fallbackPhotos = [
+    { id: 1, image: '/images/gallery/photo1.jpg', title: 'Community Service', category: 'service', type: 'photo' },
+    { id: 2, image: '/images/gallery/photo2.jpg', title: 'Cultural Program', category: 'cultural', type: 'photo' },
+    { id: 3, image: '/images/gallery/photo3.jpg', title: 'Educational Initiative', category: 'education', type: 'photo' },
+    { id: 4, image: '/images/gallery/photo4.jpg', title: 'Health Camp', category: 'healthcare', type: 'photo' },
+    { id: 5, image: '/images/gallery/photo5.jpg', title: 'Youth Program', category: 'youth', type: 'photo' },
+    { id: 6, image: '/images/gallery/photo6.jpg', title: 'Spiritual Gathering', category: 'spiritual', type: 'photo' }
   ];
 
-  const galleryVideos = [
-    { id: 1, url: '/videos/1.mp4', caption: 'Sanatan Dharma Awareness Program', category: 'spiritual', duration: '3:45' },
-    { id: 2, url: '/videos/2.mp4', caption: 'Community Health Camp Initiative', category: 'service', duration: '5:20' },
-    { id: 3, url: '/videos/3.mp4', caption: 'Educational Scholarship Distribution', category: 'education', duration: '4:15' },
-    { id: 4, url: '/videos/4.mp4', caption: 'Cultural Heritage Festival', category: 'cultural', duration: '6:30' },
-    { id: 5, url: '/videos/5.mp4', caption: 'Food Distribution Drive', category: 'charity', duration: '4:20' },
-    { id: 6, url: '/videos/6.mp4', caption: 'Youth Leadership Workshop', category: 'leadership', duration: '3:15' },
-    { id: 7, url: '/videos/7.mp4', caption: 'Environmental Conservation Project', category: 'environment', duration: '2:45' },
-    { id: 8, url: '/videos/8.mp4', caption: 'Women Empowerment Seminar', category: 'empowerment', duration: '5:10' },
-    { id: 9, url: '/videos/9.mp4', caption: 'Rural Development Initiative', category: 'development', duration: '4:30' },
-    { id: 10, url: '/videos/10.mp4', caption: 'Medical Assistance Program', category: 'healthcare', duration: '3:20' },
-    { id: 11, url: '/videos/12.mp4', caption: 'Skill Development Training', category: 'training', duration: '4:50' }
+  const fallbackVideos = [
+    { id: 1, image: '/videos/1.mp4', title: 'Sanatan Dharma Awareness Program', category: 'spiritual', duration: '3:45', type: 'video' },
+    { id: 2, image: '/videos/2.mp4', title: 'Community Health Camp Initiative', category: 'service', duration: '5:20', type: 'video' },
+    { id: 3, image: '/videos/3.mp4', title: 'Educational Scholarship Distribution', category: 'education', duration: '4:15', type: 'video' }
   ];
+
+  useEffect(() => {
+    fetchGalleryData();
+  }, []);
+
+  const fetchGalleryData = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/public/gallery');
+      const apiData = response.data.gallery || [];
+      
+      // Separate photos and videos from API
+      const apiPhotos = apiData.filter(item => item.type === 'photo');
+      const apiVideos = apiData.filter(item => item.type === 'video');
+      
+      // Combine API data with fallback data
+      setGalleryData({
+        photos: apiPhotos.length > 0 ? apiPhotos : fallbackPhotos,
+        videos: apiVideos.length > 0 ? apiVideos : fallbackVideos
+      });
+    } catch (error) {
+      console.error('Failed to fetch gallery:', error);
+      // Use fallback data on error
+      setGalleryData({
+        photos: fallbackPhotos,
+        videos: fallbackVideos
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -99,16 +123,31 @@ const Gallery = () => {
             </div>
           </motion.div>
 
+          {/* Loading State */}
+          {loading && (
+            <div style={{ textAlign: 'center', padding: '3rem' }}>
+              <div style={{ 
+                display: 'inline-block',
+                width: '40px',
+                height: '40px',
+                border: '4px solid #f3f3f3',
+                borderTop: '4px solid #d2691e',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
+              <p style={{ marginTop: '1rem', color: '#666' }}>Loading gallery...</p>
+            </div>
+          )}
+
           {/* Photos Tab */}
-          {activeTab === 'photos' && (
+          {!loading && activeTab === 'photos' && (
             <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-              gap: '1.5rem'
+              columns: window.innerWidth < 768 ? '1' : window.innerWidth < 1024 ? '2' : '300px',
+              columnGap: '1.5rem'
             }}>
-              {galleryImages.map((image, index) => (
+              {galleryData.photos.map((image, index) => (
                 <motion.div
-                  key={image.id}
+                  key={image._id || image.id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: index * 0.1 }}
@@ -129,12 +168,16 @@ const Gallery = () => {
                     overflow: 'hidden',
                     boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
                     transition: 'all 0.3s ease',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    breakInside: 'avoid',
+                    marginBottom: '1.5rem',
+                    display: 'inline-block',
+                    width: '100%'
                   }}
                 >
                   <img 
-                    src={image.url} 
-                    alt={image.caption}
+                    src={image.image?.startsWith('http') ? image.image : `http://localhost:5000${image.image}`} 
+                    alt={image.title || image.caption}
                     style={{
                       width: '100%',
                       height: 'auto',
@@ -164,10 +207,10 @@ const Gallery = () => {
                   className="gallery-overlay"
                   >
                     <h4 style={{ marginBottom: '0.5rem', fontSize: '1.1rem', fontWeight: '600' }}>
-                      {image.caption}
+                      {image.title || image.caption || 'Untitled'}
                     </h4>
                     <p style={{ fontSize: '0.9rem', opacity: 0.9, margin: 0, textTransform: 'capitalize' }}>
-                      {image.category.replace('_', ' ')} Program
+                      {(image.category || 'general').replace('_', ' ')} Program
                     </p>
                   </div>
                 </motion.div>
@@ -176,15 +219,15 @@ const Gallery = () => {
           )}
 
           {/* Videos Tab */}
-          {activeTab === 'videos' && (
+          {!loading && activeTab === 'videos' && (
             <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(350px, 100%), 1fr))', 
               gap: '2rem'
             }}>
-              {galleryVideos.map((video, index) => (
+              {galleryData.videos.map((video, index) => (
                 <motion.div
-                  key={video.id}
+                  key={video._id || video.id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: index * 0.1 }}
@@ -204,8 +247,9 @@ const Gallery = () => {
                       preload="metadata"
                       style={{
                         width: '100%',
-                        height: '250px',
-                        objectFit: 'cover',
+                        height: 'auto',
+                        maxHeight: '400px',
+                        objectFit: 'contain',
                         display: 'block'
                       }}
                       onError={(e) => {
@@ -216,13 +260,13 @@ const Gallery = () => {
                         }
                       }}
                     >
-                      <source src={video.url} type="video/mp4" />
+                      <source src={video.image?.startsWith('http') ? video.image : `http://localhost:5000${video.image}`} type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>
                     
                     <div style={{
                       display: 'none',
-                      height: '250px',
+                      minHeight: '200px',
                       background: 'linear-gradient(135deg, #f0f0f0, #e0e0e0)',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -244,7 +288,7 @@ const Gallery = () => {
                       fontSize: '0.8rem',
                       fontWeight: '600'
                     }}>
-                      {video.duration}
+                      {video.duration || '0:00'}
                     </div>
                   </div>
                   
@@ -255,7 +299,7 @@ const Gallery = () => {
                       fontSize: '1.1rem', 
                       fontWeight: '600' 
                     }}>
-                      {video.caption}
+                      {video.title || video.caption || 'Untitled'}
                     </h4>
                     <p style={{ 
                       color: '#666', 
@@ -263,7 +307,7 @@ const Gallery = () => {
                       margin: 0, 
                       textTransform: 'capitalize' 
                     }}>
-                      {video.category.replace('_', ' ')} Program
+                      {(video.category || 'general').replace('_', ' ')} Program
                     </p>
                   </div>
                 </motion.div>

@@ -123,7 +123,7 @@ NODE_ENV=development
 PORT=5000
 MONGODB_URI=mongodb://localhost:27017/sarboshakti_ngo
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=https://sarboshaktisonatanisangathan.org
 
 # Email Configuration
 SMTP_HOST=smtp.gmail.com
@@ -183,9 +183,9 @@ npm run client
 ```
 
 **Access Points:**
-- 📱 **Frontend**: http://localhost:3000
-- 🔧 **Backend API**: http://localhost:5000
-- 🛡️ **Admin Panel**: http://localhost:3000/admin
+- 📱 **Frontend**: https://sarboshaktisonatanisangathan.org
+- 🔧 **Backend API**: https://sarboshakti-backend.onrender.com
+- 🛡️ **Admin Panel**: https://sarboshaktisonatanisangathan.org/admin
 
 **Default Admin Credentials:**
 - Email: `admin@sarboshakti.org`

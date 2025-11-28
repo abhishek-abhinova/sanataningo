@@ -1,7 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import api from '../utils/api';
 
 const About = () => {
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTeamMembers();
+  }, []);
+
+  const fetchTeamMembers = async () => {
+    try {
+      const response = await api.get('/public/team');
+      setTeamMembers(response.data.team || []);
+    } catch (error) {
+      console.error('Failed to fetch team members:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       {/* Page Header */}
@@ -264,100 +283,95 @@ const About = () => {
             viewport={{ once: true }}
             style={{ textAlign: 'center', color: '#ff6b35', marginBottom: '3rem' }}
           >
-            Our Team (21 Members)
+            Our Team ({teamMembers.length} Members)
           </motion.h2>
-          <div className="team-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
-            {[
-              { name: 'Shri Amiyo Govinda Biswas', image: 'images/amiyo-govinda-biswas.jpeg' },
-              { name: 'Shri Pratap Malik', image: 'images/pratap-malik.jpeg' },
-              { name: 'Shri Tarak Chandra Pal', image: 'images/tarak-chandra-pal.jpeg' },
-              { name: 'Dr. Uttam Kumar Biswas', image: 'images/dr.-uttam-kumar-biswas.jpeg' },
-              { name: 'Shri Bijan Biswas', image: 'images/bijan-biswas.jpeg' },
-              { name: 'Shri Arun Kumar Biswas', image: 'images/arun-kumar-biswas.jpeg' },
-              { name: 'Shri Sudin Biswas', image: 'images/sudin-biswas-noida.jpeg' },
-              { name: 'Shri Aleep Biswas', image: 'images/aleep-biswas.jpeg' },
-              { name: 'Shri Shyamlal Chaudhary', image: 'images/Shyamlalchaudhary.jpeg' },
-              { name: 'Dr. Shyama Shree Chaki', image: 'images/drshyamasreechaki.jpeg' },
-              { name: 'Shri Pronit Roy', image: 'images/pronit-roy.jpeg' },
-              { name: 'Shri Mrinal Biswas', image: 'images/mrinal-kanti-biswas.jpeg' },
-              { name: 'Shri Deepu Sarkar', image: 'images/mr.-deepu-sarkar.jpeg' },
-              { name: 'Shri Neuton Roy', image: 'images/neuton-roy.jpeg' },
-              { name: 'Shri Somenath Biswas', image: 'images/mr-somenath-biswas.jpeg' },
-              { name: 'Shri Bijon Kumar Biswas', image: 'images/bijon-kumar-biswas-delhi.jpeg' },
-              { name: 'Shri Subash Biswas Somendra', image: 'images/subhash-kumar.jpeg' },
-              { name: 'Shri Somendra Srivastava', image: 'images/somendra-srivastava.jpeg' },
-              
-              { name: 'Robin Kumar Ranjit Biswas', image: 'images/robin-kumar-ranjit-biswas.jpeg' }
-            ].map((member, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -8, scale: 1.03 }}
-                style={{
-                  background: 'linear-gradient(135deg, #ffffff, #f8f9fa)',
-                  borderRadius: '15px',
-                  padding: '2rem',
-                  textAlign: 'center',
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                  border: '1px solid rgba(210, 105, 30, 0.1)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
-              >
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '4px',
-                  background: 'linear-gradient(90deg, #ff6b35, #d2691e)'
-                }}></div>
-                <div style={{
-                  width: '90px',
-                  height: '90px',
-                  borderRadius: '50%',
-                  margin: '0 auto 1.5rem',
-                  overflow: 'hidden',
-                  border: '3px solid #d2691e',
-                  boxShadow: '0 8px 20px rgba(255, 107, 53, 0.3)'
-                }}>
-                  <img 
-                    src={member.image} 
-                    alt={member.name}
-                    style={{
+          
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '3rem' }}>
+              <div style={{ 
+                display: 'inline-block',
+                width: '40px',
+                height: '40px',
+                border: '4px solid #f3f3f3',
+                borderTop: '4px solid #d2691e',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
+              <p style={{ marginTop: '1rem', color: '#666' }}>Loading team members...</p>
+            </div>
+          ) : (
+            <div className="team-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
+              {teamMembers.filter(member => member.showInTeam !== false).map((member, index) => (
+                <motion.div
+                  key={member._id || index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -8, scale: 1.03 }}
+                  style={{
+                    background: 'linear-gradient(135deg, #ffffff, #f8f9fa)',
+                    borderRadius: '15px',
+                    padding: '2rem',
+                    textAlign: 'center',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                    border: '1px solid rgba(210, 105, 30, 0.1)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '4px',
+                    background: 'linear-gradient(90deg, #ff6b35, #d2691e)'
+                  }}></div>
+                  <div style={{
+                    width: '90px',
+                    height: '90px',
+                    borderRadius: '50%',
+                    margin: '0 auto 1.5rem',
+                    overflow: 'hidden',
+                    border: '3px solid #d2691e',
+                    boxShadow: '0 8px 20px rgba(255, 107, 53, 0.3)'
+                  }}>
+                    <img 
+                      src={member.photo?.startsWith('http') ? member.photo : `http://localhost:5000${member.photo}`} 
+                      alt={member.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                    <div style={{
                       width: '100%',
                       height: '100%',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
-                  />
-                  <div style={{
-                    width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(135deg, #ff6b35, #d2691e)',
-                    display: 'none',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '2.5rem',
-                    color: 'white'
-                  }}>
-                    <i className="fas fa-user"></i>
+                      background: 'linear-gradient(135deg, #ff6b35, #d2691e)',
+                      display: 'none',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '2.5rem',
+                      color: 'white'
+                    }}>
+                      <i className="fas fa-user"></i>
+                    </div>
                   </div>
-                </div>
-                <h4 style={{ color: '#8b4513', marginBottom: '0.5rem', fontSize: '1.1rem' }}>{member.name}</h4>
-                <p style={{ color: '#666', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <i className="fas fa-users" style={{ marginRight: '8px', color: '#d2691e' }}></i>
-                  Team Member
-                </p>
-              </motion.div>
-            ))}
-          </div>
+                  <h4 style={{ color: '#8b4513', marginBottom: '0.5rem', fontSize: '1.1rem' }}>{member.name}</h4>
+                  <p style={{ color: '#666', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <i className="fas fa-users" style={{ marginRight: '8px', color: '#d2691e' }}></i>
+                    {member.position || 'Team Member'}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
       

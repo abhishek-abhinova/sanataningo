@@ -4,23 +4,43 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const http = require('http');
+const socketIo = require('socket.io');
 require('dotenv').config();
-
+ 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: [
+      'https://sarboshaktisonatanisangathan.org',
+      'http://localhost:3000',
+      'http://localhost:3003',
+      'http://localhost:5000',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3003',
+      'http://127.0.0.1:5000'
+    ],
+    methods: ["GET", "POST"]
+  }
+});
 const PORT = process.env.PORT || 5000;
+
+// Make io available globally
+app.set('io', io);
 
 // Security middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
-});
-app.use('/api/', limiter);
+// Rate limiting - disabled for development
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // limit each IP to 100 requests per windowMs
+//   message: 'Too many requests from this IP, please try again later.'
+// });
+// app.use('/api/', limiter);
 
 // CORS configuration
 const corsOptions = {
@@ -28,8 +48,10 @@ const corsOptions = {
     'https://sarboshaktisonatanisangathan.org',
     'http://localhost:3000',
     'http://localhost:3003',
+    'http://localhost:5000',
     'http://127.0.0.1:3000',
-    'http://127.0.0.1:3003'
+    'http://127.0.0.1:3003',
+    'http://127.0.0.1:5000'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -70,12 +92,11 @@ try {
   const donationRoutes = require('./routes/donations');
   const contactRoutes = require('./routes/contact');
   const publicRoutes = require('./routes/public');
-  const galleryRoutes = require('./routes/gallery');
-  const teamRoutes = require('./routes/team');
-  const eventRoutes = require('./routes/events');
   const mediaRoutes = require('./routes/media');
-  const settingsRoutes = require('./routes/settings');
-  const transactionRoutes = require('./routes/transactions');
+  const galleryRoutes = require('./routes/gallery');
+  const realtimeRoutes = require('./routes/realtime');
+  const testEmailRoutes = require('./routes/test-email');
+  const teamRoutes = require('./routes/team');
   
   // Use routes
   app.use('/api/auth', authRoutes);
@@ -84,12 +105,11 @@ try {
   app.use('/api/donations', donationRoutes);
   app.use('/api/contact', contactRoutes);
   app.use('/api/public', publicRoutes);
-  app.use('/api/gallery', galleryRoutes);
-  app.use('/api/team', teamRoutes);
-  app.use('/api/events', eventRoutes);
   app.use('/api/media', mediaRoutes);
-  app.use('/api/settings', settingsRoutes);
-  app.use('/api/transactions', transactionRoutes);
+  app.use('/api/admin/gallery', galleryRoutes);
+  app.use('/api/admin/team', teamRoutes);
+  app.use('/api', realtimeRoutes);
+  app.use('/api/test', testEmailRoutes);
   
   console.log('✅ All routes loaded successfully');
 } catch (error) {
@@ -151,10 +171,20 @@ process.on('SIGTERM', () => {
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+// WebSocket connection handling
+io.on('connection', (socket) => {
+  console.log('🔌 Client connected:', socket.id);
+  
+  socket.on('disconnect', () => {
+    console.log('🔌 Client disconnected:', socket.id);
+  });
+});
+
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+  console.log(`⚡ WebSocket enabled for real-time updates`);
 });
 
 module.exports = app;

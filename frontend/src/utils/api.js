@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND_URL || 'https://sarboshakti-backend.onrender.com',
+  baseURL: `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}/api`,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -12,8 +12,12 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Only add auth token for admin routes
-    if (config.url && (config.url.includes('/admin') || config.url.includes('/members/list') || config.url.includes('/donations/list'))) {
+    // Add auth token for protected routes
+    const protectedRoutes = ['/admin', '/auth/me', '/members/list', '/donations/list', '/donations?', '/contact', '/media', '/gallery'];
+    const needsAuth = protectedRoutes.some(route => config.url && config.url.includes(route)) || 
+                     (config.url && config.url.includes('/admin/'));
+    
+    if (needsAuth) {
       const token = localStorage.getItem('token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -35,7 +39,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      if (window.location.pathname.includes('/admin/dashboard')) {
+      if (window.location.pathname.includes('/admin')) {
         window.location.href = '/admin/login';
       }
     }

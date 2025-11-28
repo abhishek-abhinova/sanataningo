@@ -26,7 +26,7 @@ NODE_ENV=production
 PORT=10000
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/sarboshakti_ngo
 JWT_SECRET=sarboshakti-jwt-secret-2024-production-key
-FRONTEND_URL=https://your-frontend-domain.netlify.app
+FRONTEND_URL=https://sarboshaktisonatanisangathan.org
 
 # Email Configuration
 SMTP_HOST=smtp.gmail.com
@@ -64,7 +64,7 @@ npm run build
 ### Step 3: Environment Variables
 Set in Netlify dashboard:
 ```env
-REACT_APP_API_URL=https://sarboshakti-backend.onrender.com
+REACT_APP_BACKEND_URL=https://sarboshakti-backend.onrender.com
 REACT_APP_RAZORPAY_KEY_ID=your_razorpay_key_id
 ```
 
@@ -131,5 +131,5 @@ const corsOptions = {
 5. Test all functionality thoroughly
 
 Your application will be live at:
-- **Frontend**: https://your-domain.com
+- **Frontend**: https://sarboshaktisonatanisangathan.org
 - **Backend API**: https://sarboshakti-backend.onrender.com

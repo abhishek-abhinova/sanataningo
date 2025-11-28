@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
+import io from 'socket.io-client';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [galleryImages, setGalleryImages] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
   const [events, setEvents] = useState([]);
+  const [socket, setSocket] = useState(null);
   
   const slides = [
     'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1920&h=1080&fit=crop',
@@ -35,23 +37,71 @@ const Home = () => {
     fetchTeamMembers();
     fetchEvents();
 
-    return () => clearInterval(interval);
+    // Initialize WebSocket connection
+    const newSocket = io('http://localhost:5000');
+    setSocket(newSocket);
+    
+    // Listen for real-time updates
+    newSocket.on('dataUpdate', (update) => {
+      handleRealTimeUpdate(update);
+    });
+
+    return () => {
+      clearInterval(interval);
+      newSocket.disconnect();
+    };
   }, [slides.length]);
+  
+  const handleRealTimeUpdate = (update) => {
+    const { type, data } = update;
+    
+    switch (type) {
+      case 'gallery':
+        if (data.action === 'create') {
+          setGalleryImages(prev => [data.item, ...prev]);
+        } else if (data.action === 'update') {
+          setGalleryImages(prev => prev.map(item => item._id === data.item._id ? data.item : item));
+        } else if (data.action === 'delete') {
+          setGalleryImages(prev => prev.filter(item => item._id !== data.id));
+        }
+        break;
+      case 'team':
+        if (data.action === 'create') {
+          setTeamMembers(prev => [data.item, ...prev]);
+        } else if (data.action === 'update') {
+          setTeamMembers(prev => prev.map(item => item._id === data.item._id ? data.item : item));
+        } else if (data.action === 'delete') {
+          setTeamMembers(prev => prev.filter(item => item._id !== data.id));
+        }
+        break;
+      case 'events':
+        if (data.action === 'create') {
+          setEvents(prev => [data.item, ...prev]);
+        } else if (data.action === 'update') {
+          setEvents(prev => prev.map(item => item._id === data.item._id ? data.item : item));
+        } else if (data.action === 'delete') {
+          setEvents(prev => prev.filter(item => item._id !== data.id));
+        }
+        break;
+      default:
+        break;
+    }
+  };
 
   const fetchGalleryImages = async () => {
     try {
-      const response = await api.get('/admin/gallery?homepage=true');
-      setGalleryImages(response.data.images || []);
+      const response = await api.get('/public/gallery?limit=6');
+      setGalleryImages(response.data.gallery || []);
     } catch (error) {
       console.error('Failed to fetch gallery images:', error);
-      setGalleryImages([]); // Set empty array on error
+      setGalleryImages([]);
     }
   };
 
   const fetchTeamMembers = async () => {
     try {
       const response = await api.get('/public/team');
-      setTeamMembers(response.data || []);
+      setTeamMembers(response.data.team || []);
     } catch (error) {
       console.error('Failed to fetch team members:', error);
       setTeamMembers([]); // Set empty array on error
@@ -60,11 +110,11 @@ const Home = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await api.get('/admin/events?published=true');
+      const response = await api.get('/public/events');
       setEvents(response.data.events || []);
     } catch (error) {
       console.error('Failed to fetch events:', error);
-      setEvents([]); // Set empty array on error
+      setEvents([]);
     }
   };
 
@@ -294,7 +344,7 @@ const Home = () => {
               Recent Activities
             </motion.h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
-              {galleryImages.slice(0, 6).map((image, index) => (
+              {(galleryImages || []).filter(image => image && image._id && image.image).slice(0, 6).map((image, index) => (
                 <motion.div
                   key={image._id}
                   initial={{ opacity: 0, y: 30 }}
@@ -304,13 +354,13 @@ const Home = () => {
                   style={{ borderRadius: '10px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}
                 >
                   <img 
-                    src={`https://sanataningo.onrender.com${image.image}`} 
-                    alt={image.title}
+                    src={image?.image?.startsWith('http') ? image.image : `http://localhost:5000${image?.image || ''}`} 
+                    alt={image?.title || 'Gallery image'}
                     style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                   />
                   <div style={{ padding: '1rem', background: 'white' }}>
-                    <h4 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>{image.title}</h4>
-                    <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>{image.description}</p>
+                    <h4 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>{image?.title || 'Untitled'}</h4>
+                    <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>{image?.description || 'No description'}</p>
                   </div>
                 </motion.div>
               ))}

@@ -13,8 +13,11 @@ const ConnectionTest = () => {
     const results = {};
     
     try {
-      // Test health endpoint
-      const healthResponse = await fetch(API_ENDPOINTS.HEALTH, {
+      // Test health endpoint with direct URL to avoid double /api
+      const healthUrl = 'http://localhost:5000/api/health';
+      console.log('Testing health endpoint:', healthUrl);
+      
+      const healthResponse = await fetch(healthUrl, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -22,15 +25,19 @@ const ConnectionTest = () => {
       results.health = {
         status: healthResponse.status,
         ok: healthResponse.ok,
+        url: healthUrl,
         data: healthResponse.ok ? await healthResponse.json() : await healthResponse.text()
       };
     } catch (error) {
-      results.health = { error: error.message };
+      results.health = { error: error.message, url: 'http://localhost:5000/api/health' };
     }
 
     try {
-      // Test login endpoint with invalid credentials to see if it responds
-      const loginResponse = await fetch(API_ENDPOINTS.LOGIN, {
+      // Test login endpoint with direct URL
+      const loginUrl = 'http://localhost:5000/api/auth/login';
+      console.log('Testing login endpoint:', loginUrl);
+      
+      const loginResponse = await fetch(loginUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: 'test@test.com', password: 'test' })
@@ -39,10 +46,11 @@ const ConnectionTest = () => {
       results.login = {
         status: loginResponse.status,
         ok: loginResponse.ok,
+        url: loginUrl,
         data: await loginResponse.json()
       };
     } catch (error) {
-      results.login = { error: error.message };
+      results.login = { error: error.message, url: 'http://localhost:5000/api/auth/login' };
     }
 
     setDetails(results);
@@ -67,7 +75,7 @@ const ConnectionTest = () => {
       <div style={{ marginBottom: '0.5rem' }}>
         <strong>Backend URL:</strong><br/>
         <span style={{ fontSize: '0.7rem', color: '#666' }}>
-          {API_ENDPOINTS.HEALTH.replace('/api/health', '')}
+          http://localhost:5000
         </span>
       </div>
 
@@ -80,10 +88,14 @@ const ConnectionTest = () => {
           <div style={{ marginBottom: '0.5rem' }}>
             <strong>Health Check:</strong>
             {details.health?.error ? (
-              <div style={{ color: '#dc3545' }}>❌ {details.health.error}</div>
+              <div style={{ color: '#dc3545' }}>
+                ❌ {details.health.error}
+                <div style={{ fontSize: '0.6rem', color: '#999' }}>{details.health.url}</div>
+              </div>
             ) : (
               <div style={{ color: details.health?.ok ? '#28a745' : '#dc3545' }}>
                 {details.health?.ok ? '✅' : '❌'} Status: {details.health?.status}
+                <div style={{ fontSize: '0.6rem', color: '#999' }}>{details.health.url}</div>
               </div>
             )}
           </div>
@@ -91,10 +103,14 @@ const ConnectionTest = () => {
           <div>
             <strong>Login Endpoint:</strong>
             {details.login?.error ? (
-              <div style={{ color: '#dc3545' }}>❌ {details.login.error}</div>
+              <div style={{ color: '#dc3545' }}>
+                ❌ {details.login.error}
+                <div style={{ fontSize: '0.6rem', color: '#999' }}>{details.login.url}</div>
+              </div>
             ) : (
               <div style={{ color: details.login?.status === 401 ? '#28a745' : '#dc3545' }}>
                 {details.login?.status === 401 ? '✅' : '❌'} Status: {details.login?.status}
+                <div style={{ fontSize: '0.6rem', color: '#999' }}>{details.login.url}</div>
                 {details.login?.data?.error && (
                   <div style={{ fontSize: '0.7rem', color: '#666' }}>
                     {details.login.data.error}

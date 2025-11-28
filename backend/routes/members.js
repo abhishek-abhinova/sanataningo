@@ -178,7 +178,11 @@ router.put('/approve/:id', auth, async (req, res) => {
     }
 
     const validTill = new Date();
-    validTill.setMonth(validTill.getMonth() + duration);
+    if (member.membershipPlan === 'lifetime') {
+      validTill.setFullYear(validTill.getFullYear() + 50); // 50 years for lifetime
+    } else {
+      validTill.setMonth(validTill.getMonth() + duration);
+    }
 
     member.status = 'approved';
     member.approvedBy = req.user.id;
@@ -200,13 +204,13 @@ router.put('/approve/:id', auth, async (req, res) => {
       
       console.log('📧 Sending membership card email to:', member.email);
       await sendMembershipCardWithPDF(member, cardPath);
-      console.log('✅ Membership card sent successfully');
+      console.log('✅ Membership card sent successfully to', member.email);
+      
+      res.json({ success: true, message: 'Member approved and ID card sent to email successfully' });
     } catch (error) {
       console.error('❌ Card generation/email failed:', error);
-      // Don't fail the approval if card sending fails
+      res.json({ success: true, message: 'Member approved but failed to send ID card. Please resend manually.', warning: error.message });
     }
-
-    res.json({ success: true, message: 'Member approved and ID card sent to email successfully' });
   } catch (error) {
     console.error('❌ Member approval failed:', error);
     res.status(500).json({ error: error.message });
@@ -222,18 +226,21 @@ router.post('/member/send-card/:id', auth, async (req, res) => {
     }
     
     const { generateMembershipCard } = require('../utils/cardGenerator');
-    const { sendMembershipCardEmail } = require('../utils/emailService');
+    const { sendMembershipCardWithPDF } = require('../utils/emailService');
     
+    console.log('🎫 Generating membership card for:', member.fullName);
     const cardPath = await generateMembershipCard(member);
     member.cardFile = cardPath;
     member.cardGenerated = true;
     await member.save();
     
-    const { sendMembershipCardWithPDF } = require('../utils/emailService');
+    console.log('📧 Sending membership card email to:', member.email);
     await sendMembershipCardWithPDF(member, cardPath);
+    console.log('✅ Membership card sent successfully to', member.email);
     
-    res.json({ success: true, message: 'Membership card sent successfully' });
+    res.json({ success: true, message: 'Membership card sent successfully to ' + member.email });
   } catch (error) {
+    console.error('❌ Failed to send membership card:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -388,9 +395,22 @@ router.post('/:id/send-card', auth, async (req, res) => {
       return res.status(404).json({ error: 'Member not found' });
     }
     
-    await sendMembershipCardEmail(member);
-    res.json({ success: true, message: 'Membership card sent successfully' });
+    const { generateMembershipCard } = require('../utils/cardGenerator');
+    const { sendMembershipCardWithPDF } = require('../utils/emailService');
+    
+    console.log('🎫 Generating membership card for:', member.fullName);
+    const cardPath = await generateMembershipCard(member);
+    member.cardFile = cardPath;
+    member.cardGenerated = true;
+    await member.save();
+    
+    console.log('📧 Sending membership card email to:', member.email);
+    await sendMembershipCardWithPDF(member, cardPath);
+    console.log('✅ Membership card sent successfully to', member.email);
+    
+    res.json({ success: true, message: 'Membership card sent successfully to ' + member.email });
   } catch (error) {
+    console.error('❌ Failed to send membership card:', error);
     res.status(500).json({ error: error.message });
   }
 });

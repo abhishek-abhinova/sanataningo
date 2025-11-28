@@ -4,6 +4,14 @@ const Donation = require('../models/Donation');
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
 
+// Real-time broadcast helper
+const broadcastUpdate = (req, type, data) => {
+  const io = req.app.get('io');
+  if (io) {
+    io.emit('dataUpdate', { type, data, timestamp: new Date() });
+  }
+};
+
 const router = express.Router();
 
 // Root admin route
@@ -19,95 +27,106 @@ router.get('/', auth, async (req, res) => {
 // Dashboard statistics
 router.get('/dashboard', auth, async (req, res) => {
   try {
-    const Contact = require('../models/Contact');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Member statistics
-    const totalMembers = await Member.countDocuments();
-    const activeMembers = await Member.countDocuments({ 
-      status: 'approved', 
-      $or: [
-        { validTill: { $gte: new Date() } },
-        { membershipPlan: 'lifetime' }
-      ]
-    });
-    const pendingMembers = await Member.countDocuments({ status: 'pending' });
-    const rejectedMembers = await Member.countDocuments({ status: 'rejected' });
-    const expiredMembers = await Member.countDocuments({ 
-      status: 'approved',
-      membershipPlan: { $ne: 'lifetime' },
-      validTill: { $lt: new Date() }
-    });
-    
-    // Today's entries
-    const todayMembers = await Member.countDocuments({ 
-      createdAt: { $gte: today, $lt: tomorrow } 
-    });
-    const todayDonations = await Donation.countDocuments({ 
-      createdAt: { $gte: today, $lt: tomorrow } 
-    });
-    
-    // Calculate total donation amount
-    const donationSum = await Donation.aggregate([
-      { $match: { paymentStatus: 'completed' } },
-      { $group: { _id: null, total: { $sum: '$amount' } } }
-    ]);
-    const totalDonationAmount = donationSum.length > 0 ? donationSum[0].total : 0;
-    
-    // Today's donation amount
-    const todayDonationSum = await Donation.aggregate([
-      { $match: { 
-        createdAt: { $gte: today, $lt: tomorrow },
-        paymentStatus: 'completed'
-      }},
-      { $group: { _id: null, total: { $sum: '$amount' } } }
-    ]);
-    const todayDonationAmount = todayDonationSum.length > 0 ? todayDonationSum[0].total : 0;
+    // Safe count with fallback
+    const safeCount = async (model, query = {}) => {
+      try {
+        return await model.countDocuments(query);
+      } catch (error) {
+        return 0;
+      }
+    };
 
-    const totalContacts = await Contact.countDocuments();
+    // Member statistics
+    const totalMembers = await safeCount(Member);
+    const activeMembers = await safeCount(Member, { status: 'approved' });
+    const pendingMembers = await safeCount(Member, { status: 'pending' });
+    const rejectedMembers = await safeCount(Member, { status: 'rejected' });
+    const todayMembers = await safeCount(Member, { createdAt: { $gte: today, $lt: tomorrow } });
+    
+    // Donation statistics
+    const todayDonations = await safeCount(Donation, { createdAt: { $gte: today, $lt: tomorrow } });
+    
+    let totalDonationAmount = 0;
+    let todayDonationAmount = 0;
+    
+    try {
+      const donationSum = await Donation.aggregate([
+        { $match: { paymentStatus: 'completed' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]);
+      totalDonationAmount = donationSum.length > 0 ? donationSum[0].total : 0;
+      
+      const todayDonationSum = await Donation.aggregate([
+        { $match: { 
+          createdAt: { $gte: today, $lt: tomorrow },
+          paymentStatus: 'completed'
+        }},
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]);
+      todayDonationAmount = todayDonationSum.length > 0 ? todayDonationSum[0].total : 0;
+    } catch (error) {
+      console.error('Donation aggregation error:', error);
+    }
 
     const stats = {
       totalMembers,
       activeMembers,
       pendingMembers,
       rejectedMembers,
-      expiredMembers,
-      totalContacts,
+      expiredMembers: 0,
+      totalContacts: 0,
       totalDonationAmount,
       todayMembers,
       todayDonations,
-      todayDonationAmount
+      todayDonationAmount,
+      todayContacts: 0
     };
 
-    // Monthly registration data for graph
-    const monthlyData = await Member.aggregate([
-      {
-        $group: {
-          _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' }
-          },
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { '_id.year': 1, '_id.month': 1 } },
-      { $limit: 12 }
-    ]);
+    // Safe data fetching
+    let monthlyData = [];
+    let recentMembers = [];
+    let recentDonations = [];
+    
+    try {
+      monthlyData = await Member.aggregate([
+        {
+          $group: {
+            _id: {
+              year: { $year: '$createdAt' },
+              month: { $month: '$createdAt' }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } },
+        { $limit: 12 }
+      ]);
+    } catch (error) {
+      console.error('Monthly data error:', error);
+    }
 
-    // Recent members
-    const recentMembers = await Member.find()
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .select('fullName email membershipPlan status createdAt');
+    try {
+      recentMembers = await Member.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select('fullName email membershipPlan status createdAt');
+    } catch (error) {
+      console.error('Recent members error:', error);
+    }
 
-    // Recent donations
-    const recentDonations = await Donation.find()
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .select('donorName amount purpose status createdAt');
+    try {
+      recentDonations = await Donation.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select('donorName amount purpose paymentStatus createdAt');
+    } catch (error) {
+      console.error('Recent donations error:', error);
+    }
 
     res.json({
       success: true,
@@ -117,7 +136,26 @@ router.get('/dashboard', auth, async (req, res) => {
       recentDonations
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Dashboard error:', error);
+    res.json({
+      success: true,
+      stats: {
+        totalMembers: 0,
+        activeMembers: 0,
+        pendingMembers: 0,
+        rejectedMembers: 0,
+        expiredMembers: 0,
+        totalContacts: 0,
+        totalDonationAmount: 0,
+        todayMembers: 0,
+        todayDonations: 0,
+        todayDonationAmount: 0,
+        todayContacts: 0
+      },
+      monthlyData: [],
+      recentMembers: [],
+      recentDonations: []
+    });
   }
 });
 
@@ -224,6 +262,26 @@ router.get('/donations', auth, async (req, res) => {
   }
 });
 
+// Get all contacts
+router.get('/contacts', auth, async (req, res) => {
+  try {
+    let Contact;
+    try {
+      Contact = require('../models/Contact');
+    } catch (error) {
+      return res.json({ success: true, contacts: [] });
+    }
+    
+    const contacts = await Contact.find()
+      .sort({ createdAt: -1 })
+      .limit(50);
+    
+    res.json({ success: true, contacts });
+  } catch (error) {
+    res.json({ success: true, contacts: [] });
+  }
+});
+
 // Get pending approvals
 router.get('/pending', auth, async (req, res) => {
   try {
@@ -284,29 +342,77 @@ router.get('/reports/daily', auth, async (req, res) => {
 // Gallery routes
 router.post('/gallery', auth, async (req, res) => {
   try {
-    const Gallery = require('../models/Gallery');
+    let Gallery;
+    try {
+      Gallery = require('../models/Gallery');
+    } catch (error) {
+      return res.status(500).json({ error: 'Gallery model not available' });
+    }
+    
+    const { title, description, file, image, type, category } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+    
+    const imageUrl = file || image;
+    if (!imageUrl) {
+      return res.status(400).json({ error: 'Image is required' });
+    }
+    
     const gallery = new Gallery({
-      title: req.body.title,
-      description: req.body.description,
-      image: req.body.image || '/uploads/gallery/default.jpg',
-      category: req.body.category || 'general',
-      showOnHomepage: req.body.showOnHomepage === 'true',
-      published: true
+      title,
+      description: description || '',
+      image: imageUrl,
+      type: type || 'photo',
+      category: category || 'general',
+      showOnHomepage: false,
+      published: true,
+      order: 0
     });
+    
     await gallery.save();
+    broadcastUpdate(req, 'gallery', { action: 'create', item: gallery });
     res.json({ success: true, gallery });
   } catch (error) {
+    console.error('Gallery POST error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 router.get('/gallery', auth, async (req, res) => {
   try {
-    const Gallery = require('../models/Gallery');
-    const images = await Gallery.find({ published: true }).sort({ createdAt: -1 });
-    res.json({ success: true, images });
+    let Gallery;
+    try {
+      Gallery = require('../models/Gallery');
+    } catch (error) {
+      return res.json({ success: true, gallery: [] });
+    }
+    
+    const { type, category, published, page = 1, limit = 20 } = req.query;
+    
+    let query = {};
+    if (type) query.type = type;
+    if (category) query.category = category;
+    if (published !== undefined) query.published = published === 'true';
+    
+    const gallery = await Gallery.find(query)
+      .sort({ order: 1, createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+    
+    const total = await Gallery.countDocuments(query);
+    
+    res.json({ 
+      success: true, 
+      gallery,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Gallery fetch error:', error);
+    res.json({ success: true, gallery: [] });
   }
 });
 
@@ -314,7 +420,28 @@ router.put('/gallery/:id', auth, async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
     const gallery = await Gallery.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!gallery) {
+      return res.status(404).json({ error: 'Gallery item not found' });
+    }
+    broadcastUpdate(req, 'gallery', { action: 'update', item: gallery });
     res.json({ success: true, gallery });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update gallery order
+router.put('/gallery/reorder', auth, async (req, res) => {
+  try {
+    const Gallery = require('../models/Gallery');
+    const { items } = req.body;
+    
+    const updatePromises = items.map(item => 
+      Gallery.findByIdAndUpdate(item.id, { order: item.order })
+    );
+    
+    await Promise.all(updatePromises);
+    res.json({ success: true, message: 'Gallery order updated' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -324,16 +451,25 @@ router.put('/gallery/:id', auth, async (req, res) => {
 router.post('/team', auth, async (req, res) => {
   try {
     const Team = require('../models/Team');
+    const { name, position, category, bio, message, email, phone, photo, order, showOnHomepage, showOnAbout, published } = req.body;
+    
     const team = new Team({
-      name: req.body.name,
-      position: req.body.position,
-      bio: req.body.bio,
-      email: req.body.email,
-      phone: req.body.phone,
-      showOnHomepage: req.body.showOnHomepage !== 'false',
-      showOnAbout: req.body.showOnAbout !== 'false'
+      name,
+      position,
+      category: category || 'core_member',
+      bio,
+      message,
+      email,
+      phone,
+      photo,
+      order: order || 0,
+      showOnHomepage: showOnHomepage !== 'false',
+      showOnAbout: showOnAbout !== 'false',
+      published: published !== 'false'
     });
+    
     await team.save();
+    broadcastUpdate(req, 'team', { action: 'create', item: team });
     res.json({ success: true, team });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -343,8 +479,26 @@ router.post('/team', auth, async (req, res) => {
 router.get('/team', auth, async (req, res) => {
   try {
     const Team = require('../models/Team');
-    const team = await Team.find({ active: true }).sort({ order: 1, createdAt: -1 });
-    res.json({ success: true, team });
+    const { category, published, page = 1, limit = 20 } = req.query;
+    
+    let query = { active: true };
+    if (category) query.category = category;
+    if (published !== undefined) query.published = published === 'true';
+    
+    const team = await Team.find(query)
+      .sort({ order: 1, createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+    
+    const total = await Team.countDocuments(query);
+    
+    res.json({ 
+      success: true, 
+      team,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -354,7 +508,28 @@ router.put('/team/:id', auth, async (req, res) => {
   try {
     const Team = require('../models/Team');
     const team = await Team.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!team) {
+      return res.status(404).json({ error: 'Team member not found' });
+    }
+    broadcastUpdate(req, 'team', { action: 'update', item: team });
     res.json({ success: true, team });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update team order
+router.put('/team/reorder', auth, async (req, res) => {
+  try {
+    const Team = require('../models/Team');
+    const { items } = req.body; // Array of { id, order }
+    
+    const updatePromises = items.map(item => 
+      Team.findByIdAndUpdate(item.id, { order: item.order })
+    );
+    
+    await Promise.all(updatePromises);
+    res.json({ success: true, message: 'Team order updated' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -364,16 +539,25 @@ router.put('/team/:id', auth, async (req, res) => {
 router.post('/events', auth, async (req, res) => {
   try {
     const Event = require('../models/Event');
+    const { title, description, content, venue, location, eventDate, status, published, images, banner, order } = req.body;
+    
     const event = new Event({
-      title: req.body.title,
-      description: req.body.description,
-      venue: req.body.venue,
-      eventDate: req.body.eventDate,
-      status: req.body.status || 'upcoming',
-      published: true,
-      createdBy: req.user.userId
+      title,
+      description,
+      content,
+      venue,
+      location,
+      eventDate,
+      status: status || 'upcoming',
+      published: published !== 'false',
+      images: images || [],
+      banner,
+      order: order || 0,
+      createdBy: req.user._id
     });
+    
     await event.save();
+    broadcastUpdate(req, 'events', { action: 'create', item: event });
     res.json({ success: true, event });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -383,8 +567,27 @@ router.post('/events', auth, async (req, res) => {
 router.get('/events', auth, async (req, res) => {
   try {
     const Event = require('../models/Event');
-    const events = await Event.find({ published: true }).sort({ eventDate: -1 });
-    res.json({ success: true, events });
+    const { status, published, page = 1, limit = 20 } = req.query;
+    
+    let query = {};
+    if (status) query.status = status;
+    if (published !== undefined) query.published = published === 'true';
+    
+    const events = await Event.find(query)
+      .populate('createdBy', 'name')
+      .sort({ eventDate: -1, order: 1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+    
+    const total = await Event.countDocuments(query);
+    
+    res.json({ 
+      success: true, 
+      events,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -394,7 +597,28 @@ router.put('/events/:id', auth, async (req, res) => {
   try {
     const Event = require('../models/Event');
     const event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    broadcastUpdate(req, 'events', { action: 'update', item: event });
     res.json({ success: true, event });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update events order
+router.put('/events/reorder', auth, async (req, res) => {
+  try {
+    const Event = require('../models/Event');
+    const { items } = req.body;
+    
+    const updatePromises = items.map(item => 
+      Event.findByIdAndUpdate(item.id, { order: item.order })
+    );
+    
+    await Promise.all(updatePromises);
+    res.json({ success: true, message: 'Events order updated' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -408,7 +632,7 @@ router.get('/settings', auth, async (req, res) => {
     if (!settings) {
       settings = new Settings({
         organizationName: 'Sarbo Shakti Sonatani Sangathan',
-        email: 'info@sarboshakti.org',
+        email: 'info@sarboshaktisonatanisangathan.org',
         phone: '+91 9876543210',
         address: '19, Kalyan Kunj, Sector 49, Gautam Buddha Nagar, Uttar Pradesh-231301'
       });
@@ -436,11 +660,105 @@ router.put('/settings', auth, async (req, res) => {
   }
 });
 
+// Upload homepage video
+router.post('/homepage-video', auth, async (req, res) => {
+  try {
+    const Settings = require('../models/Settings');
+    const { videoUrl } = req.body;
+    
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = new Settings({ homepageVideo: videoUrl });
+    } else {
+      settings.homepageVideo = videoUrl;
+    }
+    
+    await settings.save();
+    res.json({ success: true, message: 'Homepage video updated', settings });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Upload banner video
+router.post('/banner-video', auth, async (req, res) => {
+  try {
+    const Settings = require('../models/Settings');
+    const { videoUrl } = req.body;
+    
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = new Settings({ bannerVideo: videoUrl });
+    } else {
+      settings.bannerVideo = videoUrl;
+    }
+    
+    await settings.save();
+    res.json({ success: true, message: 'Banner video updated', settings });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Bulk operations
+router.put('/members/bulk-update', auth, async (req, res) => {
+  try {
+    const { ids, status } = req.body;
+    await Member.updateMany(
+      { _id: { $in: ids } },
+      { status, approvedBy: req.user._id, approvedAt: new Date() }
+    );
+    res.json({ success: true, message: `${ids.length} members updated` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/members/bulk-delete', auth, async (req, res) => {
+  try {
+    const { ids } = req.body;
+    await Member.deleteMany({ _id: { $in: ids } });
+    res.json({ success: true, message: `${ids.length} members deleted` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Export data
+router.get('/members/export', auth, async (req, res) => {
+  try {
+    const members = await Member.find().select('-password -__v');
+    const csv = convertToCSV(members);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=members.csv');
+    res.send(csv);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update member status
+router.put('/members/:id', auth, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const member = await Member.findByIdAndUpdate(
+      req.params.id,
+      { status, approvedBy: req.user._id, approvedAt: new Date() },
+      { new: true }
+    );
+    broadcastUpdate(req, 'members', { action: 'update', item: member });
+    res.json({ success: true, member });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Delete routes
 router.delete('/gallery/:id', auth, async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
     await Gallery.findByIdAndDelete(req.params.id);
+    broadcastUpdate(req, 'gallery', { action: 'delete', id: req.params.id });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -451,9 +769,67 @@ router.delete('/team/:id', auth, async (req, res) => {
   try {
     const Team = require('../models/Team');
     await Team.findByIdAndDelete(req.params.id);
+    broadcastUpdate(req, 'team', { action: 'delete', id: req.params.id });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Generate ID card for team member
+router.post('/team/:id/generate-id-card', auth, async (req, res) => {
+  try {
+    const Team = require('../models/Team');
+    const { generateIdCard } = require('../utils/idCardGenerator');
+    
+    const member = await Team.findById(req.params.id);
+    if (!member) {
+      return res.status(404).json({ success: false, message: 'Team member not found' });
+    }
+    
+    const cardPath = await generateIdCard(member);
+    
+    if (member.email) {
+      try {
+        const nodemailer = require('nodemailer');
+        const transporter = nodemailer.createTransporter({
+          host: process.env.SMTP_HOST,
+          port: process.env.SMTP_PORT,
+          secure: false,
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+          }
+        });
+        
+        await transporter.sendMail({
+          from: process.env.SMTP_USER,
+          to: member.email,
+          subject: 'Your Team ID Card - Sarbo Shakti Sonatani Sangathan',
+          html: `
+            <h2>Dear ${member.name},</h2>
+            <p>Please find your team ID card attached.</p>
+            <p>Thank you for being part of Sarbo Shakti Sonatani Sangathan.</p>
+            <br>
+            <p>Best regards,<br>Admin Team</p>
+          `,
+          attachments: [{
+            filename: 'id-card.pdf',
+            path: cardPath
+          }]
+        });
+      } catch (emailError) {
+        console.error('Email sending failed:', emailError);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'ID card generated and sent successfully'
+    });
+  } catch (error) {
+    console.error('ID card generation error:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -461,10 +837,46 @@ router.delete('/events/:id', auth, async (req, res) => {
   try {
     const Event = require('../models/Event');
     await Event.findByIdAndDelete(req.params.id);
+    broadcastUpdate(req, 'events', { action: 'delete', id: req.params.id });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
+router.delete('/members/:id', auth, async (req, res) => {
+  try {
+    await Member.findByIdAndDelete(req.params.id);
+    broadcastUpdate(req, 'members', { action: 'delete', id: req.params.id });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/contacts/:id', auth, async (req, res) => {
+  try {
+    const Contact = require('../models/Contact');
+    await Contact.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Helper function to convert JSON to CSV
+function convertToCSV(data) {
+  if (!data.length) return '';
+  const headers = Object.keys(data[0].toObject ? data[0].toObject() : data[0]);
+  const csvHeaders = headers.join(',');
+  const csvRows = data.map(item => {
+    const obj = item.toObject ? item.toObject() : item;
+    return headers.map(header => {
+      const value = obj[header];
+      return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+    }).join(',');
+  });
+  return [csvHeaders, ...csvRows].join('\n');
+}
 
 module.exports = router;

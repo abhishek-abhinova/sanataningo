@@ -336,26 +336,37 @@ const sendMembershipCardEmail = async (member) => {
 // Send thank you email with receipt
 const sendThankYouWithReceipt = async (donation) => {
   try {
+    console.log('📧 Attempting to send thank you email to:', donation.email);
+    
     const thankYouHTML = generateThankYouEmailHTML(donation);
     const receiptHTML = generateDonationReceiptHTML(donation);
     
+    console.log('📧 Email templates generated successfully');
+    
     const mailOptions = {
-      from: process.env.ORG_EMAIL,
+      from: process.env.SMTP_USER || process.env.ORG_EMAIL,
       to: donation.email,
       subject: '🙏 Thank You for Your Generous Donation - Sarboshakti Sanatani Sangathan',
       html: thankYouHTML,
       attachments: [{
-        filename: `donation-receipt-${donation.donationId}.html`,
+        filename: `donation-receipt-${donation.donationId || donation._id}.html`,
         content: receiptHTML,
         contentType: 'text/html'
       }]
     };
     
+    console.log('📧 Sending email with options:', {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject
+    });
+    
     await transporter.sendMail(mailOptions);
-    console.log('✅ Thank you email with receipt sent');
+    console.log('✅ Thank you email with receipt sent successfully to:', donation.email);
   } catch (error) {
-    console.error('❌ Failed to send thank you email:', error);
-    throw error;
+    console.error('❌ Failed to send thank you email:', error.message);
+    console.error('❌ Full error:', error);
+    // Don't throw error to prevent donation creation failure
   }
 };
 
@@ -363,7 +374,7 @@ const sendThankYouWithReceipt = async (donation) => {
 const sendMembershipCardWithPDF = async (member, cardPath) => {
   try {
     const mailOptions = {
-      from: process.env.SMTP_USER,
+      from: process.env.SMTP_USER || process.env.ORG_EMAIL,
       to: member.email,
       subject: 'Your Membership ID Card – Sarbo Shakti Sonatani Sangathan',
       html: `
@@ -397,7 +408,15 @@ const sendMembershipCardWithPDF = async (member, cardPath) => {
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #d2691e;">
               <p style="color: #8b4513; font-weight: bold; margin: 0;">🕉️ Sarbo Shakti Sonatani Sangathan</p>
               <p style="color: #666; font-size: 14px; margin: 5px 0;">19, Kalyan Kunj, Sector 49, Gautam Buddha Nagar, UP-231301</p>
-              <p style="color: #d2691e; font-style: italic; margin: 10px 0 0 0;">"सर्वे भवन्तु सुखिनः सर्वे सन्तु निरामयाः"</p>
+              <p style="color: #666; font-size: 12px; margin: 5px 0;">Email: info@sarboshaktisonatanisangathan.org</p>
+              <div style="margin-top: 15px; font-size: 11px; line-height: 1.4; color: #555;">
+                <strong>Key Officials:</strong><br>
+                Mr. Ajit Kumar Ray - Chief General Secretary: +91 9907916429<br>
+                Shri Goutam Chandra Biswas - Cashier: +91 9868362375<br>
+                Shriwas Halder - Official Secretary: +91 9816195600<br>
+                Mr. Dinesh Bairagi - President & Founder: +91 8584871180
+              </div>
+              <p style="color: #d2691e; font-style: italic; margin: 15px 0 0 0; font-size: 12px;">"सर्वे भवन्तु सुखिनः सर्वे सन्तु निरामयाः"</p>
             </div>
           </div>
         </div>
@@ -422,7 +441,7 @@ const sendMembershipCardWithPDF = async (member, cardPath) => {
 const sendDonationReceiptWithPDF = async (donation, receiptPath) => {
   try {
     const mailOptions = {
-      from: process.env.SMTP_USER,
+      from: process.env.SMTP_USER || process.env.ORG_EMAIL,
       to: donation.email,
       subject: 'Donation Receipt – Sarbo Shakti Sonatani Sangathan',
       html: `

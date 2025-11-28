@@ -15,11 +15,10 @@ import Contact from './pages/Contact';
 import ThankYou from './pages/ThankYou';
 import ThankYouDonation from './pages/ThankYouDonation';
 import ThankYouMember from './pages/ThankYouMember';
-import Admin from './pages/Admin';
-import AdminPanel from './pages/AdminPanel';
 import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
-import PremiumAdminDashboard from './pages/PremiumAdminDashboard';
+import ComprehensiveAdminDashboard from './pages/ComprehensiveAdminDashboard';
+import TeamUploadPage from './pages/TeamUploadPage';
+import EmailTest from './pages/EmailTest';
 
 function App() {
   return (
@@ -37,11 +36,11 @@ function App() {
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/thank-you-donation" element={<ThankYouDonation />} />
           <Route path="/thank-you-member" element={<ThankYouMember />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin-panel" element={<AdminPanel />} />
+          <Route path="/admin" element={<ComprehensiveAdminDashboard />} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/premium" element={<PremiumAdminDashboard />} />
+          <Route path="/admin/dashboard" element={<ComprehensiveAdminDashboard />} />
+          <Route path="/team-upload" element={<TeamUploadPage />} />
+          <Route path="/email-test" element={<EmailTest />} />
         </Routes>
         <Footer />
         <ToastContainer
