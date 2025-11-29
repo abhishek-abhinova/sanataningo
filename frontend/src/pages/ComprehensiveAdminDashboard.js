@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
-import io from 'socket.io-client';
+// import io from 'socket.io-client'; // Disabled for production
 
 const ComprehensiveAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -39,18 +39,12 @@ const ComprehensiveAdminDashboard = () => {
       
       const interval = setInterval(fetchDashboardData, 10000);
       
-      // Initialize WebSocket connection
-      const newSocket = io(process.env.REACT_APP_BACKEND_URL);
-      setSocket(newSocket);
-      
-      // Listen for real-time updates
-      newSocket.on('dataUpdate', (update) => {
-        handleRealTimeUpdate(update);
-      });
+      // Socket.io disabled for production
+      // const newSocket = io(process.env.REACT_APP_BACKEND_URL);
+      // setSocket(newSocket);
       
       return () => {
         clearInterval(interval);
-        newSocket.disconnect();
       };
     }
   }, [isAuthenticated]);
@@ -206,7 +200,8 @@ const ComprehensiveAdminDashboard = () => {
     try {
       const response = await api.get(endpoint);
       const dataKey = key === 'gallery' ? 'gallery' : key === 'team' ? 'team' : key === 'events' ? 'events' : key;
-      setData(prev => ({ ...prev, [key]: response.data[dataKey] || response.data.data || response.data || [] }));
+      const responseData = response.data[dataKey] || response.data.data || response.data || [];
+      setData(prev => ({ ...prev, [key]: Array.isArray(responseData) ? responseData : [] }));
     } catch (error) {
       console.error(`Failed to fetch ${key}:`, error);
       setData(prev => ({ ...prev, [key]: [] }));
@@ -402,7 +397,7 @@ const ComprehensiveAdminDashboard = () => {
       </div>
       
       <div className="gallery-grid">
-        {(data.gallery || []).filter(item => item && item._id).map((item, index) => (
+        {Array.isArray(data.gallery) ? data.gallery.filter(item => item && item._id).map((item, index) => (
           <motion.div key={item._id} className="gallery-item" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.1 }}>
             {item?.type === 'video' ? (
               <video src={item?.image || item?.file} style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '8px' }} />
@@ -419,7 +414,7 @@ const ComprehensiveAdminDashboard = () => {
               </div>
             </div>
           </motion.div>
-        ))}
+        )) : []}
       </div>
       
 

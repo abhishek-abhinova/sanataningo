@@ -28,7 +28,11 @@ router.get('/gallery', async (req, res) => {
 router.get('/team', async (req, res) => {
   try {
     const Team = require('../models/Team');
-    const team = await Team.find({ published: true, active: true })
+    const team = await Team.find({ 
+      published: true, 
+      active: true,
+      showInTeam: true 
+    })
       .sort({ order: 1, createdAt: -1 });
     
     res.json({

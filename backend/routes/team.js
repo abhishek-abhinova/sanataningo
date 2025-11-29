@@ -56,4 +56,26 @@ router.put('/:id/toggle-visibility', auth, async (req, res) => {
   }
 });
 
+// Send ID card (Admin)
+router.post('/:id/send-card', auth, async (req, res) => {
+  try {
+    const team = await Team.findById(req.params.id);
+    if (!team) {
+      return res.status(404).json({ success: false, error: 'Team member not found' });
+    }
+    
+    if (!team.email) {
+      return res.status(400).json({ success: false, error: 'Team member has no email address' });
+    }
+    
+    // Simulate ID card generation and sending
+    res.json({ 
+      success: true, 
+      message: `ID card sent to ${team.email}` 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;

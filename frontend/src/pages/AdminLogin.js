@@ -98,7 +98,7 @@ const AdminLogin = () => {
               <input
                 type="email"
                 name="email"
-                placeholder="Admin Email"
+                placeholder="Enter your email address"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -113,7 +113,7 @@ const AdminLogin = () => {
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
-                placeholder="Password"
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -150,17 +150,7 @@ const AdminLogin = () => {
           </motion.button>
         </motion.form>
 
-        <motion.div 
-          className="login-footer"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-        >
-          <p>
-            <i className="fas fa-shield-alt"></i>
-            Secure Admin Access
-          </p>
-        </motion.div>
+
       </motion.div>
 
       <style>{`
@@ -206,14 +196,14 @@ const AdminLogin = () => {
         }
 
         .login-card {
-          background: rgba(255, 255, 255, 0.95);
+          background: rgba(255, 255, 255, 0.98);
           backdrop-filter: blur(20px);
           border-radius: 24px;
           padding: 3rem;
           width: 100%;
-          max-width: 450px;
-          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          max-width: 420px;
+          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.3);
           position: relative;
           overflow: hidden;
         }
@@ -230,7 +220,7 @@ const AdminLogin = () => {
 
         .login-header {
           text-align: center;
-          margin-bottom: 2.5rem;
+          margin-bottom: 3rem;
         }
 
         .logo-container {
@@ -281,8 +271,11 @@ const AdminLogin = () => {
         .input-icon {
           position: absolute;
           left: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
           color: #64748b;
           z-index: 2;
+          font-size: 1.1rem;
         }
 
         .form-input {
@@ -292,8 +285,14 @@ const AdminLogin = () => {
           border-radius: 12px;
           font-size: 1rem;
           transition: all 0.3s ease;
-          background: rgba(255, 255, 255, 0.8);
+          background: rgba(255, 255, 255, 0.9);
           backdrop-filter: blur(10px);
+          box-sizing: border-box;
+        }
+        
+        .form-input::placeholder {
+          color: #94a3b8;
+          font-weight: 500;
         }
 
         .form-input:focus {
@@ -322,12 +321,12 @@ const AdminLogin = () => {
 
         .login-button {
           width: 100%;
-          padding: 1rem 2rem;
+          padding: 1.2rem 2rem;
           background: linear-gradient(135deg, #d2691e, #ff8c00);
           color: white;
           border: none;
           border-radius: 12px;
-          font-size: 1rem;
+          font-size: 1.1rem;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s ease;
@@ -335,7 +334,8 @@ const AdminLogin = () => {
           align-items: center;
           justify-content: center;
           gap: 0.5rem;
-          box-shadow: 0 10px 25px rgba(210, 105, 30, 0.3);
+          box-shadow: 0 12px 30px rgba(210, 105, 30, 0.4);
+          margin-top: 1rem;
         }
 
         .login-button:hover:not(:disabled) {
