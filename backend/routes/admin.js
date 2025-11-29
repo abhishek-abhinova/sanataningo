@@ -27,114 +27,33 @@ router.get('/', auth, async (req, res) => {
 // Dashboard statistics
 router.get('/dashboard', auth, async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    // Safe count with fallback
-    const safeCount = async (model, query = {}) => {
-      try {
-        return await model.countDocuments(query);
-      } catch (error) {
-        return 0;
-      }
+    const stats = {
+      totalMembers: 0,
+      activeMembers: 0,
+      pendingMembers: 0,
+      totalDonationAmount: 0,
+      totalContacts: 0
     };
 
-    // Member statistics
-    const totalMembers = await safeCount(Member);
-    const activeMembers = await safeCount(Member, { status: 'approved' });
-    const pendingMembers = await safeCount(Member, { status: 'pending' });
-    const rejectedMembers = await safeCount(Member, { status: 'rejected' });
-    const todayMembers = await safeCount(Member, { createdAt: { $gte: today, $lt: tomorrow } });
-    
-    // Donation statistics
-    const todayDonations = await safeCount(Donation, { createdAt: { $gte: today, $lt: tomorrow } });
-    
-    let totalDonationAmount = 0;
-    let todayDonationAmount = 0;
-    
+    try {
+      stats.totalMembers = await Member.countDocuments();
+      stats.activeMembers = await Member.countDocuments({ status: 'approved' });
+      stats.pendingMembers = await Member.countDocuments({ status: 'pending' });
+    } catch (error) {
+      console.error('Member count error:', error);
+    }
+
     try {
       const donationSum = await Donation.aggregate([
         { $match: { paymentStatus: 'completed' } },
         { $group: { _id: null, total: { $sum: '$amount' } } }
       ]);
-      totalDonationAmount = donationSum.length > 0 ? donationSum[0].total : 0;
-      
-      const todayDonationSum = await Donation.aggregate([
-        { $match: { 
-          createdAt: { $gte: today, $lt: tomorrow },
-          paymentStatus: 'completed'
-        }},
-        { $group: { _id: null, total: { $sum: '$amount' } } }
-      ]);
-      todayDonationAmount = todayDonationSum.length > 0 ? todayDonationSum[0].total : 0;
+      stats.totalDonationAmount = donationSum.length > 0 ? donationSum[0].total : 0;
     } catch (error) {
-      console.error('Donation aggregation error:', error);
+      console.error('Donation sum error:', error);
     }
 
-    const stats = {
-      totalMembers,
-      activeMembers,
-      pendingMembers,
-      rejectedMembers,
-      expiredMembers: 0,
-      totalContacts: 0,
-      totalDonationAmount,
-      todayMembers,
-      todayDonations,
-      todayDonationAmount,
-      todayContacts: 0
-    };
-
-    // Safe data fetching
-    let monthlyData = [];
-    let recentMembers = [];
-    let recentDonations = [];
-    
-    try {
-      monthlyData = await Member.aggregate([
-        {
-          $group: {
-            _id: {
-              year: { $year: '$createdAt' },
-              month: { $month: '$createdAt' }
-            },
-            count: { $sum: 1 }
-          }
-        },
-        { $sort: { '_id.year': 1, '_id.month': 1 } },
-        { $limit: 12 }
-      ]);
-    } catch (error) {
-      console.error('Monthly data error:', error);
-    }
-
-    try {
-      recentMembers = await Member.find()
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select('fullName email membershipPlan status createdAt');
-    } catch (error) {
-      console.error('Recent members error:', error);
-    }
-
-    try {
-      recentDonations = await Donation.find()
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select('donorName amount purpose paymentStatus createdAt');
-    } catch (error) {
-      console.error('Recent donations error:', error);
-    }
-
-    res.json({
-      success: true,
-      stats,
-      monthlyData,
-      recentMembers,
-      recentDonations
-    });
+    res.json({ success: true, stats });
   } catch (error) {
     console.error('Dashboard error:', error);
     res.json({
@@ -143,18 +62,9 @@ router.get('/dashboard', auth, async (req, res) => {
         totalMembers: 0,
         activeMembers: 0,
         pendingMembers: 0,
-        rejectedMembers: 0,
-        expiredMembers: 0,
-        totalContacts: 0,
         totalDonationAmount: 0,
-        todayMembers: 0,
-        todayDonations: 0,
-        todayDonationAmount: 0,
-        todayContacts: 0
-      },
-      monthlyData: [],
-      recentMembers: [],
-      recentDonations: []
+        totalContacts: 0
+      }
     });
   }
 });
