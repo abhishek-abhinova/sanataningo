@@ -13,13 +13,7 @@ const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: [
-      'https://sarboshaktisonatanisangathan.org',
-      'http://localhost:3000',
-      'http://localhost:3003',
-      'http://localhost:5000',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3003',
-      'http://127.0.0.1:5000'
+      'https://sarboshaktisonatanisangathan.org'
     ],
     methods: ["GET", "POST"]
   }
@@ -45,13 +39,7 @@ app.use(helmet({
 // CORS configuration
 const corsOptions = {
   origin: [
-    'https://sarboshaktisonatanisangathan.org',
-    'http://localhost:3000',
-    'http://localhost:3003',
-    'http://localhost:5000',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3003',
-    'http://127.0.0.1:5000'
+    'https://sarboshaktisonatanisangathan.org'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -187,7 +175,7 @@ io.on('connection', (socket) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+  console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL}`);
   console.log(`⚡ WebSocket enabled for real-time updates`);
 });
 

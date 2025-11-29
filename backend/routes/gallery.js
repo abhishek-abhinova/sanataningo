@@ -185,7 +185,7 @@ const handleImageUpload = async (req, res) => {
       success: true,
       message: `${uploadedImages.length} image(s) uploaded successfully`,
       data: result,
-      urls: uploadedImages.map(img => `${process.env.FRONTEND_URL || 'http://localhost:5000'}${img.image}`)
+      urls: uploadedImages.map(img => `${process.env.FRONTEND_URL}${img.image}`)
     });
   } catch (error) {
     console.error('Gallery upload error:', error);
@@ -249,7 +249,7 @@ const handleVideoUpload = async (req, res) => {
       success: true,
       message: 'Video uploaded successfully',
       data: galleryItem,
-      url: youtubeUrl || `${process.env.FRONTEND_URL || 'http://localhost:5000'}${videoUrl}`
+      url: youtubeUrl || `${process.env.FRONTEND_URL}${videoUrl}`
     });
   } catch (error) {
     console.error('Video upload error:', error);
