@@ -31,7 +31,7 @@ const Gallery = () => {
     try {
       setLoading(true);
       const response = await api.get('/public/gallery');
-      const apiData = response.data.gallery || [];
+      const apiData = Array.isArray(response.data.gallery) ? response.data.gallery : [];
       
       // Separate photos and videos from API
       const apiPhotos = apiData.filter(item => item.type === 'photo');
@@ -176,7 +176,7 @@ const Gallery = () => {
                   }}
                 >
                   <img 
-                    src={image.image?.startsWith('http') ? image.image : `http://localhost:5000${image.image}`} 
+                    src={image.image?.startsWith('http') ? image.image : `${process.env.REACT_APP_BACKEND_URL}${image.image}`} 
                     alt={image.title || image.caption}
                     style={{
                       width: '100%',
@@ -260,7 +260,7 @@ const Gallery = () => {
                         }
                       }}
                     >
-                      <source src={video.image?.startsWith('http') ? video.image : `http://localhost:5000${video.image}`} type="video/mp4" />
+                      <source src={video.image?.startsWith('http') ? video.image : `${process.env.REACT_APP_BACKEND_URL}${video.image}`} type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>
                     

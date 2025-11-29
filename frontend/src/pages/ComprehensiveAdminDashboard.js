@@ -40,7 +40,7 @@ const ComprehensiveAdminDashboard = () => {
       const interval = setInterval(fetchDashboardData, 10000);
       
       // Initialize WebSocket connection
-      const newSocket = io('http://localhost:5000');
+      const newSocket = io(process.env.REACT_APP_BACKEND_URL);
       setSocket(newSocket);
       
       // Listen for real-time updates
@@ -67,7 +67,7 @@ const ComprehensiveAdminDashboard = () => {
     uploadData.append('caption', 'Gallery Image');
 
     try {
-      const response = await fetch('http://localhost:5000/api/admin/gallery/upload', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/gallery/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -96,7 +96,7 @@ const ComprehensiveAdminDashboard = () => {
       uploadData.append('caption', file.name.replace(/\.[^/.]+$/, ''));
 
       try {
-        const response = await fetch('http://localhost:5000/api/admin/gallery/upload-video', {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/gallery/upload-video`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1201,7 +1201,7 @@ const GalleryForm = ({ data, onSave, onCancel }) => {
     uploadData.append('caption', formData.title);
 
     try {
-      const response = await fetch('http://localhost:5000/api/admin/gallery/upload', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/gallery/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1257,7 +1257,7 @@ const GalleryForm = ({ data, onSave, onCancel }) => {
         <div style={{ marginTop: '1rem' }}>
           <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#666' }}>Preview:</p>
           <img 
-            src={formData.image.startsWith('http') ? formData.image : `http://localhost:5000${formData.image}`} 
+            src={formData.image.startsWith('http') ? formData.image : `${process.env.REACT_APP_BACKEND_URL}${formData.image}`} 
             alt="Preview" 
             style={{ width: '200px', height: '150px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #e2e8f0' }} 
           />
@@ -1379,7 +1379,7 @@ const TeamForm = ({ data, onSave, onCancel }) => {
         {preview && (
           <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
             <img 
-              src={preview.startsWith('http') ? preview : `http://localhost:5000${preview}`}
+              src={preview.startsWith('http') ? preview : `${process.env.REACT_APP_BACKEND_URL}${preview}`}
               alt="Preview" 
               style={{
                 width: '100px',

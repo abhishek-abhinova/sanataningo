@@ -160,11 +160,6 @@ const AdminLogin = () => {
             <i className="fas fa-shield-alt"></i>
             Secure Admin Access
           </p>
-          <div className="demo-credentials">
-            <small>Demo Credentials:</small>
-            <small>Email: admin@sarboshakti.org</small>
-            <small>Password: admin123</small>
-          </div>
         </motion.div>
       </motion.div>
 
@@ -370,24 +365,7 @@ const AdminLogin = () => {
           gap: 0.5rem;
         }
 
-        .demo-credentials {
-          background: rgba(210, 105, 30, 0.1);
-          border-radius: 8px;
-          padding: 1rem;
-          margin-top: 1rem;
-        }
 
-        .demo-credentials small {
-          display: block;
-          color: #d2691e;
-          font-weight: 500;
-          margin: 0.25rem 0;
-        }
-
-        .demo-credentials small:first-child {
-          font-weight: 600;
-          margin-bottom: 0.5rem;
-        }
 
         @media (max-width: 768px) {
           .login-card {

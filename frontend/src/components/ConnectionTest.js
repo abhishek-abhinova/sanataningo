@@ -14,7 +14,7 @@ const ConnectionTest = () => {
     
     try {
       // Test health endpoint with direct URL to avoid double /api
-      const healthUrl = 'http://localhost:5000/api/health';
+      const healthUrl = `${process.env.REACT_APP_BACKEND_URL}/api/health`;
       console.log('Testing health endpoint:', healthUrl);
       
       const healthResponse = await fetch(healthUrl, {
@@ -29,12 +29,12 @@ const ConnectionTest = () => {
         data: healthResponse.ok ? await healthResponse.json() : await healthResponse.text()
       };
     } catch (error) {
-      results.health = { error: error.message, url: 'http://localhost:5000/api/health' };
+      results.health = { error: error.message, url: `${process.env.REACT_APP_BACKEND_URL}/api/health` };
     }
 
     try {
       // Test login endpoint with direct URL
-      const loginUrl = 'http://localhost:5000/api/auth/login';
+      const loginUrl = `${process.env.REACT_APP_BACKEND_URL}/api/auth/login`;
       console.log('Testing login endpoint:', loginUrl);
       
       const loginResponse = await fetch(loginUrl, {
@@ -50,7 +50,7 @@ const ConnectionTest = () => {
         data: await loginResponse.json()
       };
     } catch (error) {
-      results.login = { error: error.message, url: 'http://localhost:5000/api/auth/login' };
+      results.login = { error: error.message, url: `${process.env.REACT_APP_BACKEND_URL}/api/auth/login` };
     }
 
     setDetails(results);
@@ -75,7 +75,7 @@ const ConnectionTest = () => {
       <div style={{ marginBottom: '0.5rem' }}>
         <strong>Backend URL:</strong><br/>
         <span style={{ fontSize: '0.7rem', color: '#666' }}>
-          http://localhost:5000
+          {process.env.REACT_APP_BACKEND_URL}
         </span>
       </div>
 
