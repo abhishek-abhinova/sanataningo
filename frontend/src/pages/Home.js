@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
 import io from 'socket.io-client';
+import RecentActivities from '../components/RecentActivities';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -197,6 +198,9 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Recent Activities Section */}
+      <RecentActivities />
 
       {/* Trustees Section */}
       <section className="founders">

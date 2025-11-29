@@ -218,6 +218,7 @@ const ComprehensiveAdminDashboard = () => {
       case 'contacts': await fetchData('/admin/contacts', 'contacts'); break;
       case 'team': await fetchData('/admin/team', 'team'); break;
       case 'events': await fetchData('/admin/events', 'events'); break;
+      case 'activities': await fetchData('/admin/activities', 'activities'); break;
       case 'gallery': await fetchData('/admin/gallery', 'gallery'); break;
     }
   };
@@ -418,6 +419,50 @@ const ComprehensiveAdminDashboard = () => {
       </div>
       
 
+    </motion.div>
+  );
+
+  const renderActivitiesManagement = () => (
+    <motion.div className="admin-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <div className="section-header">
+        <h2><i className="fas fa-newspaper"></i> Activities Management</h2>
+        <button onClick={() => setEditingItem({ type: 'activities', data: {} })} className="btn-primary">
+          <i className="fas fa-plus"></i> Add Activity
+        </button>
+      </div>
+      
+      <div className="events-grid">
+        {data.activities.map((activity, index) => (
+          <motion.div key={activity._id} className="event-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
+            <div className="event-header">
+              <h4>{activity.title}</h4>
+              <span className={`status-badge ${activity.category}`}>{activity.category}</span>
+            </div>
+            <p>{activity.description}</p>
+            <div className="event-details">
+              <small><i className="fas fa-calendar"></i> {new Date(activity.date).toLocaleDateString()}</small>
+              {activity.location && <small><i className="fas fa-map-marker-alt"></i> {activity.location}</small>}
+            </div>
+            <div className="event-actions">
+              <button onClick={() => setEditingItem({ type: 'activities', data: activity })} className="btn-icon btn-edit">
+                <i className="fas fa-edit"></i>
+              </button>
+              <button onClick={() => deleteItem('activities', activity._id)} className="btn-icon btn-delete">
+                <i className="fas fa-trash"></i>
+              </button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      
+      {editingItem?.type === 'activities' && (
+        <div className="modal-overlay" onClick={() => setEditingItem(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{editingItem.data._id ? 'Edit' : 'Add'} Activity</h3>
+            <ActivityForm data={editingItem.data} onSave={(data) => saveItem('activities', data)} onCancel={() => setEditingItem(null)} />
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 
@@ -631,6 +676,7 @@ const ComprehensiveAdminDashboard = () => {
               { id: 'donations', icon: 'fas fa-donate', label: 'Donations' },
               { id: 'team', icon: 'fas fa-user-tie', label: 'Team' },
               { id: 'events', icon: 'fas fa-calendar', label: 'Events' },
+              { id: 'activities', icon: 'fas fa-newspaper', label: 'Activities' },
               { id: 'gallery', icon: 'fas fa-images', label: 'Gallery' },
               { id: 'contacts', icon: 'fas fa-envelope', label: 'Messages' }
             ].map(item => (
@@ -688,6 +734,7 @@ const ComprehensiveAdminDashboard = () => {
           )}
           {activeTab === 'team' && renderTeamManagement()}
           {activeTab === 'events' && renderEventsManagement()}
+          {activeTab === 'activities' && renderActivitiesManagement()}
           {activeTab === 'gallery' && renderGalleryManagement()}
           {activeTab === 'contacts' && renderContactsManagement()}
         </div>
@@ -1418,6 +1465,81 @@ const TeamForm = ({ data, onSave, onCancel }) => {
         <label htmlFor="showInTeam" style={{ fontWeight: '600', color: '#333', cursor: 'pointer' }}>
           Show in Team Section
         </label>
+      </div>
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+        <button type="button" onClick={onCancel} className="btn-secondary">Cancel</button>
+        <button type="submit" className="btn-primary">Save</button>
+      </div>
+    </form>
+  );
+};
+
+const ActivityForm = ({ data, onSave, onCancel }) => {
+  const [formData, setFormData] = useState({
+    title: data.title || '',
+    description: data.description || '',
+    location: data.location || '',
+    date: data.date ? new Date(data.date).toISOString().split('T')[0] : '',
+    category: data.category || 'event',
+    published: data.published !== undefined ? data.published : true,
+    featured: data.featured || false
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave({ ...data, ...formData });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <input
+        type="text"
+        placeholder="Activity Title"
+        value={formData.title}
+        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+        required
+        style={{ padding: '0.75rem', border: '2px solid #e2e8f0', borderRadius: '8px' }}
+      />
+      <textarea
+        placeholder="Activity Description"
+        value={formData.description}
+        onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+        required
+        style={{ padding: '0.75rem', border: '2px solid #e2e8f0', borderRadius: '8px', minHeight: '100px' }}
+      />
+      <input
+        type="text"
+        placeholder="Location"
+        value={formData.location}
+        onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+        style={{ padding: '0.75rem', border: '2px solid #e2e8f0', borderRadius: '8px' }}
+      />
+      <input
+        type="date"
+        value={formData.date}
+        onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+        required
+        style={{ padding: '0.75rem', border: '2px solid #e2e8f0', borderRadius: '8px' }}
+      />
+      <select
+        value={formData.category}
+        onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+        style={{ padding: '0.75rem', border: '2px solid #e2e8f0', borderRadius: '8px' }}
+      >
+        <option value="event">Event</option>
+        <option value="service">Service</option>
+        <option value="achievement">Achievement</option>
+        <option value="announcement">Announcement</option>
+        <option value="donation">Donation</option>
+      </select>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <input
+          type="checkbox"
+          id="featured"
+          checked={formData.featured}
+          onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
+        />
+        <label htmlFor="featured">Featured Activity</label>
       </div>
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
         <button type="button" onClick={onCancel} className="btn-secondary">Cancel</button>

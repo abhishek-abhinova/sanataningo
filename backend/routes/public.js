@@ -60,6 +60,25 @@ router.get('/events', async (req, res) => {
   }
 });
 
+// Get public activities
+router.get('/activities', async (req, res) => {
+  try {
+    const Activity = require('../models/Activity');
+    const { limit = 10 } = req.query;
+    
+    const activities = await Activity.find({ published: true })
+      .sort({ featured: -1, date: -1, order: 1 })
+      .limit(limit * 1);
+    
+    res.json({
+      success: true,
+      activities
+    });
+  } catch (error) {
+    res.json({ success: true, activities: [] });
+  }
+});
+
 // Get organization info
 router.get('/info', async (req, res) => {
   try {

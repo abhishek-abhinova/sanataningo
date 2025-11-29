@@ -98,6 +98,7 @@ try {
   const testEmailRoutes = require('./routes/test-email');
   const teamRoutes = require('./routes/team');
   const eventsRoutes = require('./routes/events');
+  const activitiesRoutes = require('./routes/activities');
   
   // Use routes
   app.use('/api/auth', authRoutes);
@@ -110,6 +111,7 @@ try {
   app.use('/api/admin/gallery', galleryRoutes);
   app.use('/api/admin/team', teamRoutes);
   app.use('/api/admin/events', eventsRoutes);
+  app.use('/api/admin/activities', activitiesRoutes);
   app.use('/api', realtimeRoutes);
   app.use('/api/test', testEmailRoutes);
   
