@@ -93,7 +93,14 @@ const broadcastUpdate = (req, type, data) => {
 };
 
 // Upload single/multiple images
-router.post('/upload', auth, galleryUpload.single('images'), async (req, res) => {
+router.post('/upload', auth, (req, res, next) => {
+  galleryUpload.single('images')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
     const { category = 'general', description = '', title = 'Gallery Item', featured = false } = req.body;
@@ -205,7 +212,14 @@ const handleImageUpload = async (req, res) => {
 };
 
 // Upload video
-router.post('/upload-video', auth, videoUpload.single('video'), async (req, res) => {
+router.post('/upload-video', auth, (req, res, next) => {
+  videoUpload.single('video')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
     const { category = 'general', description = '', youtubeUrl, title = 'Video', featured = false } = req.body;
@@ -288,6 +302,11 @@ const handleVideoUpload = async (req, res) => {
 // Test route
 router.get('/test', (req, res) => {
   res.json({ success: true, message: 'Gallery routes working' });
+});
+
+// Simple upload test route
+router.post('/upload-test', auth, (req, res) => {
+  res.json({ success: true, message: 'Upload route accessible' });
 });
 
 // Get all gallery items (Admin)
