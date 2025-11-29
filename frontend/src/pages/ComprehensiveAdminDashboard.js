@@ -1663,21 +1663,29 @@ const TeamForm = ({ data, onSave, onCancel }) => {
     uploadData.append('teamImage', file);
     uploadData.append('name', formData.name || 'Team Member');
     uploadData.append('position', formData.position || 'Member');
+    uploadData.append('description', formData.bio || '');
 
     try {
-      const response = await api.post('/media/team-upload', uploadData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/media/team-upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: uploadData
       });
       
-      if (response.data.success) {
-        const imageUrl = response.data.teamMember.image;
+      const result = await response.json();
+      if (result.success) {
+        const imageUrl = result.teamMember.image;
         setFormData(prev => ({ ...prev, photo: imageUrl }));
         setPreview(imageUrl);
-        // toast.success('Image uploaded successfully!');
+        toast.success('Image uploaded successfully!');
+      } else {
+        throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
       console.error('Upload failed:', error);
-      // toast.error('Failed to upload image');
+      toast.error('Failed to upload image: ' + error.message);
     } finally {
       setUploading(false);
     }
