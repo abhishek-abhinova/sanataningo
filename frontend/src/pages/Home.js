@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
-import io from 'socket.io-client';
+// import io from 'socket.io-client'; // Disabled for production
 import RecentActivities from '../components/RecentActivities';
 
 const Home = () => {
@@ -38,18 +38,9 @@ const Home = () => {
     fetchTeamMembers();
     fetchEvents();
 
-    // Initialize WebSocket connection
-    const newSocket = io('http://localhost:5000');
-    setSocket(newSocket);
-    
-    // Listen for real-time updates
-    newSocket.on('dataUpdate', (update) => {
-      handleRealTimeUpdate(update);
-    });
-
+    // Socket.io disabled for production
     return () => {
       clearInterval(interval);
-      newSocket.disconnect();
     };
   }, [slides.length]);
   
@@ -288,7 +279,7 @@ const Home = () => {
             viewport={{ once: true }}
             style={{ textAlign: 'center', color: '#ff6b35', marginBottom: '3rem' }}
           >
-            Our Team ({teamMembers.length > 0 ? teamMembers.length : '21'} Members)
+            Our Team ({teamMembers.filter(m => m.showInTeam !== false).length + (teamMembers.length === 0 ? 19 : 0)} Members)
           </motion.h2>
           <div className="team-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
             {(teamMembers.length > 0 ? teamMembers.slice(4) : [
@@ -358,7 +349,7 @@ const Home = () => {
                   style={{ borderRadius: '10px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}
                 >
                   <img 
-                    src={image?.image?.startsWith('http') ? image.image : `http://localhost:5000${image?.image || ''}`} 
+                    src={image?.image?.startsWith('http') ? image.image : `${process.env.REACT_APP_BACKEND_URL}${image?.image || ''}`} 
                     alt={image?.title || 'Gallery image'}
                     style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                   />

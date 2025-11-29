@@ -275,12 +275,13 @@ const AdminLogin = () => {
           transform: translateY(-50%);
           color: #64748b;
           z-index: 2;
-          font-size: 1.1rem;
+          font-size: 1rem;
+          pointer-events: none;
         }
 
         .form-input {
           width: 100%;
-          padding: 1rem 1rem 1rem 3rem;
+          padding: 1rem 3.5rem 1rem 3rem;
           border: 2px solid #e2e8f0;
           border-radius: 12px;
           font-size: 1rem;
@@ -305,6 +306,8 @@ const AdminLogin = () => {
         .password-toggle {
           position: absolute;
           right: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
           background: none;
           border: none;
           color: #64748b;
@@ -312,6 +315,7 @@ const AdminLogin = () => {
           padding: 0.5rem;
           border-radius: 6px;
           transition: all 0.3s ease;
+          z-index: 3;
         }
 
         .password-toggle:hover {
