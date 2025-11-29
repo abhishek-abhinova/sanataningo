@@ -1,20 +1,8 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 const auth = require('../middleware/auth');
-
-// Check if multer is available
-let multer;
-try {
-  multer = require('multer');
-} catch (error) {
-  console.error('Multer not installed. Please install: npm install multer');
-  // Fallback for when multer is not available
-  multer = {
-    diskStorage: () => ({}),
-    memoryStorage: () => ({})
-  };
-}
 
 const router = express.Router();
 
@@ -93,14 +81,7 @@ const broadcastUpdate = (req, type, data) => {
 };
 
 // Upload single/multiple images
-router.post('/upload', auth, (req, res, next) => {
-  galleryUpload.single('images')(req, res, (err) => {
-    if (err) {
-      return res.status(400).json({ success: false, message: err.message });
-    }
-    next();
-  });
-}, async (req, res) => {
+router.post('/upload', auth, galleryUpload.single('images'), async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
     const { category = 'general', description = '', title = 'Gallery Item', featured = false } = req.body;
@@ -212,14 +193,7 @@ const handleImageUpload = async (req, res) => {
 };
 
 // Upload video
-router.post('/upload-video', auth, (req, res, next) => {
-  videoUpload.single('video')(req, res, (err) => {
-    if (err) {
-      return res.status(400).json({ success: false, message: err.message });
-    }
-    next();
-  });
-}, async (req, res) => {
+router.post('/upload-video', auth, videoUpload.single('video'), async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
     const { category = 'general', description = '', youtubeUrl, title = 'Video', featured = false } = req.body;
