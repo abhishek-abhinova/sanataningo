@@ -257,6 +257,11 @@ const handleVideoUpload = async (req, res) => {
   }
 };
 
+// Test route
+router.get('/test', (req, res) => {
+  res.json({ success: true, message: 'Gallery routes working' });
+});
+
 // Get all gallery items (Admin)
 router.get('/', auth, async (req, res) => {
   try {

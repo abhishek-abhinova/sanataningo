@@ -227,10 +227,10 @@ const ComprehensiveAdminDashboard = () => {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
           {[
-            { icon: 'fas fa-user-plus', title: 'Add Team Member', action: () => setEditingItem({ type: 'team', data: {} }), color: '#667eea' },
-            { icon: 'fas fa-images', title: 'Upload Gallery', action: () => setEditingItem({ type: 'gallery', data: { type: 'photo' } }), color: '#10b981' },
-            { icon: 'fas fa-calendar-plus', title: 'Create Event', action: () => setEditingItem({ type: 'events', data: {} }), color: '#f59e0b' },
-            { icon: 'fas fa-newspaper', title: 'Add Activity', action: () => setEditingItem({ type: 'activities', data: {} }), color: '#8b5cf6' }
+            { icon: 'fas fa-user-plus', title: 'Add Team Member', action: () => { setActiveTab('team'); setEditingItem({ type: 'team', data: {} }); }, color: '#667eea' },
+            { icon: 'fas fa-images', title: 'Upload Gallery', action: () => { setActiveTab('gallery'); setEditingItem({ type: 'gallery', data: { type: 'photo' } }); }, color: '#10b981' },
+            { icon: 'fas fa-calendar-plus', title: 'Create Event', action: () => { setActiveTab('events'); setEditingItem({ type: 'events', data: {} }); }, color: '#f59e0b' },
+            { icon: 'fas fa-newspaper', title: 'Add Activity', action: () => { setActiveTab('activities'); setEditingItem({ type: 'activities', data: {} }); }, color: '#8b5cf6' }
           ].map((action, index) => (
             <motion.button
               key={action.title}
