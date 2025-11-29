@@ -1,8 +1,42 @@
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const Member = require('../models/Member');
 const Donation = require('../models/Donation');
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
+
+// Multer configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = path.join(__dirname, '../uploads/gallery');
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + '-' + Math.random().toString(36).substr(2, 9) + path.extname(file.originalname);
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|webm|avi|mov/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only image and video files are allowed'));
+    }
+  }
+});
 
 // Real-time broadcast helper
 const broadcastUpdate = (req, type, data) => {
@@ -173,15 +207,20 @@ router.get('/donations', auth, async (req, res) => {
 });
 
 // Gallery upload route
-router.post('/gallery/upload', auth, async (req, res) => {
+router.post('/gallery/upload', auth, upload.single('images'), async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
     const { title = 'Gallery Item', description = '', category = 'general', featured = false } = req.body;
     
+    let imageUrl = '/images/placeholder.jpg';
+    if (req.file) {
+      imageUrl = `/uploads/gallery/${req.file.filename}`;
+    }
+    
     const galleryItem = new Gallery({
       title,
       description,
-      image: '/images/placeholder.jpg',
+      image: imageUrl,
       category,
       type: 'photo',
       published: true,
@@ -190,10 +229,11 @@ router.post('/gallery/upload', auth, async (req, res) => {
     });
     
     await galleryItem.save();
+    broadcastUpdate(req, 'gallery', { action: 'create', item: galleryItem });
     
     res.json({
       success: true,
-      message: 'Gallery item created successfully',
+      message: 'Image uploaded successfully',
       data: galleryItem
     });
   } catch (error) {
@@ -203,15 +243,20 @@ router.post('/gallery/upload', auth, async (req, res) => {
 });
 
 // Gallery video upload route
-router.post('/gallery/upload-video', auth, async (req, res) => {
+router.post('/gallery/upload-video', auth, upload.single('video'), async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
     const { title = 'Video', description = '', category = 'general', featured = false } = req.body;
     
+    let videoUrl = '/videos/placeholder.mp4';
+    if (req.file) {
+      videoUrl = `/uploads/gallery/${req.file.filename}`;
+    }
+    
     const galleryItem = new Gallery({
       title,
       description,
-      image: '/videos/placeholder.mp4',
+      image: videoUrl,
       category,
       type: 'video',
       published: true,
@@ -220,10 +265,11 @@ router.post('/gallery/upload-video', auth, async (req, res) => {
     });
     
     await galleryItem.save();
+    broadcastUpdate(req, 'gallery', { action: 'create', item: galleryItem });
     
     res.json({
       success: true,
-      message: 'Video item created successfully',
+      message: 'Video uploaded successfully',
       data: galleryItem
     });
   } catch (error) {
