@@ -96,10 +96,6 @@ try {
   app.use('/api/contact', contactRoutes);
   app.use('/api/public', publicRoutes);
   app.use('/api/media', mediaRoutes);
-  app.use('/api/admin/gallery', galleryRoutes);
-  app.use('/api/admin/team', teamRoutes);
-  app.use('/api/admin/events', eventsRoutes);
-  app.use('/api/admin/activities', activitiesRoutes);
   app.use('/api', realtimeRoutes);
   app.use('/api/test', testEmailRoutes);
   

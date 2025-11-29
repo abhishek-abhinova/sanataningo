@@ -1049,11 +1049,15 @@ router.delete('/events/:id', auth, async (req, res) => {
 
 router.delete('/members/:id', auth, async (req, res) => {
   try {
-    await Member.findByIdAndDelete(req.params.id);
+    const member = await Member.findByIdAndDelete(req.params.id);
+    if (!member) {
+      return res.status(404).json({ success: false, error: 'Member not found' });
+    }
     broadcastUpdate(req, 'members', { action: 'delete', id: req.params.id });
-    res.json({ success: true });
+    res.json({ success: true, message: 'Member deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Delete member error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -1104,9 +1108,10 @@ router.post('/activities', auth, async (req, res) => {
     const activity = new Activity(req.body);
     await activity.save();
     broadcastUpdate(req, 'activities', { action: 'create', item: activity });
-    res.json({ success: true, activity });
+    res.json({ success: true, data: activity });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Save activity error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -1115,12 +1120,13 @@ router.put('/activities/:id', auth, async (req, res) => {
     const Activity = require('../models/Activity');
     const activity = await Activity.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!activity) {
-      return res.status(404).json({ error: 'Activity not found' });
+      return res.status(404).json({ success: false, error: 'Activity not found' });
     }
     broadcastUpdate(req, 'activities', { action: 'update', item: activity });
-    res.json({ success: true, activity });
+    res.json({ success: true, data: activity });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Update activity error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
