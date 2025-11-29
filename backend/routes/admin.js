@@ -172,6 +172,66 @@ router.get('/donations', auth, async (req, res) => {
   }
 });
 
+// Gallery upload route
+router.post('/gallery/upload', auth, async (req, res) => {
+  try {
+    const Gallery = require('../models/Gallery');
+    const { title = 'Gallery Item', description = '', category = 'general', featured = false } = req.body;
+    
+    const galleryItem = new Gallery({
+      title,
+      description,
+      image: '/images/placeholder.jpg',
+      category,
+      type: 'photo',
+      published: true,
+      showOnHomepage: featured === 'true' || featured === true,
+      order: 0
+    });
+    
+    await galleryItem.save();
+    
+    res.json({
+      success: true,
+      message: 'Gallery item created successfully',
+      data: galleryItem
+    });
+  } catch (error) {
+    console.error('Gallery upload error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Gallery video upload route
+router.post('/gallery/upload-video', auth, async (req, res) => {
+  try {
+    const Gallery = require('../models/Gallery');
+    const { title = 'Video', description = '', category = 'general', featured = false } = req.body;
+    
+    const galleryItem = new Gallery({
+      title,
+      description,
+      image: '/videos/placeholder.mp4',
+      category,
+      type: 'video',
+      published: true,
+      showOnHomepage: featured === 'true' || featured === true,
+      order: 0
+    });
+    
+    await galleryItem.save();
+    
+    res.json({
+      success: true,
+      message: 'Video item created successfully',
+      data: galleryItem
+    });
+  } catch (error) {
+    console.error('Video upload error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Send donation receipt email
 router.post('/donations/:id/send-receipt', auth, async (req, res) => {
   try {
