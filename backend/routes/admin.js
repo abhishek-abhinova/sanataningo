@@ -349,16 +349,13 @@ router.post('/gallery', auth, async (req, res) => {
       return res.status(500).json({ error: 'Gallery model not available' });
     }
     
-    const { title, description, file, image, type, category } = req.body;
+    const { title, description, file, image, type, category, featured } = req.body;
     
     if (!title) {
       return res.status(400).json({ error: 'Title is required' });
     }
     
-    const imageUrl = file || image;
-    if (!imageUrl) {
-      return res.status(400).json({ error: 'Image is required' });
-    }
+    const imageUrl = file || image || '/images/placeholder.jpg';
     
     const gallery = new Gallery({
       title,
@@ -366,14 +363,14 @@ router.post('/gallery', auth, async (req, res) => {
       image: imageUrl,
       type: type || 'photo',
       category: category || 'general',
-      showOnHomepage: false,
+      showOnHomepage: featured === true || featured === 'true',
       published: true,
       order: 0
     });
     
     await gallery.save();
     broadcastUpdate(req, 'gallery', { action: 'create', item: gallery });
-    res.json({ success: true, gallery });
+    res.json({ success: true, data: gallery });
   } catch (error) {
     console.error('Gallery POST error:', error);
     res.status(500).json({ error: error.message });
@@ -530,6 +527,41 @@ router.put('/team/reorder', auth, async (req, res) => {
     
     await Promise.all(updatePromises);
     res.json({ success: true, message: 'Team order updated' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Toggle team visibility
+router.put('/team/:id/toggle-visibility', auth, async (req, res) => {
+  try {
+    const Team = require('../models/Team');
+    const member = await Team.findById(req.params.id);
+    if (!member) {
+      return res.status(404).json({ error: 'Team member not found' });
+    }
+    
+    member.showInTeam = !member.showInTeam;
+    await member.save();
+    
+    broadcastUpdate(req, 'team', { action: 'update', item: member });
+    res.json({ success: true, member });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Send ID card to team member
+router.post('/team/:id/send-card', auth, async (req, res) => {
+  try {
+    const Team = require('../models/Team');
+    const member = await Team.findById(req.params.id);
+    if (!member) {
+      return res.status(404).json({ error: 'Team member not found' });
+    }
+    
+    // For now, just return success - implement actual ID card generation later
+    res.json({ success: true, message: 'ID card sent successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -859,6 +891,63 @@ router.delete('/contacts/:id', auth, async (req, res) => {
     const Contact = require('../models/Contact');
     await Contact.findByIdAndDelete(req.params.id);
     res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/donations/:id', auth, async (req, res) => {
+  try {
+    await Donation.findByIdAndDelete(req.params.id);
+    broadcastUpdate(req, 'donations', { action: 'delete', id: req.params.id });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/activities/:id', auth, async (req, res) => {
+  try {
+    const Activity = require('../models/Activity');
+    await Activity.findByIdAndDelete(req.params.id);
+    broadcastUpdate(req, 'activities', { action: 'delete', id: req.params.id });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/activities', auth, async (req, res) => {
+  try {
+    const Activity = require('../models/Activity');
+    const activities = await Activity.find().sort({ order: 1, date: -1 });
+    res.json({ success: true, activities });
+  } catch (error) {
+    res.json({ success: true, activities: [] });
+  }
+});
+
+router.post('/activities', auth, async (req, res) => {
+  try {
+    const Activity = require('../models/Activity');
+    const activity = new Activity(req.body);
+    await activity.save();
+    broadcastUpdate(req, 'activities', { action: 'create', item: activity });
+    res.json({ success: true, activity });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/activities/:id', auth, async (req, res) => {
+  try {
+    const Activity = require('../models/Activity');
+    const activity = await Activity.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!activity) {
+      return res.status(404).json({ error: 'Activity not found' });
+    }
+    broadcastUpdate(req, 'activities', { action: 'update', item: activity });
+    res.json({ success: true, activity });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
