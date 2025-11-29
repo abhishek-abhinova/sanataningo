@@ -58,6 +58,16 @@ router.get('/', auth, async (req, res) => {
   });
 });
 
+// Test route
+router.get('/test', (req, res) => {
+  res.json({ success: true, message: 'Admin routes working' });
+});
+
+// Gallery test route
+router.post('/gallery/test', auth, (req, res) => {
+  res.json({ success: true, message: 'Gallery upload route accessible' });
+});
+
 // Dashboard statistics
 router.get('/dashboard', auth, async (req, res) => {
   try {
