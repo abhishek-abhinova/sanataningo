@@ -13,7 +13,8 @@ const ComprehensiveAdminDashboard = () => {
     contacts: [],
     team: [],
     events: [],
-    gallery: []
+    gallery: [],
+    activities: []
   });
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -371,7 +372,7 @@ const ComprehensiveAdminDashboard = () => {
       </div>
       
       <div className="events-grid">
-        {data.activities.map((activity, index) => (
+        {(data.activities || []).map((activity, index) => (
           <motion.div key={activity._id} className="event-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
             <div className="event-header">
               <h4>{activity.title}</h4>
