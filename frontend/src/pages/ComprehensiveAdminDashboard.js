@@ -614,6 +614,16 @@ const ComprehensiveAdminDashboard = () => {
     }
   };
 
+  const sendDonationReceipt = async (donation) => {
+    try {
+      await api.post(`/admin/donations/${donation._id}/send-receipt`);
+      toast.success(`Receipt sent to ${donation.donorEmail}`);
+    } catch (error) {
+      console.error('Send receipt error:', error);
+      toast.error('Failed to send receipt: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
   const saveItem = async (type, data) => {
     try {
       const endpoint = data._id ? `/admin/${type}/${data._id}` : `/admin/${type}`;
@@ -742,9 +752,19 @@ const ComprehensiveAdminDashboard = () => {
                         <td><span className={`status-badge ${donation.paymentStatus}`}>{donation.paymentStatus}</span></td>
                         <td>{new Date(donation.createdAt).toLocaleDateString()}</td>
                         <td>
-                          <button onClick={() => deleteItem('donations', donation._id)} className="btn-icon btn-delete">
-                            <i className="fas fa-trash"></i>
-                          </button>
+                          <div className="action-buttons">
+                            <button 
+                              onClick={() => sendDonationReceipt(donation)} 
+                              className="btn-icon" 
+                              style={{ background: '#28a745', color: 'white' }}
+                              title="Send Receipt Email"
+                            >
+                              <i className="fas fa-envelope"></i>
+                            </button>
+                            <button onClick={() => deleteItem('donations', donation._id)} className="btn-icon btn-delete">
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </div>
                         </td>
                       </motion.tr>
                     ))}
@@ -1804,12 +1824,59 @@ const ActivityForm = ({ data, onSave, onCancel }) => {
     date: data.date ? new Date(data.date).toISOString().split('T')[0] : '',
     category: data.category || 'event',
     published: data.published !== undefined ? data.published : true,
-    featured: data.featured || false
+    featured: data.featured || false,
+    image: data.image || ''
   });
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setFormData(prev => ({ ...prev, image: previewUrl }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({ ...data, ...formData });
+    
+    if (!formData.title.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+
+    let finalData = { ...data, ...formData };
+    
+    // Upload image if selected
+    if (selectedFile) {
+      setUploading(true);
+      try {
+        const uploadData = new FormData();
+        uploadData.append('file', selectedFile);
+        
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/media/upload`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: uploadData
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+          finalData.image = result.url;
+        }
+      } catch (error) {
+        console.error('Image upload failed:', error);
+        toast.error('Failed to upload image');
+      } finally {
+        setUploading(false);
+      }
+    }
+    
+    onSave(finalData);
   };
 
   return (
@@ -1854,6 +1921,30 @@ const ActivityForm = ({ data, onSave, onCancel }) => {
         <option value="announcement">Announcement</option>
         <option value="donation">Donation</option>
       </select>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <label style={{ fontWeight: '600', color: '#333' }}>Activity Image</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          style={{
+            padding: '12px',
+            border: '2px dashed #d2691e',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            background: '#fafbfc'
+          }}
+        />
+        {formData.image && (
+          <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+            <img 
+              src={formData.image.startsWith('blob:') ? formData.image : `${process.env.REACT_APP_BACKEND_URL}${formData.image}`}
+              alt="Preview" 
+              style={{ width: '150px', height: '100px', objectFit: 'cover', borderRadius: '8px' }}
+            />
+          </div>
+        )}
+      </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <input
           type="checkbox"
@@ -1863,9 +1954,12 @@ const ActivityForm = ({ data, onSave, onCancel }) => {
         />
         <label htmlFor="featured">Featured Activity</label>
       </div>
+      {uploading && <p style={{ color: '#666', textAlign: 'center' }}>Uploading image...</p>}
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
         <button type="button" onClick={onCancel} className="btn-secondary">Cancel</button>
-        <button type="submit" className="btn-primary">Save</button>
+        <button type="submit" disabled={uploading} className="btn-primary">
+          {uploading ? 'Saving...' : 'Save'}
+        </button>
       </div>
     </form>
   );

@@ -262,6 +262,101 @@ router.get('/donations', auth, async (req, res) => {
   }
 });
 
+// Send donation receipt email
+router.post('/donations/:id/send-receipt', auth, async (req, res) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) {
+      return res.status(404).json({ error: 'Donation not found' });
+    }
+    
+    if (!donation.donorEmail) {
+      return res.status(400).json({ error: 'Donor email not found' });
+    }
+    
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransporter({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    });
+    
+    const receiptHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
+        <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <img src="${process.env.FRONTEND_URL}/images/logo.jpeg" alt="Logo" style="width: 80px; height: 80px; border-radius: 50%;">
+            <h1 style="color: #d2691e; margin: 10px 0;">Sarbo Shakti Sonatani Sangathan</h1>
+            <p style="color: #666; margin: 0;">Serving Humanity through Sanatan Dharma Values</p>
+          </div>
+          
+          <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+            <h2 style="margin: 0;">🙏 Thank You for Your Donation!</h2>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #333; margin-bottom: 15px;">Donation Receipt</h3>
+            <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+              <span><strong>Receipt ID:</strong></span>
+              <span>${donation._id}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+              <span><strong>Donor Name:</strong></span>
+              <span>${donation.donorName}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+              <span><strong>Amount:</strong></span>
+              <span style="color: #28a745; font-weight: bold;">₹${donation.amount}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+              <span><strong>Purpose:</strong></span>
+              <span>${donation.purpose}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+              <span><strong>Date:</strong></span>
+              <span>${new Date(donation.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+              <span><strong>Payment Status:</strong></span>
+              <span style="color: #28a745;">✓ ${donation.paymentStatus}</span>
+            </div>
+          </div>
+          
+          <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="color: #28a745; margin-bottom: 10px;">🏛️ Tax Benefits (80G)</h4>
+            <p style="margin: 0; color: #333;">This donation is eligible for tax deduction under Section 80G of the Income Tax Act. Please keep this receipt for your tax filing.</p>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <p style="color: #666;">Your contribution helps us serve humanity and preserve our cultural values. May you be blessed with prosperity and happiness.</p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #666; font-size: 14px;">🕉️ Dharma • Seva • Sanskriti • Samaj 🕉️</p>
+            <p style="color: #666; font-size: 12px;">Sarbo Shakti Sonatani Sangathan<br>${process.env.ORG_ADDRESS}<br>Email: ${process.env.ORG_EMAIL} | Phone: ${process.env.ORG_PHONE}</p>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: donation.donorEmail,
+      subject: 'Thank You for Your Donation - Receipt & Tax Benefits',
+      html: receiptHtml
+    });
+    
+    res.json({ success: true, message: `Receipt sent to ${donation.donorEmail}` });
+  } catch (error) {
+    console.error('Send receipt error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get all contacts
 router.get('/contacts', auth, async (req, res) => {
   try {
@@ -560,9 +655,69 @@ router.post('/team/:id/send-card', auth, async (req, res) => {
       return res.status(404).json({ error: 'Team member not found' });
     }
     
-    // For now, just return success - implement actual ID card generation later
-    res.json({ success: true, message: 'ID card sent successfully' });
+    if (!member.email) {
+      return res.status(400).json({ error: 'Team member email not found' });
+    }
+    
+    // Send ID card email
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransporter({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    });
+    
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
+        <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <img src="${process.env.FRONTEND_URL}/images/logo.jpeg" alt="Logo" style="width: 80px; height: 80px; border-radius: 50%;">
+            <h1 style="color: #d2691e; margin: 10px 0;">Sarbo Shakti Sonatani Sangathan</h1>
+          </div>
+          
+          <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+            <h2 style="margin: 0;">Team Member ID Card</h2>
+          </div>
+          
+          <div style="text-align: center; margin: 20px 0;">
+            <img src="${process.env.FRONTEND_URL}${member.photo}" alt="${member.name}" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #d2691e;">
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #333; margin-bottom: 15px;">Member Details:</h3>
+            <p><strong>Name:</strong> ${member.name}</p>
+            <p><strong>Position:</strong> ${member.position}</p>
+            <p><strong>Category:</strong> ${member.category}</p>
+            <p><strong>Email:</strong> ${member.email}</p>
+            ${member.phone ? `<p><strong>Phone:</strong> ${member.phone}</p>` : ''}
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0; padding: 20px; background: #e8f5e8; border-radius: 8px;">
+            <p style="color: #28a745; font-weight: bold; margin: 0;">✓ This is your official team member ID card</p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #666; font-size: 14px;">Thank you for being part of our team!</p>
+            <p style="color: #666; font-size: 12px;">Sarbo Shakti Sonatani Sangathan<br>${process.env.ORG_ADDRESS}</p>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: member.email,
+      subject: 'Your Team ID Card - Sarbo Shakti Sonatani Sangathan',
+      html: emailHtml
+    });
+    
+    res.json({ success: true, message: `ID card sent to ${member.email}` });
   } catch (error) {
+    console.error('Send ID card error:', error);
     res.status(500).json({ error: error.message });
   }
 });
