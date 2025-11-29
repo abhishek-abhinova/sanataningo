@@ -93,27 +93,38 @@ const broadcastUpdate = (req, type, data) => {
 };
 
 // Upload single/multiple images
-router.post('/upload', auth, async (req, res) => {
+router.post('/upload', auth, galleryUpload.single('images'), async (req, res) => {
   try {
-    // Handle multer upload
-    if (multer && galleryUpload) {
-      galleryUpload.single('images')(req, res, async (err) => {
-        if (err) {
-          console.error('Multer error:', err);
-          return res.status(400).json({ success: false, message: err.message });
-        }
-        // Convert single file to array format for consistency
-        if (req.file) {
-          req.files = [req.file];
-        }
-        await handleImageUpload(req, res);
-      });
-    } else {
-      // Fallback without file upload
-      await handleImageUpload(req, res);
+    const Gallery = require('../models/Gallery');
+    const { category = 'general', description = '', title = 'Gallery Item', featured = false } = req.body;
+    
+    let imageUrl = '/images/placeholder.jpg';
+    
+    if (req.file) {
+      imageUrl = `/uploads/gallery/${req.file.filename}`;
     }
+    
+    const galleryItem = new Gallery({
+      title: title || 'New Gallery Item',
+      description: description || '',
+      image: imageUrl,
+      category,
+      type: 'photo',
+      published: true,
+      showOnHomepage: category === 'featured' || featured === 'true' || featured === true,
+      order: 0
+    });
+    
+    await galleryItem.save();
+    broadcastUpdate(req, 'gallery', { action: 'create', item: galleryItem });
+    
+    res.json({
+      success: true,
+      message: 'Image uploaded successfully',
+      data: galleryItem
+    });
   } catch (error) {
-    console.error('Upload route error:', error);
+    console.error('Gallery upload error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -194,23 +205,40 @@ const handleImageUpload = async (req, res) => {
 };
 
 // Upload video
-router.post('/upload-video', auth, async (req, res) => {
+router.post('/upload-video', auth, videoUpload.single('video'), async (req, res) => {
   try {
-    // Handle multer upload for video
-    if (multer && videoUpload) {
-      videoUpload.single('video')(req, res, async (err) => {
-        if (err) {
-          console.error('Video multer error:', err);
-          return res.status(400).json({ success: false, message: err.message });
-        }
-        await handleVideoUpload(req, res);
-      });
-    } else {
-      // Fallback without file upload
-      await handleVideoUpload(req, res);
+    const Gallery = require('../models/Gallery');
+    const { category = 'general', description = '', youtubeUrl, title = 'Video', featured = false } = req.body;
+    
+    let videoUrl = '/videos/placeholder.mp4';
+    
+    if (youtubeUrl) {
+      videoUrl = youtubeUrl;
+    } else if (req.file) {
+      videoUrl = `/uploads/videos/${req.file.filename}`;
     }
+
+    const galleryItem = new Gallery({
+      title: title || 'Video',
+      description: description || 'Video uploaded from admin',
+      image: videoUrl,
+      category,
+      type: 'video',
+      published: true,
+      showOnHomepage: category === 'featured' || featured === 'true' || featured === true,
+      order: 0
+    });
+    
+    await galleryItem.save();
+    broadcastUpdate(req, 'gallery', { action: 'create', item: galleryItem });
+
+    res.json({
+      success: true,
+      message: 'Video uploaded successfully',
+      data: galleryItem
+    });
   } catch (error) {
-    console.error('Video upload route error:', error);
+    console.error('Video upload error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
