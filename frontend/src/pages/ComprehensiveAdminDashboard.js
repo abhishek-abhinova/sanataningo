@@ -186,28 +186,76 @@ const ComprehensiveAdminDashboard = () => {
     >
       <div className="stats-grid">
         {[
-          { icon: 'fas fa-users', title: 'Total Members', value: stats.totalMembers || 0, color: '#4f46e5' },
-          { icon: 'fas fa-rupee-sign', title: 'Total Donations', value: `₹${stats.totalDonationAmount || 0}`, color: '#059669' },
-          { icon: 'fas fa-clock', title: 'Pending Approvals', value: stats.pendingMembers || 0, color: '#dc2626' },
-          { icon: 'fas fa-envelope', title: 'Messages', value: stats.totalContacts || 0, color: '#7c3aed' }
+          { icon: 'fas fa-users', title: 'Total Members', value: stats.totalMembers || 0, color: '#667eea', trend: '+12%' },
+          { icon: 'fas fa-rupee-sign', title: 'Total Donations', value: `₹${(stats.totalDonationAmount || 0).toLocaleString()}`, color: '#10b981', trend: '+8%' },
+          { icon: 'fas fa-clock', title: 'Pending Approvals', value: stats.pendingMembers || 0, color: '#f59e0b', trend: '-5%' },
+          { icon: 'fas fa-envelope', title: 'Messages', value: stats.totalContacts || 0, color: '#8b5cf6', trend: '+15%' }
         ].map((stat, index) => (
           <motion.div 
             key={stat.title}
             className="stat-card"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            whileHover={{ y: -5 }}
+            initial={{ opacity: 0, scale: 0.9, rotateY: -10 }}
+            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+            transition={{ duration: 0.6, delay: index * 0.1, type: "spring", stiffness: 100 }}
+            whileHover={{ y: -8, scale: 1.02, rotateY: 5 }}
           >
-            <div className="stat-icon" style={{ background: stat.color }}>
+            <div className="stat-icon" style={{ 
+              background: `linear-gradient(135deg, ${stat.color}, ${stat.color}dd)`,
+              boxShadow: `0 10px 20px ${stat.color}40`
+            }}>
               <i className={stat.icon}></i>
             </div>
             <div className="stat-content">
               <h3>{stat.title}</h3>
               <p className="stat-number">{stat.value}</p>
+              <div style={{ 
+                fontSize: '0.8rem', 
+                color: stat.trend.startsWith('+') ? '#10b981' : '#ef4444',
+                fontWeight: '600',
+                marginTop: '0.5rem'
+              }}>
+                <i className={`fas fa-arrow-${stat.trend.startsWith('+') ? 'up' : 'down'}`}></i> {stat.trend} this month
+              </div>
             </div>
           </motion.div>
         ))}
+      </div>
+      
+      <div style={{ marginTop: '3rem' }}>
+        <div className="section-header">
+          <h2><i className="fas fa-chart-line"></i> Quick Actions</h2>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+          {[
+            { icon: 'fas fa-user-plus', title: 'Add Team Member', action: () => setEditingItem({ type: 'team', data: {} }), color: '#667eea' },
+            { icon: 'fas fa-images', title: 'Upload Gallery', action: () => setEditingItem({ type: 'gallery', data: { type: 'photo' } }), color: '#10b981' },
+            { icon: 'fas fa-calendar-plus', title: 'Create Event', action: () => setEditingItem({ type: 'events', data: {} }), color: '#f59e0b' },
+            { icon: 'fas fa-newspaper', title: 'Add Activity', action: () => setEditingItem({ type: 'activities', data: {} }), color: '#8b5cf6' }
+          ].map((action, index) => (
+            <motion.button
+              key={action.title}
+              onClick={action.action}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + index * 0.1 }}
+              whileHover={{ scale: 1.05, y: -3 }}
+              whileTap={{ scale: 0.95 }}
+              style={{
+                background: `linear-gradient(135deg, ${action.color}, ${action.color}dd)`,
+                color: 'white',
+                border: 'none',
+                borderRadius: '16px',
+                padding: '1.5rem',
+                cursor: 'pointer',
+                boxShadow: `0 10px 20px ${action.color}30`,
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <i className={action.icon} style={{ fontSize: '1.5rem', marginBottom: '0.5rem', display: 'block' }}></i>
+              <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{action.title}</div>
+            </motion.button>
+          ))}
+        </div>
       </div>
     </motion.div>
   );
@@ -610,7 +658,26 @@ const ComprehensiveAdminDashboard = () => {
             <h1>Sarbo Shakti Admin</h1>
           </div>
           <div className="admin-user">
-            <span>Welcome, Admin</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ 
+                width: '40px', 
+                height: '40px', 
+                borderRadius: '50%', 
+                background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '1.2rem'
+              }}>
+                A
+              </div>
+              <div>
+                <div style={{ fontWeight: '600', color: '#1e293b' }}>Welcome, Admin</div>
+                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Super Administrator</div>
+              </div>
+            </div>
             <button onClick={() => {
               localStorage.removeItem('token');
               window.location.href = '/admin/login';
@@ -697,17 +764,30 @@ const ComprehensiveAdminDashboard = () => {
       <style>{`
         .comprehensive-admin {
           min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #667eea 100%);
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          position: relative;
+        }
+        .comprehensive-admin::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="%23ffffff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+          pointer-events: none;
+          z-index: 0;
         }
         .admin-header {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(20px);
+          background: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(25px);
           color: #1a202c;
-          padding: 1rem 0;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+          padding: 1.5rem 0;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.15);
           position: relative;
           z-index: 1000;
+          border-bottom: 1px solid rgba(255,255,255,0.2);
         }
         .admin-nav {
           max-width: 1400px;
@@ -754,20 +834,25 @@ const ComprehensiveAdminDashboard = () => {
           box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
         }
         .admin-container {
-          max-width: 1400px;
+          max-width: 1600px;
           margin: 0 auto;
           display: grid;
-          grid-template-columns: 280px 1fr;
-          gap: 2rem;
-          padding: 2rem;
+          grid-template-columns: 320px 1fr;
+          gap: 3rem;
+          padding: 3rem;
+          position: relative;
+          z-index: 1;
         }
         .admin-sidebar {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(20px);
-          border-radius: 20px;
-          padding: 2rem;
+          background: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(25px);
+          border-radius: 24px;
+          padding: 2.5rem;
           height: fit-content;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+          border: 1px solid rgba(255,255,255,0.3);
+          position: sticky;
+          top: 2rem;
         }
         .admin-menu {
           display: flex;
@@ -809,11 +894,14 @@ const ComprehensiveAdminDashboard = () => {
           transform: translateX(5px);
         }
         .admin-content {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(20px);
-          border-radius: 20px;
-          padding: 2rem;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          background: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(25px);
+          border-radius: 24px;
+          padding: 3rem;
+          box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+          border: 1px solid rgba(255,255,255,0.3);
+          position: relative;
+          z-index: 1;
         }
         .dashboard-grid {
           display: flex;
@@ -826,17 +914,22 @@ const ComprehensiveAdminDashboard = () => {
           gap: 2rem;
         }
         .stat-card {
-          background: rgba(255, 255, 255, 0.9);
-          backdrop-filter: blur(20px);
-          border-radius: 20px;
-          padding: 2rem;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(25px);
+          border-radius: 24px;
+          padding: 2.5rem;
+          box-shadow: 0 15px 35px rgba(0,0,0,0.12);
           display: flex;
           align-items: center;
-          gap: 1.5rem;
-          transition: all 0.3s ease;
+          gap: 2rem;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.4);
+        }
+        .stat-card:hover {
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 25px 50px rgba(0,0,0,0.2);
         }
         .stat-card::before {
           content: '';
@@ -845,7 +938,28 @@ const ComprehensiveAdminDashboard = () => {
           left: 0;
           right: 0;
           height: 4px;
-          background: linear-gradient(135deg, #d2691e, #ff8c00);
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          border-radius: 24px 24px 0 0;
+        }
+        .stat-card::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+          transform: rotate(45deg);
+          transition: all 0.6s ease;
+          opacity: 0;
+        }
+        .stat-card:hover::after {
+          opacity: 1;
+          animation: shimmer 1.5s ease-in-out;
+        }
+        @keyframes shimmer {
+          0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+          100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
         .stat-icon {
           width: 70px;
@@ -927,10 +1041,12 @@ const ComprehensiveAdminDashboard = () => {
           box-shadow: 0 0 0 3px rgba(210, 105, 30, 0.1);
         }
         .enhanced-table {
-          background: white;
-          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.98);
+          border-radius: 20px;
           overflow: hidden;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+          box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+          border: 1px solid rgba(255,255,255,0.3);
+          backdrop-filter: blur(10px);
         }
         .enhanced-table table {
           width: 100%;
@@ -978,23 +1094,41 @@ const ComprehensiveAdminDashboard = () => {
           gap: 0.5rem;
         }
         .btn-icon {
-          width: 36px;
-          height: 36px;
+          width: 40px;
+          height: 40px;
           border: none;
-          border-radius: 8px;
+          border-radius: 12px;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+        }
+        .btn-icon::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          background: rgba(255,255,255,0.3);
+          border-radius: 50%;
           transition: all 0.3s ease;
+          transform: translate(-50%, -50%);
+        }
+        .btn-icon:hover::before {
+          width: 100%;
+          height: 100%;
         }
         .btn-icon.btn-delete {
           background: #fef2f2;
           color: #dc2626;
         }
         .btn-icon:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+          transform: translateY(-3px) scale(1.05);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.25);
         }
         .admin-section {
           padding: 2rem;
@@ -1009,14 +1143,17 @@ const ComprehensiveAdminDashboard = () => {
           gap: 2rem;
         }
         .gallery-item {
-          background: white;
-          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.98);
+          border-radius: 16px;
           overflow: hidden;
-          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-          transition: transform 0.3s ease;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          border: 1px solid rgba(255,255,255,0.3);
+          backdrop-filter: blur(10px);
         }
         .gallery-item:hover {
-          transform: translateY(-5px);
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         .gallery-info {
           padding: 1rem;
@@ -1040,14 +1177,17 @@ const ComprehensiveAdminDashboard = () => {
           gap: 2rem;
         }
         .event-card {
-          background: white;
-          border-radius: 12px;
-          padding: 1.5rem;
-          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-          transition: transform 0.3s ease;
+          background: rgba(255, 255, 255, 0.98);
+          border-radius: 16px;
+          padding: 2rem;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          border: 1px solid rgba(255,255,255,0.3);
+          backdrop-filter: blur(10px);
         }
         .event-card:hover {
-          transform: translateY(-5px);
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         .event-header {
           display: flex;
@@ -1089,29 +1229,46 @@ const ComprehensiveAdminDashboard = () => {
           z-index: 1000;
         }
         .modal {
-          background: white;
-          border-radius: 20px;
-          padding: 2rem;
+          background: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(25px);
+          border-radius: 24px;
+          padding: 3rem;
           width: 90%;
-          max-width: 600px;
+          max-width: 700px;
           max-height: 90vh;
           overflow-y: auto;
-          box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+          box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+          border: 1px solid rgba(255,255,255,0.3);
+          position: relative;
+        }
+        .modal::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+          border-radius: 24px;
+          pointer-events: none;
         }
         .modal h3 {
           margin: 0 0 1.5rem 0;
           color: #1e293b;
         }
         .team-card {
-          background: white;
-          border-radius: 12px;
-          padding: 1.5rem;
+          background: rgba(255, 255, 255, 0.98);
+          border-radius: 16px;
+          padding: 2rem;
           text-align: center;
-          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-          transition: transform 0.3s ease;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          border: 1px solid rgba(255,255,255,0.3);
+          backdrop-filter: blur(10px);
         }
         .team-card:hover {
-          transform: translateY(-5px);
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         .team-card h4 {
           margin: 1rem 0 0.5rem 0;
@@ -1132,10 +1289,17 @@ const ComprehensiveAdminDashboard = () => {
           gap: 1.5rem;
         }
         .contact-card {
-          background: white;
-          border-radius: 12px;
-          padding: 1.5rem;
-          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          background: rgba(255, 255, 255, 0.98);
+          border-radius: 16px;
+          padding: 2rem;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+          border: 1px solid rgba(255,255,255,0.3);
+          backdrop-filter: blur(10px);
+          transition: all 0.3s ease;
+        }
+        .contact-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 15px 30px rgba(0,0,0,0.15);
         }
         .contact-header {
           display: flex;
@@ -1152,10 +1316,101 @@ const ComprehensiveAdminDashboard = () => {
           gap: 0.5rem;
           margin-top: 1rem;
         }
+        .btn-primary {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          padding: 0.875rem 2rem;
+          border-radius: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+          position: relative;
+          overflow: hidden;
+        }
+        .btn-primary::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transition: left 0.5s;
+        }
+        .btn-primary:hover::before {
+          left: 100%;
+        }
+        .btn-primary:hover {
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+        .btn-secondary {
+          background: rgba(255, 255, 255, 0.9);
+          color: #64748b;
+          border: 2px solid rgba(100, 116, 139, 0.2);
+          padding: 0.875rem 2rem;
+          border-radius: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          backdrop-filter: blur(10px);
+        }
+        .btn-secondary:hover {
+          background: rgba(100, 116, 139, 0.1);
+          border-color: rgba(100, 116, 139, 0.3);
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(100, 116, 139, 0.2);
+        }
+        .section-header {
+          background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+          border-radius: 16px;
+          padding: 1.5rem;
+          margin-bottom: 2rem;
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255,255,255,0.2);
+        }
+        .admin-logo img {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          border: 3px solid #d2691e;
+          box-shadow: 0 5px 15px rgba(210, 105, 30, 0.3);
+        }
+        .menu-item {
+          position: relative;
+          background: rgba(255, 255, 255, 0.05);
+          margin-bottom: 0.5rem;
+        }
+        .menu-item.active {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .search-box input {
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(10px);
+          border: 2px solid rgba(226, 232, 240, 0.5);
+        }
+        .search-box input:focus {
+          background: rgba(255, 255, 255, 0.95);
+          border-color: #667eea;
+          box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        .enhanced-table th {
+          background: linear-gradient(135deg, rgba(248, 250, 252, 0.9), rgba(226, 232, 240, 0.9));
+          backdrop-filter: blur(10px);
+        }
+        .enhanced-table tr:hover {
+          background: rgba(102, 126, 234, 0.05);
+          transform: scale(1.01);
+          transition: all 0.2s ease;
+        }
         @media (max-width: 768px) {
           .admin-container {
             grid-template-columns: 1fr;
-            padding: 1rem;
+            padding: 1.5rem;
+            gap: 2rem;
           }
           .stats-grid {
             grid-template-columns: 1fr;
@@ -1166,6 +1421,13 @@ const ComprehensiveAdminDashboard = () => {
           }
           .search-box {
             min-width: auto;
+          }
+          .admin-content {
+            padding: 2rem;
+          }
+          .modal {
+            padding: 2rem;
+            width: 95%;
           }
         }
       `}</style>
