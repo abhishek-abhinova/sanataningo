@@ -49,66 +49,7 @@ const ComprehensiveAdminDashboard = () => {
     }
   }, [isAuthenticated]);
   
-  const handleDirectUpload = async (e) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
 
-    const uploadData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      uploadData.append('images', files[i]);
-    }
-    uploadData.append('category', 'general');
-    uploadData.append('caption', 'Gallery Image');
-
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/gallery/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: uploadData
-      });
-      const result = await response.json();
-      if (result.success) {
-        toast.success(`${files.length} image(s) uploaded successfully!`);
-        await fetchData('/admin/gallery', 'gallery');
-      }
-    } catch (error) {
-      console.error('Upload failed:', error);
-      toast.error('Upload failed');
-    }
-  };
-
-  const handleVideoUpload = async (e) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    for (const file of files) {
-      const uploadData = new FormData();
-      uploadData.append('video', file);
-      uploadData.append('category', 'general');
-      uploadData.append('caption', file.name.replace(/\.[^/.]+$/, ''));
-
-      try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/gallery/upload-video`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: uploadData
-        });
-        const result = await response.json();
-        if (result.success) {
-          toast.success(`Video "${file.name}" uploaded successfully!`);
-        }
-      } catch (error) {
-        console.error('Video upload failed:', error);
-        toast.error(`Failed to upload ${file.name}`);
-      }
-    }
-    
-    await fetchData('/admin/gallery', 'gallery');
-  };
 
   const generateIdCard = async (member) => {
     try {
@@ -359,41 +300,32 @@ const ComprehensiveAdminDashboard = () => {
       <div className="section-header">
         <h2><i className="fas fa-images"></i> Gallery Management</h2>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleDirectUpload}
-            style={{ display: 'none' }}
-            id="gallery-upload"
-          />
-          <input
-            type="file"
-            accept="video/*"
-            multiple
-            onChange={handleVideoUpload}
-            style={{ display: 'none' }}
-            id="video-upload"
-          />
-          <label htmlFor="gallery-upload" className="btn-primary" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button 
+            onClick={() => setEditingItem({ type: 'gallery', data: { type: 'photo' } })} 
+            className="btn-primary" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
             <i className="fas fa-plus"></i> Add Images
-          </label>
-          <label htmlFor="video-upload" style={{ 
-            cursor: 'pointer', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.5rem',
-            padding: '0.75rem 1.5rem',
-            background: 'linear-gradient(135deg, #28a745, #20c997)',
-            color: 'white',
-            borderRadius: '8px',
-            fontWeight: '600',
-            border: 'none',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 15px rgba(40, 167, 69, 0.3)'
-          }}>
+          </button>
+          <button 
+            onClick={() => setEditingItem({ type: 'gallery', data: { type: 'video' } })} 
+            style={{ 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              padding: '0.75rem 1.5rem',
+              background: 'linear-gradient(135deg, #28a745, #20c997)',
+              color: 'white',
+              borderRadius: '8px',
+              fontWeight: '600',
+              border: 'none',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(40, 167, 69, 0.3)'
+            }}
+          >
             <i className="fas fa-video"></i> Add Videos
-          </label>
+          </button>
         </div>
       </div>
       
@@ -418,7 +350,14 @@ const ComprehensiveAdminDashboard = () => {
         )) : []}
       </div>
       
-
+      {editingItem?.type === 'gallery' && (
+        <div className="modal-overlay" onClick={() => setEditingItem(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{editingItem.data._id ? 'Edit' : 'Add'} Gallery Item</h3>
+            <GalleryForm data={editingItem.data} onSave={(data) => saveGalleryItem(data)} onCancel={() => setEditingItem(null)} />
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 
@@ -640,6 +579,20 @@ const ComprehensiveAdminDashboard = () => {
     } catch (error) {
       console.error(`Save ${type} error:`, error);
       toast.error(`Failed to save ${type}`);
+    }
+  };
+
+  const saveGalleryItem = async (data) => {
+    try {
+      const endpoint = data._id ? `/admin/gallery/${data._id}` : '/admin/gallery';
+      const method = data._id ? 'put' : 'post';
+      await api[method](endpoint, data);
+      toast.success(`Gallery item ${data._id ? 'updated' : 'created'} successfully`);
+      setEditingItem(null);
+      await fetchData('/admin/gallery', 'gallery');
+    } catch (error) {
+      console.error('Save gallery error:', error);
+      toast.error('Failed to save gallery item');
     }
   };
 
@@ -1225,86 +1178,105 @@ const GalleryForm = ({ data, onSave, onCancel }) => {
     description: data.description || '',
     image: data.image || data.file || '',
     type: data.type || 'photo',
-    category: data.category || 'general'
+    category: data.category || 'general',
+    featured: data.featured || false
   });
   const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  const handleFileUpload = async (e) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    setUploading(true);
-    const uploadData = new FormData();
-    
-    for (let i = 0; i < files.length; i++) {
-      uploadData.append('images', files[i]);
-    }
-    uploadData.append('category', formData.category);
-    uploadData.append('caption', formData.title);
-
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/gallery/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: uploadData
-      });
-      const result = await response.json();
-      if (result.success) {
-        if (result.data && result.data.length > 0) {
-          setFormData(prev => ({ ...prev, image: result.data[0].image }));
-        }
-        // Immediately refresh gallery data
-        fetchData('/admin/gallery', 'gallery');
-        toast.success('Images uploaded successfully!');
-      }
-    } catch (error) {
-      console.error('Upload failed:', error);
-    } finally {
-      setUploading(false);
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setFormData(prev => ({ ...prev, image: previewUrl }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({ ...data, ...formData });
+    
+    if (!formData.title.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+
+    if (!selectedFile && !data._id) {
+      toast.error('Please select a file');
+      return;
+    }
+
+    setUploading(true);
+    
+    try {
+      let imageUrl = formData.image;
+      
+      // Upload file if new file is selected
+      if (selectedFile) {
+        const uploadData = new FormData();
+        
+        if (formData.type === 'video') {
+          uploadData.append('video', selectedFile);
+        } else {
+          uploadData.append('images', selectedFile);
+        }
+        
+        uploadData.append('title', formData.title);
+        uploadData.append('description', formData.description);
+        uploadData.append('category', formData.category);
+        uploadData.append('featured', formData.featured);
+
+        const uploadEndpoint = formData.type === 'video' 
+          ? '/api/admin/gallery/upload-video'
+          : '/api/admin/gallery/upload';
+
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}${uploadEndpoint}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: uploadData
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+          toast.success(`${formData.type === 'video' ? 'Video' : 'Image'} uploaded successfully!`);
+          onSave(result.data);
+          return;
+        } else {
+          throw new Error(result.message || 'Upload failed');
+        }
+      } else {
+        // Update existing item without file change
+        onSave({ ...data, ...formData });
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      toast.error('Failed to upload file');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <input
         type="text"
-        placeholder="Title"
+        placeholder="Title *"
         value={formData.title}
         onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
         required
         style={{ padding: '0.75rem', border: '2px solid #e2e8f0', borderRadius: '8px' }}
       />
+      
       <textarea
         placeholder="Description"
         value={formData.description}
         onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
         style={{ padding: '0.75rem', border: '2px solid #e2e8f0', borderRadius: '8px', minHeight: '100px' }}
       />
-      <input
-        type="file"
-        accept="image/*"
-        multiple
-        onChange={handleFileUpload}
-        style={{ padding: '0.75rem', border: '2px solid #e2e8f0', borderRadius: '8px', width: '100%' }}
-      />
-      {uploading && <p style={{ color: '#666' }}>Uploading...</p>}
-      {formData.image && (
-        <div style={{ marginTop: '1rem' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#666' }}>Preview:</p>
-          <img 
-            src={formData.image.startsWith('http') ? formData.image : `${process.env.REACT_APP_BACKEND_URL}${formData.image}`} 
-            alt="Preview" 
-            style={{ width: '200px', height: '150px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #e2e8f0' }} 
-          />
-        </div>
-      )}
+      
       <select
         value={formData.category}
         onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
@@ -1318,9 +1290,88 @@ const GalleryForm = ({ data, onSave, onCancel }) => {
         <option value="festival">Festival</option>
         <option value="featured">Featured</option>
       </select>
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-        <button type="button" onClick={onCancel} className="btn-secondary">Cancel</button>
-        <button type="submit" className="btn-primary">Save</button>
+      
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <input
+          type="checkbox"
+          id="featured"
+          checked={formData.featured}
+          onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
+        />
+        <label htmlFor="featured" style={{ fontWeight: '600', color: '#333' }}>Featured Item</label>
+      </div>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <label style={{ fontWeight: '600', color: '#333' }}>
+          {formData.type === 'video' ? 'Select Video File *' : 'Select Image File *'}
+        </label>
+        <input
+          type="file"
+          accept={formData.type === 'video' ? 'video/*' : 'image/*'}
+          onChange={handleFileSelect}
+          required={!data._id}
+          style={{
+            padding: '12px',
+            border: '2px dashed #d2691e',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            background: '#fafbfc'
+          }}
+        />
+      </div>
+      
+      {uploading && <p style={{ color: '#666', textAlign: 'center' }}>Uploading...</p>}
+      
+      {formData.image && (
+        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#666' }}>Preview:</p>
+          {formData.type === 'video' ? (
+            <video 
+              src={formData.image} 
+              style={{ width: '200px', height: '150px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #e2e8f0' }}
+              controls
+            />
+          ) : (
+            <img 
+              src={formData.image.startsWith('blob:') ? formData.image : (formData.image.startsWith('http') ? formData.image : `${process.env.REACT_APP_BACKEND_URL}${formData.image}`)} 
+              alt="Preview" 
+              style={{ width: '200px', height: '150px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #e2e8f0' }} 
+            />
+          )}
+        </div>
+      )}
+      
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+        <button 
+          type="button" 
+          onClick={onCancel} 
+          style={{
+            padding: '0.75rem 1.5rem',
+            border: '2px solid #e2e8f0',
+            borderRadius: '8px',
+            background: 'white',
+            color: '#64748b',
+            cursor: 'pointer',
+            fontWeight: '600'
+          }}
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          disabled={uploading}
+          style={{
+            padding: '0.75rem 1.5rem',
+            background: uploading ? '#ccc' : 'linear-gradient(135deg, #d2691e, #ff8c00)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: uploading ? 'not-allowed' : 'pointer',
+            fontWeight: '600'
+          }}
+        >
+          {uploading ? 'Uploading...' : (data._id ? 'Update' : 'Upload')}
+        </button>
       </div>
     </form>
   );

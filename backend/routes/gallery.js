@@ -97,10 +97,14 @@ router.post('/upload', auth, async (req, res) => {
   try {
     // Handle multer upload
     if (multer && galleryUpload) {
-      galleryUpload.array('images', 10)(req, res, async (err) => {
+      galleryUpload.single('images')(req, res, async (err) => {
         if (err) {
           console.error('Multer error:', err);
           return res.status(400).json({ success: false, message: err.message });
+        }
+        // Convert single file to array format for consistency
+        if (req.file) {
+          req.files = [req.file];
         }
         await handleImageUpload(req, res);
       });
@@ -117,19 +121,19 @@ router.post('/upload', auth, async (req, res) => {
 const handleImageUpload = async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
-    const { category = 'general', caption = '', title = 'Gallery Item' } = req.body;
+    const { category = 'general', description = '', title = 'Gallery Item', featured = false } = req.body;
     
     // Handle case when no files are uploaded but we want to create a gallery item
     if (!req.files || req.files.length === 0) {
       // Create a placeholder gallery item
       const galleryItem = new Gallery({
-        title: title || caption || 'New Gallery Item',
-        description: caption || 'Gallery item created from admin',
+        title: title || 'New Gallery Item',
+        description: description || 'Gallery item created from admin',
         image: '/images/placeholder.jpg',
         category,
         type: 'photo',
         published: true,
-        showOnHomepage: category === 'featured',
+        showOnHomepage: category === 'featured' || featured === 'true' || featured === true,
         order: 0
       });
       
@@ -139,13 +143,15 @@ const handleImageUpload = async (req, res) => {
       return res.json({
         success: true,
         message: 'Gallery item created successfully',
-        data: [galleryItem]
+        data: galleryItem
       });
     }
 
+    // For single file upload (from form)
+    const files = req.files.length ? req.files : [req.files.images].filter(Boolean);
     const uploadedImages = [];
     
-    for (const file of req.files) {
+    for (const file of files) {
       const imageUrl = `/uploads/gallery/${file.filename}`;
       
       // Check for duplicate
@@ -155,13 +161,13 @@ const handleImageUpload = async (req, res) => {
       }
       
       const galleryItem = new Gallery({
-        title: title || caption || file.originalname,
-        description: caption,
+        title: title || file.originalname,
+        description: description || '',
         image: imageUrl,
         category,
         type: 'photo',
         published: true,
-        showOnHomepage: category === 'featured',
+        showOnHomepage: category === 'featured' || featured === 'true' || featured === true,
         order: 0
       });
       
@@ -169,13 +175,16 @@ const handleImageUpload = async (req, res) => {
       uploadedImages.push(galleryItem);
     }
 
+    // Return single item if only one was uploaded
+    const result = uploadedImages.length === 1 ? uploadedImages[0] : uploadedImages;
+
     // Broadcast update
     broadcastUpdate(req, 'gallery', { action: 'create', items: uploadedImages });
 
     res.json({
       success: true,
       message: `${uploadedImages.length} image(s) uploaded successfully`,
-      data: uploadedImages,
+      data: result,
       urls: uploadedImages.map(img => `${process.env.FRONTEND_URL || 'http://localhost:5000'}${img.image}`)
     });
   } catch (error) {
@@ -187,8 +196,29 @@ const handleImageUpload = async (req, res) => {
 // Upload video
 router.post('/upload-video', auth, async (req, res) => {
   try {
+    // Handle multer upload for video
+    if (multer && videoUpload) {
+      videoUpload.single('video')(req, res, async (err) => {
+        if (err) {
+          console.error('Video multer error:', err);
+          return res.status(400).json({ success: false, message: err.message });
+        }
+        await handleVideoUpload(req, res);
+      });
+    } else {
+      // Fallback without file upload
+      await handleVideoUpload(req, res);
+    }
+  } catch (error) {
+    console.error('Video upload route error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+const handleVideoUpload = async (req, res) => {
+  try {
     const Gallery = require('../models/Gallery');
-    const { category = 'general', caption = '', youtubeUrl, title = 'Video' } = req.body;
+    const { category = 'general', description = '', youtubeUrl, title = 'Video', featured = false } = req.body;
     
     let videoUrl;
     
@@ -202,13 +232,13 @@ router.post('/upload-video', auth, async (req, res) => {
     }
 
     const galleryItem = new Gallery({
-      title: title || caption || 'Video',
-      description: caption || 'Video uploaded from admin',
+      title: title || 'Video',
+      description: description || 'Video uploaded from admin',
       image: videoUrl,
       category,
       type: 'video',
       published: true,
-      showOnHomepage: category === 'featured',
+      showOnHomepage: category === 'featured' || featured === 'true' || featured === true,
       order: 0
     });
     
@@ -225,7 +255,7 @@ router.post('/upload-video', auth, async (req, res) => {
     console.error('Video upload error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
-});
+};
 
 // Get all gallery items (Admin)
 router.get('/', auth, async (req, res) => {
@@ -262,15 +292,49 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// Create new gallery item (without file upload)
+router.post('/', auth, async (req, res) => {
+  try {
+    const Gallery = require('../models/Gallery');
+    const { title, description, category, type = 'photo', featured = false } = req.body;
+    
+    const galleryItem = new Gallery({
+      title,
+      description,
+      image: '/images/placeholder.jpg',
+      category,
+      type,
+      published: true,
+      showOnHomepage: category === 'featured' || featured,
+      order: 0
+    });
+    
+    await galleryItem.save();
+    broadcastUpdate(req, 'gallery', { action: 'create', item: galleryItem });
+    
+    res.json({
+      success: true,
+      message: 'Gallery item created successfully',
+      data: galleryItem
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Update gallery item
 router.put('/:id', auth, async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
-    const { title, description, category, published, showOnHomepage } = req.body;
+    const { title, description, category, published, showOnHomepage, featured } = req.body;
+    
+    const updateData = { title, description, category, published };
+    if (showOnHomepage !== undefined) updateData.showOnHomepage = showOnHomepage;
+    if (featured !== undefined) updateData.showOnHomepage = featured;
     
     const galleryItem = await Gallery.findByIdAndUpdate(
       req.params.id,
-      { title, description, category, published, showOnHomepage },
+      updateData,
       { new: true }
     );
     
