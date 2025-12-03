@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: sarboshakti-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: ORG_NAME
+        value: Sarboshakti Sanatani Sangathan
+      - key: ORG_ADDRESS
+        value: K-11, S/F, Gali No. 6, Old Gobind Pura, Delhi — 110051, India
+      - key: ORG_EMAIL
+        sync: false
+      - key: ORG_PHONE
+        value: +91 9876543210

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head><title>Server Status Test</title></head>
+<body>
+<h1>Testing Render Server Status</h1>
+<button onclick="testServer()">Test Server</button>
+<div id="result"></div>
+
+<script>
+async function testServer() {
+  const result = document.getElementById('result');
+  result.innerHTML = 'Testing...';
+  
+  try {
+    const response = await fetch('https://sanataningo.onrender.com/api/health');
+    if (response.ok) {
+      const data = await response.json();
+      result.innerHTML = `<h3 style="color:green">✅ Server is UP</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+    } else {
+      result.innerHTML = `<h3 style="color:red">❌ Server Error: ${response.status}</h3>`;
+    }
+  } catch (error) {
+    result.innerHTML = `<h3 style="color:red">❌ Server DOWN</h3><p>${error.message}</p>
+    <p><strong>Possible issues:</strong></p>
+    <ul>
+      <li>Render service is sleeping (free tier)</li>
+      <li>Deployment failed</li>
+      <li>Environment variables missing</li>
+      <li>Build errors</li>
+    </ul>`;
+  }
+}
+</script>
+</body>
+</html>

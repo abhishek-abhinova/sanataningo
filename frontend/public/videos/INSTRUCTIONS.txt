@@ -1,0 +1,33 @@
+HOW TO ADD VIDEOS TO GALLERY
+============================
+
+1. Add your MP4 video files to this directory with these exact names:
+   - community-service.mp4
+   - cultural-event.mp4
+   - educational-program.mp4
+   - spiritual-gathering.mp4
+   - featured-documentary.mp4
+
+2. Video Requirements:
+   - Format: MP4
+   - Resolution: 720p or higher
+   - File size: Under 50MB recommended
+   - Include audio for full experience
+
+3. The gallery will automatically detect and play these videos with full controls including:
+   - Play/Pause
+   - Volume control with sound
+   - Fullscreen mode
+   - Progress bar
+   - Duration display
+
+4. If videos are not available, placeholder content will be shown.
+
+5. Poster images are already created in /images/ directory:
+   - video-poster1.jpg (for community-service.mp4)
+   - video-poster2.jpg (for cultural-event.mp4)
+   - video-poster3.jpg (for educational-program.mp4)
+   - video-poster4.jpg (for spiritual-gathering.mp4)
+   - featured-video-poster.jpg (for featured-documentary.mp4)
+
+Simply drop your MP4 files here and refresh the website to see them in the gallery!

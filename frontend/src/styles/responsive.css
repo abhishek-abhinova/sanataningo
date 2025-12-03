@@ -1,0 +1,319 @@
+/* Responsive Design for All Pages */
+
+/* Mobile First Approach */
+@media (max-width: 768px) {
+  /* Global Responsive */
+  .container {
+    padding: 0 1rem !important;
+    max-width: 100% !important;
+  }
+
+  /* Navigation */
+  .navbar {
+    padding: 0.5rem 1rem !important;
+  }
+
+  .navbar .nav-links {
+    display: none !important;
+  }
+
+  .navbar .mobile-menu {
+    display: block !important;
+  }
+
+  /* Hero Section */
+  .hero {
+    min-height: 70vh !important;
+    padding: 2rem 0 !important;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .hero-content h2 {
+    font-size: 1.2rem !important;
+  }
+
+  .hero-content p {
+    font-size: 0.9rem !important;
+  }
+
+  .hero-stats {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .hero-buttons {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .hero-buttons .btn {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* Content Sections */
+  .content-section {
+    padding: 3rem 0 !important;
+  }
+
+  .content-section h2 {
+    font-size: 1.8rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Founders/Trustees Grid */
+  .founders-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  .founder-card {
+    padding: 1.5rem !important;
+  }
+
+  .founder-card h3 {
+    font-size: 1.2rem !important;
+  }
+
+  .founder-card p {
+    font-size: 0.9rem !important;
+  }
+
+  /* Team Grid */
+  .team-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 1rem !important;
+  }
+
+  .team-member img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .team-member h4 {
+    font-size: 0.9rem !important;
+  }
+
+  /* Forms */
+  .form-container {
+    padding: 1.5rem !important;
+    margin: 1rem !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.8rem 1.5rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* Gallery */
+  .gallery-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .gallery-item {
+    height: 200px !important;
+  }
+
+  /* Activities */
+  .activities-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  .activity-card {
+    padding: 1.5rem !important;
+  }
+
+  /* Footer */
+  .footer-content {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+    text-align: center !important;
+  }
+
+  .footer-section h3 {
+    font-size: 1.1rem !important;
+  }
+
+  .footer-section ul li {
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Admin Dashboard Mobile */
+  .admin-sidebar {
+    width: 100% !important;
+    transform: translateX(-100%) !important;
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  .admin-main {
+    margin-left: 0 !important;
+  }
+
+  .admin-topbar {
+    padding: 1rem !important;
+  }
+
+  .admin-topbar h1 {
+    font-size: 1.3rem !important;
+  }
+
+  .admin-stats {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .admin-table {
+    font-size: 0.8rem !important;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.5rem !important;
+  }
+}
+
+/* Tablet Responsive */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding: 0 2rem !important;
+  }
+
+  .hero-content h1 {
+    font-size: 2.5rem !important;
+  }
+
+  .founders-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .team-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  }
+
+  .activities-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .footer-content {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Desktop Responsive */
+@media (min-width: 1025px) {
+  .container {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 2rem !important;
+  }
+
+  .founders-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  .team-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  }
+
+  .activities-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .footer-content {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  .admin-stats {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1400px !important;
+  }
+
+  .admin-stats {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+/* Utility Classes */
+.mobile-only {
+  display: none !important;
+}
+
+.desktop-only {
+  display: block !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block !important;
+  }
+  
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+/* Text Responsive */
+@media (max-width: 768px) {
+  h1 { font-size: 1.8rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  h3 { font-size: 1.2rem !important; }
+  h4 { font-size: 1rem !important; }
+  p { font-size: 0.9rem !important; }
+}
+
+/* Image Responsive */
+img {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Table Responsive */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  table {
+    min-width: 600px !important;
+  }
+}
