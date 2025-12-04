@@ -107,6 +107,7 @@ try {
   app.use('/api', realtimeRoutes);
   app.use('/api/test', testEmailRoutes);
   app.use('/api/simple-email', require('./routes/test-simple-email'));
+  app.use('/api/render-email', require('./routes/test-render-email'));
 
   console.log('✅ All routes loaded successfully');
 } catch (error) {
