@@ -34,7 +34,7 @@ const createTransporter = () => {
       pool: opts.pool
     });
 
-    return nodemailer.createTransporter(opts);
+    return nodemailer.createTransport(opts);
   } catch (err) {
     console.error('❌ Failed to create transporter:', err);
     throw err;
