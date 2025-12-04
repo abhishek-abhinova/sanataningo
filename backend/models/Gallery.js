@@ -7,6 +7,7 @@ class Gallery {
       title,
       description,
       image_url,
+      image_data,
       thumbnail_url,
       category,
       display_order = 0,
@@ -15,12 +16,12 @@ class Gallery {
     } = galleryData;
 
     const query = `
-      INSERT INTO gallery (title, description, image_url, thumbnail_url, category, display_order, is_active, uploaded_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO gallery (title, description, image_url, image_data, thumbnail_url, category, display_order, is_active, uploaded_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const [result] = await promisePool.query(query, [
-      title, description, image_url, thumbnail_url, category, display_order, is_active, uploaded_by
+      title, description, image_url, image_data, thumbnail_url, category, display_order, is_active, uploaded_by
     ]);
 
     return this.findById(result.insertId);
@@ -65,7 +66,7 @@ class Gallery {
     const updates = [];
     const values = [];
 
-    const allowedFields = ['title', 'description', 'image_url', 'thumbnail_url', 'category', 'display_order', 'is_active'];
+    const allowedFields = ['title', 'description', 'image_url', 'image_data', 'thumbnail_url', 'category', 'display_order', 'is_active'];
 
     allowedFields.forEach(field => {
       if (galleryData[field] !== undefined) {

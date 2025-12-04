@@ -91,6 +91,7 @@ try {
   const eventsRoutes = require('./routes/events');
   const activitiesRoutes = require('./routes/activities');
   const hostingerUploadRoutes = require('./routes/hostinger-upload');
+  const databaseUploadRoutes = require('./routes/database-upload');
 
   // Use routes
   app.use('/api/auth', authRoutes);
@@ -102,6 +103,7 @@ try {
   app.use('/api/media', mediaRoutes);
   app.use('/api/gallery', galleryRoutes);
   app.use('/api/hostinger', hostingerUploadRoutes);
+  app.use('/api/database', databaseUploadRoutes);
   app.use('/api', realtimeRoutes);
   app.use('/api/test', testEmailRoutes);
 
