@@ -1,0 +1,7 @@
+# Team Photos
+
+Team member profile photos are stored here.
+
+## Usage:
+- Team member profile images uploaded via admin
+- Accessible at: `/uploads/team/filename.jpg`

@@ -1,0 +1,7 @@
+# Video Files
+
+Uploaded video files are stored here.
+
+## Usage:
+- Video files uploaded via admin dashboard
+- Accessible at: `/uploads/videos/filename.mp4`

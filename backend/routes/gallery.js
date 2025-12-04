@@ -42,7 +42,7 @@ const videoStorage = multer.diskStorage({
 
 const galleryUpload = multer({
   storage: galleryStorage,
-  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -58,7 +58,7 @@ const galleryUpload = multer({
 
 const videoUpload = multer({
   storage: videoStorage,
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = /mp4|webm|avi|mov/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());

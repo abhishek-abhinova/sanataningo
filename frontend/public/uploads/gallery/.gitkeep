@@ -1,0 +1,8 @@
+# Gallery Images
+
+Admin uploaded gallery images are stored here.
+
+## Usage:
+- Images uploaded via admin dashboard
+- Accessible at: `/uploads/gallery/filename.jpg`
+- Production URL: `https://sarboshaktisonatanisangathan.org/uploads/gallery/`

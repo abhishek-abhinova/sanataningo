@@ -1,0 +1,7 @@
+# Aadhaar Documents
+
+Member Aadhaar document images are stored here.
+
+## Usage:
+- Front and back Aadhaar images from membership applications
+- Accessible at: `/uploads/aadhaar/filename.jpg`
