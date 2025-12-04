@@ -286,30 +286,10 @@ const Home = () => {
             viewport={{ once: true }}
             style={{ textAlign: 'center', color: '#ff6b35', marginBottom: '3rem' }}
           >
-            Our Team ({teamMembers.filter(m => m.showInTeam !== false).length + (teamMembers.length === 0 ? 19 : 0)} Members)
+            Our Team ({teamMembers.filter(m => m.is_active !== false).length} Members)
           </motion.h2>
           <div className="team-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
-            {(teamMembers.length > 0 ? teamMembers.filter(m => m.is_active !== false && m.showInTeam !== false) : [
-              { name: 'Shri Amiyo Govinda Biswas', image: '/images/amiyo-govinda-biswas.jpeg' },
-              { name: 'Shri Pratap Malik', image: '/images/pratap-malik.jpeg' },
-              { name: 'Shri Tarak Chandra Pal', image: '/images/tarak-chandra-pal.jpeg' },
-              { name: 'Dr. Uttam Kumar Biswas', image: '/images/dr.-uttam-kumar-biswas.jpeg' },
-              { name: 'Shri Bijan Biswas', image: '/images/bijan-biswas.jpeg' },
-              { name: 'Shri Arun Kumar Biswas', image: '/images/arun-kumar-biswas.jpeg' },
-              { name: 'Shri Sudin Biswas', image: '/images/sudin-biswas-noida.jpeg' },
-              { name: 'Shri Aleep Biswas', image: '/images/aleep-biswas.jpeg' },
-              { name: 'Shri Shyamlal Chaudhary', image: '/images/Shyamlalchaudhary.jpeg' },
-              { name: 'Dr. Shyama Shree Chaki', image: 'images/drshyamasreechaki.jpeg' },
-              { name: 'Shri Pronit Roy', image: '/images/pronit-roy.jpeg' },
-              { name: 'Shri Mrinal Biswas', image: '/images/mrinal-kanti-biswas.jpeg' },
-              { name: 'Shri Deepu Sarkar', image: '/images/mr.-deepu-sarkar.jpeg' },
-              { name: 'Shri Neuton Roy', image: '/images/neuton-roy.jpeg' },
-              { name: 'Shri Somenath Biswas', image: '/images/mr-somenath-biswas.jpeg' },
-              { name: 'Shri Bijon Kumar Biswas', image: '/images/bijon-kumar-biswas-delhi.jpeg' },
-              { name: 'Shri Subash Biswas Somendra', image: '/images/subhash-kumar.jpeg' },
-              { name: 'Shri Somendra Srivastava', image: '/images/somendra-srivastava.jpeg' },
-              { name: 'Robin Kumar Ranjit Biswas ', image: 'images/robin-kumar-ranjit-biswas.jpeg' }
-            ]).map((member, index) => (
+            {teamMembers.filter(m => m.is_active !== false).map((member, index) => (
               <motion.div
                 key={index}
                 className="team-member"

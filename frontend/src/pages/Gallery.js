@@ -8,21 +8,7 @@ const Gallery = () => {
   const [galleryData, setGalleryData] = useState({ photos: [], videos: [] });
   const [loading, setLoading] = useState(true);
 
-  // Fallback data
-  const fallbackPhotos = [
-    { id: 1, image: '/images/gallery/photo1.jpg', title: 'Community Service', category: 'service', type: 'photo' },
-    { id: 2, image: '/images/gallery/photo2.jpg', title: 'Cultural Program', category: 'cultural', type: 'photo' },
-    { id: 3, image: '/images/gallery/photo3.jpg', title: 'Educational Initiative', category: 'education', type: 'photo' },
-    { id: 4, image: '/images/gallery/photo4.jpg', title: 'Health Camp', category: 'healthcare', type: 'photo' },
-    { id: 5, image: '/images/gallery/photo5.jpg', title: 'Youth Program', category: 'youth', type: 'photo' },
-    { id: 6, image: '/images/gallery/photo6.jpg', title: 'Spiritual Gathering', category: 'spiritual', type: 'photo' }
-  ];
 
-  const fallbackVideos = [
-    { id: 1, image: '/videos/1.mp4', title: 'Sanatan Dharma Awareness Program', category: 'spiritual', duration: '3:45', type: 'video' },
-    { id: 2, image: '/videos/2.mp4', title: 'Community Health Camp Initiative', category: 'service', duration: '5:20', type: 'video' },
-    { id: 3, image: '/videos/3.mp4', title: 'Educational Scholarship Distribution', category: 'education', duration: '4:15', type: 'video' }
-  ];
 
   useEffect(() => {
     fetchGalleryData();
@@ -35,20 +21,20 @@ const Gallery = () => {
       const apiData = Array.isArray(response.data.gallery) ? response.data.gallery : [];
       
       // Separate photos and videos from API
-      const apiPhotos = apiData.filter(item => item.type === 'photo');
+      const apiPhotos = apiData.filter(item => item.type === 'photo' || !item.type);
       const apiVideos = apiData.filter(item => item.type === 'video');
       
-      // Combine API data with fallback data (only use fallback when API has none)
+      // Use only database data
       setGalleryData({
-        photos: apiPhotos.length > 0 ? apiPhotos : fallbackPhotos,
-        videos: apiVideos.length > 0 ? apiVideos : fallbackVideos
+        photos: apiPhotos,
+        videos: apiVideos
       });
     } catch (error) {
       console.error('Failed to fetch gallery:', error);
-      // Use fallback data on error
+      // Use empty arrays on error
       setGalleryData({
-        photos: fallbackPhotos,
-        videos: fallbackVideos
+        photos: [],
+        videos: []
       });
     } finally {
       setLoading(false);

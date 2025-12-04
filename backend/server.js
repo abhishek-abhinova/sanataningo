@@ -92,6 +92,7 @@ try {
   const activitiesRoutes = require('./routes/activities');
   const hostingerUploadRoutes = require('./routes/hostinger-upload');
   const databaseUploadRoutes = require('./routes/database-upload');
+  const publicTeamRoutes = require('./routes/public-team');
 
   // Use routes
   app.use('/api/auth', authRoutes);
@@ -100,6 +101,10 @@ try {
   app.use('/api/donations', donationRoutes);
   app.use('/api/contact', contactRoutes);
   app.use('/api/public', publicRoutes);
+  app.use('/api/public', publicTeamRoutes);
+  app.use('/api/team', teamRoutes);
+  app.use('/api/events', eventsRoutes);
+  app.use('/api/activities', activitiesRoutes);
   app.use('/api/media', mediaRoutes);
   app.use('/api/gallery', galleryRoutes);
   app.use('/api/hostinger', hostingerUploadRoutes);

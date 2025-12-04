@@ -6,9 +6,10 @@ const router = express.Router();
 // Get all team members (Admin)
 router.get('/', auth, async (req, res) => {
   try {
-    const team = await Team.find().sort({ order: 1, createdAt: -1 });
+    const team = await Team.findAll({ is_active: true });
     res.json({ success: true, team });
   } catch (error) {
+    console.error('Team fetch error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -16,10 +17,10 @@ router.get('/', auth, async (req, res) => {
 // Create team member (Admin)
 router.post('/', auth, async (req, res) => {
   try {
-    const team = new Team(req.body);
-    await team.save();
+    const team = await Team.create(req.body);
     res.json({ success: true, team });
   } catch (error) {
+    console.error('Team create error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -27,9 +28,10 @@ router.post('/', auth, async (req, res) => {
 // Update team member (Admin)
 router.put('/:id', auth, async (req, res) => {
   try {
-    const team = await Team.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const team = await Team.update(req.params.id, req.body);
     res.json({ success: true, team });
   } catch (error) {
+    console.error('Team update error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -37,9 +39,10 @@ router.put('/:id', auth, async (req, res) => {
 // Delete team member (Admin)
 router.delete('/:id', auth, async (req, res) => {
   try {
-    await Team.findByIdAndDelete(req.params.id);
+    await Team.delete(req.params.id);
     res.json({ success: true, message: 'Team member deleted' });
   } catch (error) {
+    console.error('Team delete error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -48,10 +51,13 @@ router.delete('/:id', auth, async (req, res) => {
 router.put('/:id/toggle-visibility', auth, async (req, res) => {
   try {
     const team = await Team.findById(req.params.id);
-    team.showInTeam = !team.showInTeam;
-    await team.save();
-    res.json({ success: true, team });
+    if (!team) {
+      return res.status(404).json({ error: 'Team member not found' });
+    }
+    const updatedTeam = await Team.update(req.params.id, { is_active: !team.is_active });
+    res.json({ success: true, team: updatedTeam });
   } catch (error) {
+    console.error('Team toggle error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -74,6 +80,7 @@ router.post('/:id/send-card', auth, async (req, res) => {
       message: `ID card sent to ${team.email}` 
     });
   } catch (error) {
+    console.error('Team send card error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
