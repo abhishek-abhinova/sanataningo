@@ -24,21 +24,17 @@ const createTransporter = () => {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
       },
-      pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-      greetingTimeout: 120000, // 2 minutes
-      connectionTimeout: 120000, // 2 minutes
-      socketTimeout: 120000, // 2 minutes
+      pool: false, // Disable pooling to avoid timeout issues
+      greetingTimeout: 60000, // 1 minute
+      connectionTimeout: 60000, // 1 minute
+      socketTimeout: 60000, // 1 minute
       tls: { 
         rejectUnauthorized: false,
-        ciphers: 'SSLv3',
-        minVersion: 'TLSv1'
+        ciphers: 'SSLv3'
       },
-      dnsTimeout: 30000,
-      requireTLS: false,
-      debug: process.env.NODE_ENV === 'development', // Enable debug in development
-      logger: process.env.NODE_ENV === 'development' // Enable logger in development
+      requireTLS: true, // Force TLS for port 587
+      debug: false,
+      logger: false
     };
 
     console.log('📧 Creating SMTP transporter:', {
