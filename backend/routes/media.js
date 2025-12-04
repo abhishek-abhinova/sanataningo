@@ -46,7 +46,7 @@ router.post('/upload', auth, upload.single('file'), (req, res) => {
       return res.status(400).json({ success: false, error: 'No file uploaded' });
     }
 
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const fileUrl = `https://sarboshaktisonatanisangathan.org/uploads/${req.file.filename}`;
     
     res.json({
       success: true,
@@ -68,7 +68,7 @@ router.post('/upload-multiple', auth, upload.array('files', 10), (req, res) => {
     }
 
     const uploadedFiles = req.files.map(file => ({
-      url: `/uploads/${file.filename}`,
+      url: `https://sarboshaktisonatanisangathan.org/uploads/${file.filename}`,
       filename: file.filename,
       originalName: file.originalname,
       size: file.size
@@ -126,7 +126,7 @@ router.post('/team-upload', auth, teamUpload.single('teamImage'), (req, res) => 
       return res.status(400).json({ success: false, error: 'Name and position are required' });
     }
 
-    const imageUrl = `/uploads/team/${req.file.filename}`;
+    const imageUrl = `https://sarboshaktisonatanisangathan.org/uploads/team/${req.file.filename}`;
     
     res.json({
       success: true,

@@ -89,7 +89,8 @@ router.post('/upload', auth, galleryUpload.single('images'), async (req, res) =>
     let imageUrl = '/images/placeholder.jpg';
     
     if (req.file) {
-      imageUrl = `/uploads/gallery/${req.file.filename}`;
+      // Store with full Hostinger URL for persistence
+      imageUrl = `https://sarboshaktisonatanisangathan.org/uploads/gallery/${req.file.filename}`;
     }
     
     const galleryItem = new Gallery({
@@ -151,7 +152,7 @@ const handleImageUpload = async (req, res) => {
     const uploadedImages = [];
     
     for (const file of files) {
-      const imageUrl = `/uploads/gallery/${file.filename}`;
+      const imageUrl = `https://sarboshaktisonatanisangathan.org/uploads/gallery/${file.filename}`;
       
       // Check for duplicate
       const existingItem = await Gallery.findOne({ image: imageUrl });
@@ -203,7 +204,7 @@ router.post('/upload-video', auth, videoUpload.single('video'), async (req, res)
     if (youtubeUrl) {
       videoUrl = youtubeUrl;
     } else if (req.file) {
-      videoUrl = `/uploads/videos/${req.file.filename}`;
+      videoUrl = `https://sarboshaktisonatanisangathan.org/uploads/videos/${req.file.filename}`;
     }
 
     const galleryItem = new Gallery({
@@ -241,7 +242,7 @@ const handleVideoUpload = async (req, res) => {
     if (youtubeUrl) {
       videoUrl = youtubeUrl;
     } else if (req.file) {
-      videoUrl = `/uploads/videos/${req.file.filename}`;
+      videoUrl = `https://sarboshaktisonatanisangathan.org/uploads/videos/${req.file.filename}`;
     } else {
       // Create placeholder video item
       videoUrl = '/videos/placeholder.mp4';
