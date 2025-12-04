@@ -278,7 +278,7 @@ router.post('/:id/send-thank-you', auth, async (req, res) => {
   }
 });
 
-// Approve donation and send receipt with PDF
+// Approve donation and send receipt with PDF (async to prevent timeout)
 router.post('/approve/:id', auth, async (req, res) => {
   try {
     const donation = await Donation.findById(req.params.id);
@@ -286,39 +286,45 @@ router.post('/approve/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Donation not found' });
     }
 
-    donation.paymentStatus = 'approved';
-    donation.approvedBy = req.user.id;
-    donation.approvedAt = new Date();
-    donation.receiptGenerated = true;
+    // Update donation status first
+    await Donation.update(req.params.id, {
+      payment_status: 'approved',
+      approved_by: req.user.id,
+      approved_at: new Date(),
+      receipt_generated: true
+    });
 
-    await donation.save();
+    // Return immediate response to prevent timeout
+    res.json({ success: true, message: 'Donation approved. Receipt will be sent to email shortly.' });
 
-    // Generate and send receipt automatically
-    try {
-      const { generateDonationReceipt } = require('../utils/cardGenerator');
-      const { sendDonationReceiptWithPDF } = require('../utils/emailService');
+    // Process receipt generation and email sending asynchronously
+    setImmediate(async () => {
+      try {
+        const { generateDonationReceipt } = require('../utils/cardGenerator');
+        const { sendDonationReceiptWithPDF } = require('../utils/emailService');
 
-      console.log('🧾 Generating donation receipt for:', donation.donorName);
-      const receiptPath = await generateDonationReceipt(donation);
-      donation.receiptFile = receiptPath;
-      await donation.save();
+        console.log('🧾 Generating donation receipt for:', donation.donor_name);
+        const receiptPath = await generateDonationReceipt(donation);
+        
+        // Update with receipt file path
+        await Donation.update(req.params.id, {
+          receipt_file: receiptPath
+        });
 
-      console.log('📧 Sending donation receipt email to:', donation.email);
-      await sendDonationReceiptWithPDF(donation, receiptPath);
-      console.log('✅ Donation receipt sent successfully');
-    } catch (error) {
-      console.error('❌ Receipt generation/email failed:', error);
-      // Don't fail the approval if receipt sending fails
-    }
-
-    res.json({ success: true, message: 'Donation approved and receipt sent to email successfully' });
+        console.log('📧 Sending donation receipt email to:', donation.email);
+        await sendDonationReceiptWithPDF(donation, receiptPath);
+        console.log('✅ Donation receipt sent successfully to:', donation.email);
+      } catch (error) {
+        console.error('❌ Receipt generation/email failed:', error);
+      }
+    });
   } catch (error) {
     console.error('❌ Donation approval failed:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Send donation receipt
+// Send donation receipt (async to prevent timeout)
 router.post('/send-receipt/:id', auth, async (req, res) => {
   try {
     const donation = await Donation.findById(req.params.id);
@@ -326,22 +332,33 @@ router.post('/send-receipt/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Donation not found' });
     }
 
-    const { generateDonationReceipt } = require('../utils/cardGenerator');
-    const { sendDonationReceiptWithPDF } = require('../utils/emailService');
+    // Return immediate response to prevent timeout
+    res.json({ success: true, message: 'Receipt generation started. Email will be sent shortly.' });
 
-    console.log('🧾 Generating donation receipt for:', donation.donorName);
-    const receiptPath = await generateDonationReceipt(donation);
-    donation.receiptFile = receiptPath;
-    donation.receiptGenerated = true;
-    await donation.save();
+    // Process receipt generation and email sending asynchronously
+    setImmediate(async () => {
+      try {
+        const { generateDonationReceipt } = require('../utils/cardGenerator');
+        const { sendDonationReceiptWithPDF } = require('../utils/emailService');
 
-    console.log('📧 Sending donation receipt email to:', donation.email);
-    await sendDonationReceiptWithPDF(donation, receiptPath);
-    console.log('✅ Donation receipt sent successfully');
+        console.log('🧾 Generating donation receipt for:', donation.donor_name);
+        const receiptPath = await generateDonationReceipt(donation);
+        
+        // Update donation record
+        await Donation.update(req.params.id, {
+          receipt_file: receiptPath,
+          receipt_generated: true
+        });
 
-    res.json({ success: true, message: 'Receipt sent successfully' });
+        console.log('📧 Sending donation receipt email to:', donation.email);
+        await sendDonationReceiptWithPDF(donation, receiptPath);
+        console.log('✅ Donation receipt sent successfully to:', donation.email);
+      } catch (error) {
+        console.error('❌ Failed to send receipt:', error);
+      }
+    });
   } catch (error) {
-    console.error('❌ Failed to send receipt:', error);
+    console.error('❌ Failed to process receipt request:', error);
     res.status(500).json({ error: error.message });
   }
 });
