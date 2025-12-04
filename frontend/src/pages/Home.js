@@ -82,7 +82,7 @@ const Home = () => {
 
   const fetchGalleryImages = async () => {
     try {
-      const response = await api.get('/public/gallery?limit=6');
+      const response = await api.get('/cloudinary/gallery?limit=6');
       setGalleryImages(response.data.gallery || []);
     } catch (error) {
       console.error('Failed to fetch gallery images:', error);

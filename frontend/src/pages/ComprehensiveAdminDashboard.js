@@ -43,8 +43,8 @@ const ComprehensiveAdminDashboard = () => {
   useEffect(() => {
     if (isAuthenticated) {
       fetchDashboardData();
-      // Load initial gallery data
-      fetchData('/admin/gallery', 'gallery');
+      // Load initial gallery data from Cloudinary
+      fetchData('/cloudinary/gallery', 'gallery');
 
       const interval = setInterval(fetchDashboardData, 10000);
 
@@ -169,7 +169,7 @@ const ComprehensiveAdminDashboard = () => {
       case 'team': await fetchData('/admin/team', 'team'); break;
       case 'events': await fetchData('/admin/events', 'events'); break;
       case 'activities': await fetchData('/admin/activities', 'activities'); break;
-      case 'gallery': await fetchData('/admin/gallery', 'gallery'); break;
+      case 'gallery': await fetchData('/cloudinary/gallery', 'gallery'); break;
     }
   };
 
@@ -601,7 +601,17 @@ const ComprehensiveAdminDashboard = () => {
                     <p>{item?.description || 'No description'}</p>
                     <div className="gallery-actions">
                       <button
-                        onClick={() => deleteItem('gallery', id)}
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to delete this item?')) {
+                            api.delete(`/cloudinary/${id}`).then(() => {
+                              toast.success('Gallery item deleted successfully');
+                              fetchData('/cloudinary/gallery', 'gallery');
+                            }).catch(error => {
+                              console.error('Delete error:', error);
+                              toast.error('Failed to delete item');
+                            });
+                          }
+                        }}
                         className="btn-icon btn-delete"
                         title="Delete item"
                       >
@@ -940,12 +950,12 @@ const ComprehensiveAdminDashboard = () => {
   const saveGalleryItem = async (data) => {
     try {
       const id = data._id || data.id;
-      const endpoint = id ? `/admin/gallery/${id}` : '/admin/gallery';
+      const endpoint = id ? `/cloudinary/${id}` : '/cloudinary/gallery';
       const method = id ? 'put' : 'post';
       await api[method](endpoint, data);
       toast.success(`Gallery item ${id ? 'updated' : 'created'} successfully`);
       setEditingItem(null);
-      await fetchData('/admin/gallery', 'gallery');
+      await fetchData('/cloudinary/gallery', 'gallery');
     } catch (error) {
       console.error('Save gallery error:', error);
       toast.error('Failed to save gallery item');
@@ -1928,14 +1938,18 @@ const GalleryForm = ({ data, onSave, onCancel }) => {
       if (selectedFile) {
         const uploadData = new FormData();
 
-        // Backend /admin/gallery/upload accepts both images and videos on the same "images" field
-        uploadData.append('images', selectedFile);
+        // Use Cloudinary upload endpoint
+        if (formData.type === 'video') {
+          uploadData.append('video', selectedFile);
+        } else {
+          uploadData.append('image', selectedFile);
+        }
         uploadData.append('title', formData.title);
         uploadData.append('description', formData.description);
         uploadData.append('category', formData.category);
         uploadData.append('featured', formData.featured);
 
-        const uploadEndpoint = '/admin/gallery/upload';
+        const uploadEndpoint = formData.type === 'video' ? '/cloudinary/video' : '/cloudinary/gallery';
 
         const response = await api.post(uploadEndpoint, uploadData, {
           headers: {

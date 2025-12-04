@@ -16,9 +16,9 @@
 
 ### 2. Set Environment Variables in Render
 ```
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
+CLOUDINARY_CLOUD_NAME=dbzx5y9ds
+CLOUDINARY_API_KEY=511921135832342
+CLOUDINARY_API_SECRET=FAIHZMs4RBaHmDJI51k68RvGRnk
 ```
 
 ### 3. Install Cloudinary Package

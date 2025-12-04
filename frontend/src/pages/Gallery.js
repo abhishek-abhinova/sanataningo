@@ -17,7 +17,7 @@ const Gallery = () => {
   const fetchGalleryData = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/public/gallery');
+      const response = await api.get('/cloudinary/gallery');
       const apiData = Array.isArray(response.data.gallery) ? response.data.gallery : [];
       
       // Separate photos and videos from API
