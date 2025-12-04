@@ -13,64 +13,12 @@ const ensureDir = (dir) => {
   }
 };
 
-// Gallery storage configuration - Store in frontend public directory
-const galleryStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../../frontend/public/uploads/gallery');
-    ensureDir(uploadPath);
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const cleanName = file.originalname.replace(/\s+/g, '');
-    const uniqueName = Date.now() + '-' + Math.random().toString(36).substr(2, 9) + '-' + cleanName;
-    cb(null, uniqueName);
-  }
-});
+// Import Hostinger upload utility
+const { createHostingerUpload, getHostingerUrl, getUploadInstructions } = require('../utils/hostingerUpload');
 
-// Video storage configuration - Store in frontend public directory
-const videoStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../../frontend/public/uploads/videos');
-    ensureDir(uploadPath);
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const cleanName = file.originalname.replace(/\s+/g, '');
-    cb(null, Date.now() + '-' + cleanName);
-  }
-});
-
-const galleryUpload = multer({
-  storage: galleryStorage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Only JPG, PNG, and WEBP images are allowed'));
-    }
-  }
-});
-
-const videoUpload = multer({
-  storage: videoStorage,
-  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /mp4|webm|avi|mov/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Only MP4, WEBM, AVI, and MOV videos are allowed'));
-    }
-  }
-});
+// Create upload handlers
+const galleryUpload = createHostingerUpload('gallery');
+const videoUpload = createHostingerUpload('videos');
 
 // Real-time broadcast helper
 const broadcastUpdate = (req, type, data) => {
@@ -87,10 +35,12 @@ router.post('/upload', auth, galleryUpload.single('images'), async (req, res) =>
     const { category = 'general', description = '', title = 'Gallery Item', featured = false } = req.body;
     
     let imageUrl = '/images/placeholder.jpg';
+    let uploadInstructions = null;
     
     if (req.file) {
-      // Store with relative path for frontend accessibility
-      imageUrl = `/uploads/gallery/${req.file.filename}`;
+      // Generate Hostinger URL
+      imageUrl = getHostingerUrl(req.file.filename, 'gallery');
+      uploadInstructions = getUploadInstructions(req.file.filename, 'gallery');
     }
     
     const galleryData = {
@@ -108,8 +58,9 @@ router.post('/upload', auth, galleryUpload.single('images'), async (req, res) =>
     
     res.json({
       success: true,
-      message: 'Image uploaded successfully',
-      data: galleryItem
+      message: 'Image uploaded to server. Please follow instructions to make it accessible.',
+      data: galleryItem,
+      uploadInstructions: uploadInstructions
     });
   } catch (error) {
     console.error('Gallery upload error:', error);
@@ -199,31 +150,33 @@ router.post('/upload-video', auth, videoUpload.single('video'), async (req, res)
     const { category = 'general', description = '', youtubeUrl, title = 'Video', featured = false } = req.body;
     
     let videoUrl = '/videos/placeholder.mp4';
+    let uploadInstructions = null;
     
     if (youtubeUrl) {
       videoUrl = youtubeUrl;
     } else if (req.file) {
-      videoUrl = `/uploads/videos/${req.file.filename}`;
+      videoUrl = getHostingerUrl(req.file.filename, 'videos');
+      uploadInstructions = getUploadInstructions(req.file.filename, 'videos');
     }
 
-    const galleryItem = new Gallery({
+    const galleryData = {
       title: title || 'Video',
       description: description || 'Video uploaded from admin',
-      image: videoUrl,
+      image_url: videoUrl,
       category,
-      type: 'video',
-      published: true,
-      showOnHomepage: category === 'featured' || featured === 'true' || featured === true,
-      order: 0
-    });
+      display_order: 0,
+      is_active: true,
+      uploaded_by: req.user?.id || null
+    };
     
-    await galleryItem.save();
+    const galleryItem = await Gallery.create(galleryData);
     broadcastUpdate(req, 'gallery', { action: 'create', item: galleryItem });
 
     res.json({
       success: true,
-      message: 'Video uploaded successfully',
-      data: galleryItem
+      message: 'Video uploaded to server. Please follow instructions to make it accessible.',
+      data: galleryItem,
+      uploadInstructions: uploadInstructions
     });
   } catch (error) {
     console.error('Video upload error:', error);

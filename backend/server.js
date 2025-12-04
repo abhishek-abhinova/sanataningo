@@ -90,6 +90,7 @@ try {
   const teamRoutes = require('./routes/team');
   const eventsRoutes = require('./routes/events');
   const activitiesRoutes = require('./routes/activities');
+  const hostingerUploadRoutes = require('./routes/hostinger-upload');
 
   // Use routes
   app.use('/api/auth', authRoutes);
@@ -99,6 +100,8 @@ try {
   app.use('/api/contact', contactRoutes);
   app.use('/api/public', publicRoutes);
   app.use('/api/media', mediaRoutes);
+  app.use('/api/gallery', galleryRoutes);
+  app.use('/api/hostinger', hostingerUploadRoutes);
   app.use('/api', realtimeRoutes);
   app.use('/api/test', testEmailRoutes);
 
