@@ -14,6 +14,7 @@ const io = socketIo(server, {
   cors: {
     origin: [
       'https://sarboshaktisonatanisangathan.org',
+      'https://www.sarboshaktisonatanisangathan.org',
       'http://localhost:3000'
     ],
     methods: ["GET", "POST"]
@@ -41,11 +42,13 @@ app.use(helmet({
 const corsOptions = {
   origin: [
     'https://sarboshaktisonatanisangathan.org',
+    'https://www.sarboshaktisonatanisangathan.org',
     'http://localhost:3000'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
 
