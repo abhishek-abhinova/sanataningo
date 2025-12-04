@@ -93,18 +93,17 @@ router.post('/upload', auth, galleryUpload.single('images'), async (req, res) =>
       imageUrl = `https://sarboshaktisonatanisangathan.org/uploads/gallery/${req.file.filename}`;
     }
     
-    const galleryItem = new Gallery({
+    const galleryData = {
       title: title || 'New Gallery Item',
       description: description || '',
-      image: imageUrl,
+      image_url: imageUrl,
       category,
-      type: 'photo',
-      published: true,
-      showOnHomepage: category === 'featured' || featured === 'true' || featured === true,
-      order: 0
-    });
+      display_order: 0,
+      is_active: true,
+      uploaded_by: req.user?.id || null
+    };
     
-    await galleryItem.save();
+    const galleryItem = await Gallery.create(galleryData);
     broadcastUpdate(req, 'gallery', { action: 'create', item: galleryItem });
     
     res.json({
@@ -288,33 +287,25 @@ router.post('/upload-test', auth, (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const Gallery = require('../models/Gallery');
-    const { category, type, search, page = 1, limit = 20 } = req.query;
+    const { category, page = 1, limit = 20 } = req.query;
     
-    let query = {};
-    if (category) query.category = category;
-    if (type) query.type = type;
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
-    }
+    const options = {
+      category,
+      page: parseInt(page),
+      limit: parseInt(limit)
+    };
     
-    const gallery = await Gallery.find(query)
-      .sort({ order: 1, createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
-    
-    const total = await Gallery.countDocuments(query);
+    const gallery = await Gallery.findAll(options);
     
     res.json({
       success: true,
       gallery,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-      total
+      totalPages: Math.ceil(gallery.length / limit),
+      currentPage: parseInt(page),
+      total: gallery.length
     });
   } catch (error) {
+    console.error('Gallery fetch error:', error);
     res.json({ success: true, gallery: [] });
   }
 });
@@ -392,14 +383,14 @@ router.delete('/:id', auth, async (req, res) => {
     }
     
     // Delete file from filesystem
-    if (galleryItem.image && !galleryItem.image.includes('youtube')) {
-      const filePath = path.join(__dirname, '..', galleryItem.image);
+    if (galleryItem.image_url && !galleryItem.image_url.includes('youtube')) {
+      const filePath = path.join(__dirname, '..', galleryItem.image_url);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
     }
     
-    await Gallery.findByIdAndDelete(req.params.id);
+    await Gallery.delete(req.params.id);
     broadcastUpdate(req, 'gallery', { action: 'delete', id: req.params.id });
     
     res.json({
@@ -407,6 +398,7 @@ router.delete('/:id', auth, async (req, res) => {
       message: 'Gallery item deleted successfully'
     });
   } catch (error) {
+    console.error('Gallery delete error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
