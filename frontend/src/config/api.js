@@ -35,6 +35,11 @@ export const API_ENDPOINTS = {
   ADMIN_DONATIONS: `${API_BASE_URL}/api/admin/donations`,
   ADMIN_CONTACTS: `${API_BASE_URL}/api/admin/contacts`,
   
+  // Cloudinary endpoints
+  CLOUDINARY_GALLERY: `${API_BASE_URL}/api/cloudinary/gallery`,
+  CLOUDINARY_VIDEO: `${API_BASE_URL}/api/cloudinary/video`,
+  CLOUDINARY_DELETE: (id) => `${API_BASE_URL}/api/cloudinary/${id}`,
+  
   // Health check
   HEALTH: `${API_BASE_URL}/api/health`
 };

@@ -20,9 +20,17 @@ const Gallery = () => {
       const response = await api.get('/cloudinary/gallery');
       const apiData = Array.isArray(response.data.gallery) ? response.data.gallery : [];
       
-      // Separate photos and videos from API
-      const apiPhotos = apiData.filter(item => item.type === 'photo' || !item.type);
-      const apiVideos = apiData.filter(item => item.type === 'video');
+      // Separate photos and videos from API, exclude team member photos
+      const apiPhotos = apiData.filter(item => 
+        (item.type === 'photo' || !item.type) && 
+        item.category !== 'team' && 
+        !item.id?.toString().startsWith('team_')
+      );
+      const apiVideos = apiData.filter(item => 
+        item.type === 'video' && 
+        item.category !== 'team' && 
+        !item.id?.toString().startsWith('team_')
+      );
       
       // Use only database data
       setGalleryData({

@@ -5,34 +5,23 @@ const { normalizeDonationData } = require('./donationFormatter');
 // Create transporter factory with better timeouts and pooling
 const createTransporter = () => {
   try {
-    // Validate required environment variables
-    if (!process.env.SMTP_HOST) {
-      throw new Error('SMTP_HOST environment variable is not set');
-    }
-    if (!process.env.SMTP_USER) {
-      throw new Error('SMTP_USER environment variable is not set');
-    }
-    if (!process.env.SMTP_PASS) {
-      throw new Error('SMTP_PASS environment variable is not set');
-    }
-    
     const opts = {
-      host: process.env.SMTP_HOST,
+      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
       port: parseInt(process.env.SMTP_PORT, 10) || 587,
-      secure: process.env.SMTP_SECURE === 'true' || false,
+      secure: false,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
       },
-      pool: false, // Disable pooling to avoid timeout issues
-      greetingTimeout: 60000, // 1 minute
-      connectionTimeout: 60000, // 1 minute
-      socketTimeout: 60000, // 1 minute
+      pool: false,
+      maxConnections: 1,
+      greetingTimeout: 10000,
+      connectionTimeout: 10000,
+      socketTimeout: 10000,
       tls: { 
         rejectUnauthorized: false,
-        ciphers: 'SSLv3'
+        minVersion: 'TLSv1'
       },
-      requireTLS: true, // Force TLS for port 587
       debug: false,
       logger: false
     };
@@ -45,23 +34,7 @@ const createTransporter = () => {
       pool: opts.pool
     });
 
-    const t = nodemailer.createTransport(opts);
-    
-    // Verify transporter (non-blocking)
-    t.verify((err) => {
-      if (err) {
-        console.error('❌ Email transporter verify failed:', err.message || err);
-        console.error('❌ Verify error details:', {
-          code: err.code,
-          command: err.command,
-          response: err.response
-        });
-      } else {
-        console.log('✅ Email transporter ready and verified');
-      }
-    });
-    
-    return t;
+    return nodemailer.createTransporter(opts);
   } catch (err) {
     console.error('❌ Failed to create transporter:', err);
     throw err;
@@ -74,23 +47,7 @@ let transporter = createTransporter();
 const sendMailWithRetry = async (mailOptions, attempts = 3) => {
   let lastErr = null;
   
-  // Verify transporter before sending
-  try {
-    await new Promise((resolve, reject) => {
-      transporter.verify((err, success) => {
-        if (err) {
-          console.warn('⚠️ Transporter verification failed, recreating...', err.message);
-          transporter = createTransporter();
-          reject(err);
-        } else {
-          console.log('✅ Transporter verified successfully');
-          resolve(success);
-        }
-      });
-    });
-  } catch (verifyErr) {
-    console.warn('⚠️ Transporter verification warning, continuing anyway...');
-  }
+  // Skip verification to avoid timeout issues
   
   for (let i = 0; i < attempts; i++) {
     try {

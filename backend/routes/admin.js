@@ -78,9 +78,14 @@ router.get('/dashboard', auth, async (req, res) => {
     const memberStats = await Member.getStatistics();
     const donationStats = await Donation.getStatistics();
     const contactStats = await Contact.getStatistics();
+    
+    // Get team member count
+    const teamMembers = await Team.findAll({ is_active: true });
+    const totalTeamMembers = teamMembers.length;
 
     const stats = {
       totalMembers: memberStats.total,
+      totalTeamMembers: totalTeamMembers,
       activeMembers: memberStats.active,
       pendingMembers: memberStats.byPaymentStatus.find(s => s.payment_status === 'pending')?.count || 0,
       totalDonations: donationStats.totalDonations,

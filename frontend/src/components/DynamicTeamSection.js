@@ -44,18 +44,30 @@ const DynamicTeamSection = ({ category, showOnHomepage = false, limit = 8 }) => 
       <div className="team-grid">
         {team.slice(0, limit).map((member) => (
           <div key={member._id} className="team-member-card">
-            <div className="member-photo">
-              <img 
-                src={member.photo || '/images/default-avatar.png'} 
-                alt={member.name}
-                onError={(e) => {
-                  e.target.src = '/images/default-avatar.png';
-                }}
-              />
-            </div>
+            {member.photo && (
+              <div className="member-photo">
+                <img 
+                  src={member.photo.startsWith('http') ? member.photo : `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}/${member.photo.replace(/^\/*/, '')}`}
+                  alt={member.name}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
             <div className="member-info">
-              <h3>{member.name}</h3>
-              <p className="position">{member.position}</p>
+              <h3>{member.name} - Member</h3>
+              {member.type && (
+                <span className={`member-type ${member.type}`}>
+                  {member.type === 'team_member' ? 'Team Member' : 'Member'}
+                </span>
+              )}
+              {member.memberId && (
+                <p className="member-id">ID: {member.memberId}</p>
+              )}
+              {member.membershipType && (
+                <p className="membership-type">{member.membershipType} Member</p>
+              )}
             </div>
           </div>
         ))}
@@ -159,6 +171,35 @@ const DynamicTeamSection = ({ category, showOnHomepage = false, limit = 8 }) => 
           padding-left: 1rem;
           margin: 1rem 0;
           font-size: 0.9rem;
+        }
+        .member-type {
+          display: inline-block;
+          padding: 0.25rem 0.75rem;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          margin: 0.5rem 0;
+        }
+        .member-type.team_member {
+          background: #e3f2fd;
+          color: #1565c0;
+        }
+        .member-type.regular_member {
+          background: #f3e5f5;
+          color: #7b1fa2;
+        }
+        .member-id {
+          font-size: 0.8rem;
+          color: #666;
+          margin: 0.25rem 0;
+          font-weight: 600;
+        }
+        .membership-type {
+          font-size: 0.8rem;
+          color: #d2691e;
+          margin: 0.25rem 0;
+          font-weight: 600;
+          text-transform: capitalize;
         }
         @media (max-width: 768px) {
           .team-grid {

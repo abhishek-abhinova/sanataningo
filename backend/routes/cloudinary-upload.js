@@ -105,7 +105,14 @@ router.post('/video', auth, upload.single('video'), async (req, res) => {
 // Delete image/video from Cloudinary
 router.delete('/:id', auth, async (req, res) => {
   try {
-    const galleryItem = await Gallery.findById(req.params.id);
+    const itemId = req.params.id;
+    
+    // Check if it's a team member photo
+    if (itemId.startsWith('team_')) {
+      return res.status(400).json({ error: 'Cannot delete team member photos from gallery. Delete from team management instead.' });
+    }
+    
+    const galleryItem = await Gallery.findById(itemId);
     
     if (!galleryItem) {
       return res.status(404).json({ error: 'Gallery item not found' });
@@ -128,7 +135,7 @@ router.delete('/:id', auth, async (req, res) => {
     }
 
     // Delete from database
-    await Gallery.delete(req.params.id);
+    await Gallery.delete(itemId);
 
     res.json({
       success: true,
@@ -152,11 +159,34 @@ router.get('/gallery', async (req, res) => {
       is_active: true
     };
     
-    const gallery = await Gallery.findAll(options);
+    let gallery = await Gallery.findAll(options);
+    
+    // Include team member photos if no specific category filter
+    if (!category || category === 'team') {
+      const Team = require('../models/Team');
+      const teamMembers = await Team.findAll({ is_active: true });
+      
+      const teamPhotos = teamMembers
+        .filter(member => member.photo_url)
+        .map(member => ({
+          id: `team_${member.id}`,
+          title: `${member.name} - ${member.designation}`,
+          description: member.bio || `Team member: ${member.name}`,
+          image_url: member.photo_url,
+          thumbnail_url: member.photo_url,
+          category: 'team',
+          display_order: 0,
+          is_active: true,
+          created_at: member.created_at,
+          updated_at: member.updated_at
+        }));
+      
+      gallery = [...gallery, ...teamPhotos];
+    }
 
     res.json({
       success: true,
-      gallery: gallery, // All URLs are already full Cloudinary URLs
+      gallery: gallery,
       totalPages: Math.ceil(gallery.length / limit),
       currentPage: parseInt(page),
       total: gallery.length

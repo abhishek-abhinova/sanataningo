@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Gallery Upload</title>
+</head>
+<body>
+    <h1>Debug Gallery Upload</h1>
+    <form id="uploadForm">
+        <input type="text" id="title" placeholder="Title" required>
+        <input type="file" id="image" accept="image/*" required>
+        <button type="submit">Upload to Cloudinary</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const file = document.getElementById('image').files[0];
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                document.getElementById('result').innerHTML = '<p style="color: red;">No authentication token found. Please login to admin first.</p>';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('title', title);
+            formData.append('description', 'Test upload');
+            formData.append('category', 'general');
+            
+            try {
+                const response = await fetch('https://sarboshakti-backend.onrender.com/api/cloudinary/gallery', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('result').innerHTML = `
+                        <p style="color: green;">✅ Upload successful!</p>
+                        <p>Image URL: <a href="${result.data.image_url}" target="_blank">${result.data.image_url}</a></p>
+                        <img src="${result.data.image_url}" style="max-width: 200px; border-radius: 8px;">
+                    `;
+                } else {
+                    document.getElementById('result').innerHTML = `<p style="color: red;">❌ Upload failed: ${result.error || result.message}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p style="color: red;">❌ Network error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

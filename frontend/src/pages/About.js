@@ -372,11 +372,7 @@ const About = () => {
                       <i className="fas fa-user"></i>
                     </div>
                   </div>
-                  <h4 style={{ color: '#8b4513', marginBottom: '0.5rem', fontSize: '1.1rem' }}>{member.name}</h4>
-                  <p style={{ color: '#666', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <i className="fas fa-users" style={{ marginRight: '8px', color: '#d2691e' }}></i>
-                    {member.position || member.designation || 'Team Member'}
-                  </p>
+                  <h4 style={{ color: '#8b4513', marginBottom: '0.5rem', fontSize: '1.1rem' }}>{member.name} - Member</h4>
                 </motion.div>
               ))}
             </div>

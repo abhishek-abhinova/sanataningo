@@ -13,7 +13,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Add auth token for protected routes
-    const protectedRoutes = ['/admin', '/auth/me', '/members/list', '/donations/list', '/donations?', '/contact', '/media', '/gallery'];
+    const protectedRoutes = ['/admin', '/auth/me', '/members/list', '/donations/list', '/donations?', '/contact', '/media', '/gallery', '/cloudinary'];
     const needsAuth = protectedRoutes.some(route => config.url && config.url.includes(route)) || 
                      (config.url && config.url.includes('/admin/'));
     

@@ -34,6 +34,7 @@ const Navbar = () => {
           <li><Link to="/about" className={isActive('/about')} onClick={handleNavClick}>About Us</Link></li>
           <li><Link to="/activities" className={isActive('/activities')} onClick={handleNavClick}>What We Do</Link></li>
           <li><Link to="/gallery" className={isActive('/gallery')} onClick={handleNavClick}>Gallery</Link></li>
+          <li><Link to="/members" className={isActive('/members')} onClick={handleNavClick}>Our Members</Link></li>
           <li><Link to="/membership" className={isActive('/membership')} onClick={handleNavClick}>Become a Member</Link></li>
           <li><Link to="/donate" className={isActive('/donate')} onClick={handleNavClick}>Donate</Link></li>
           <li><Link to="/contact" className={isActive('/contact')} onClick={handleNavClick}>Contact</Link></li>

@@ -307,8 +307,7 @@ const Home = () => {
                     e.target.src = '/images/default-avatar.png';
                   }}
                 />
-                <h4 style={{ margin: '0.5rem 0', color: '#333' }}>{member.name || 'Team Member'}</h4>
-                <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>{member.position || member.designation || 'Executive Member'}</p>
+                <h4 style={{ margin: '0.5rem 0', color: '#333' }}>{member.name || 'Team Member'} - Member</h4>
                 {/* Removed other details as per requirement */}
               </motion.div>
             ))}

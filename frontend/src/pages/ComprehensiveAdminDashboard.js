@@ -46,7 +46,10 @@ const ComprehensiveAdminDashboard = () => {
       // Load initial gallery data from Cloudinary
       fetchData('/cloudinary/gallery', 'gallery');
 
-      const interval = setInterval(fetchDashboardData, 10000);
+      // Only refresh dashboard stats, not all data
+      const interval = setInterval(() => {
+        fetchDashboardData();
+      }, 30000); // Reduced frequency to 30 seconds
 
       // Socket.io disabled for production
       // const newSocket = io(process.env.REACT_APP_BACKEND_URL);
@@ -199,7 +202,7 @@ const ComprehensiveAdminDashboard = () => {
     >
       <div className="stats-grid">
         {[
-          { icon: 'fas fa-users', title: 'Total Members', value: stats.totalMembers || 0, color: '#667eea', trend: '+12%' },
+          { icon: 'fas fa-users', title: 'Total Members', value: (stats.totalMembers || 0) + (stats.totalTeamMembers || 0), color: '#667eea', trend: '+12%' },
           { icon: 'fas fa-rupee-sign', title: 'Total Donations', value: `₹${(stats.totalDonationAmount || 0).toLocaleString()}`, color: '#10b981', trend: '+8%' },
       { icon: 'fas fa-clock', title: 'Pending Approvals', value: stats.pendingMembers || 0, color: '#f59e0b', trend: '-5%' },
       { icon: 'fas fa-envelope', title: 'Messages', value: stats.totalContacts || 0, color: '#d2691e', trend: '+15%' }
@@ -559,7 +562,7 @@ const ComprehensiveAdminDashboard = () => {
               const rawUrl = item.image_url || item.image || item.file || item.imageUrl || '';
               const isExternal = typeof rawUrl === 'string' && /^https?:\/\//i.test(rawUrl);
               const fullUrl = rawUrl
-                ? (isExternal ? rawUrl : `${API_BASE_URL}/${String(rawUrl).replace(/^\/*/, '')}`)
+                ? (isExternal ? rawUrl : (rawUrl.startsWith('/') ? `${API_BASE_URL}${rawUrl}` : `${API_BASE_URL}/${rawUrl}`))
                 : '/images/placeholder.jpg';
               const isVideo = /\.(mp4|webm|ogg|avi|mov)$/i.test(rawUrl || '') ||
                 (rawUrl || '').includes('youtube.com') ||
@@ -593,6 +596,10 @@ const ComprehensiveAdminDashboard = () => {
                     <img
                       src={fullUrl}
                       alt={item?.title || 'Gallery item'}
+                      onError={(e) => {
+                        console.log('Gallery image error:', fullUrl);
+                        e.target.src = '/images/placeholder.jpg';
+                      }}
                       style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '8px' }}
                     />
                   )}
@@ -759,10 +766,15 @@ const ComprehensiveAdminDashboard = () => {
       <div className="team-grid">
         {(data.team || []).map((member, index) => (
           <motion.div key={member.id || member._id} className="team-card" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.1 }}>
-            <img src={(member.photo_url && (member.photo_url.startsWith('http') ? member.photo_url : `${API_BASE_URL}/${String(member.photo_url).replace(/^\/*/, '')}`)) || member.photo || '/images/default-avatar.png'} alt={member.name} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover' }} />
-            <h4>{member.name}</h4>
-            <p>{member.designation || member.position}</p>
-            <small style={{ color: '#6c757d', fontWeight: 600 }}>ID: TM{String(member.id || member._id).padStart(6, '0')}</small>
+            {member.photo_url && (
+              <img 
+                src={member.photo_url.startsWith('http') ? member.photo_url : `${API_BASE_URL}/${String(member.photo_url).replace(/^\/*/, '')}`} 
+                alt={member.name} 
+                style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover' }} 
+              />
+            )}
+            <h4>{member.name} - Core Member</h4>
+
             {member.category && (<span className={`status-badge ${member.category}`}>{member.category}</span>)}
             <div style={{
               fontSize: '0.8rem',
@@ -915,6 +927,7 @@ const ComprehensiveAdminDashboard = () => {
           delete payload._id;
           delete payload.id;
         }
+        console.log('Activity payload:', payload);
       } else if (type === 'team') {
         payload = {
           name: data.name,
@@ -949,16 +962,13 @@ const ComprehensiveAdminDashboard = () => {
 
   const saveGalleryItem = async (data) => {
     try {
-      const id = data._id || data.id;
-      const endpoint = id ? `/cloudinary/${id}` : '/cloudinary/gallery';
-      const method = id ? 'put' : 'post';
-      await api[method](endpoint, data);
-      toast.success(`Gallery item ${id ? 'updated' : 'created'} successfully`);
+      console.log('Saving gallery item:', data);
       setEditingItem(null);
       await fetchData('/cloudinary/gallery', 'gallery');
+      toast.success('Gallery item saved successfully');
     } catch (error) {
       console.error('Save gallery error:', error);
-      toast.error('Failed to save gallery item');
+      toast.error(`Failed to save gallery item: ${error.response?.data?.error || error.message}`);
     }
   };
 
@@ -2113,31 +2123,40 @@ const TeamForm = ({ data, onSave, onCancel }) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Create immediate preview
+    const previewUrl = URL.createObjectURL(file);
+    setPreview(previewUrl);
+
     setUploading(true);
     const uploadData = new FormData();
-    uploadData.append('file', file);
+    uploadData.append('image', file);
+    uploadData.append('title', `Team Member - ${formData.name || 'Photo'}`);
+    uploadData.append('category', 'team');
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL || API_BASE_URL}/api/media/upload`, {
-        method: 'POST',
+      const response = await api.post('/cloudinary/gallery', uploadData, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: uploadData
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      const result = await response.json();
-      if (result.success) {
-        const imageUrl = result.url || result.data?.url || result.data?.image_url;
+      const result = response.data;
+      if (result?.success) {
+        const imageUrl = result.data.image_url;
         setFormData(prev => ({ ...prev, photo: imageUrl }));
         setPreview(imageUrl);
-        toast.success('Image uploaded successfully!');
+        // Clean up blob URL
+        URL.revokeObjectURL(previewUrl);
+        toast.success('Team member photo uploaded to Cloudinary!');
       } else {
-        throw new Error(result.error || 'Upload failed');
+        throw new Error(result?.message || 'Upload failed');
       }
     } catch (error) {
       console.error('Upload failed:', error);
-      toast.error('Failed to upload image: ' + error.message);
+      toast.error('Failed to upload image: ' + (error.response?.data?.error || error.message));
+      // Revert preview on error
+      setPreview(data.photo || data.photo_url || '');
+      URL.revokeObjectURL(previewUrl);
     } finally {
       setUploading(false);
     }
@@ -2151,10 +2170,7 @@ const TeamForm = ({ data, onSave, onCancel }) => {
       return;
     }
 
-    if (!formData.position.trim()) {
-      toast.error('Please enter a position');
-      return;
-    }
+
 
     // Map form data to backend expectations
     const finalData = {
@@ -2185,14 +2201,7 @@ const TeamForm = ({ data, onSave, onCancel }) => {
         required
         style={{ padding: '0.75rem', border: '2px solid #e2e8f0', borderRadius: '8px' }}
       />
-      <input
-        type="text"
-        placeholder="Position"
-        value={formData.position}
-        onChange={(e) => setFormData(prev => ({ ...prev, position: e.target.value }))}
-        required
-        style={{ padding: '0.75rem', border: '2px solid #e2e8f0', borderRadius: '8px' }}
-      />
+
       <select
         value={formData.category}
         onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
@@ -2222,7 +2231,7 @@ const TeamForm = ({ data, onSave, onCancel }) => {
         {preview && (
           <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
             <img
-              src={preview.startsWith('http') ? preview : (preview.startsWith('/') ? `${API_BASE_URL}${preview}` : `${API_BASE_URL}/${preview}`)}
+              src={preview.startsWith('http') || preview.startsWith('blob:') ? preview : `${API_BASE_URL}/${preview.replace(/^\/*/, '')}`}
               alt="Preview"
               style={{
                 width: '100px',
@@ -2310,29 +2319,30 @@ const ActivityForm = ({ data, onSave, onCancel }) => {
       setUploading(true);
       try {
         const uploadData = new FormData();
-        uploadData.append('file', selectedFile);
+        uploadData.append('image', selectedFile);
+        uploadData.append('title', `Activity - ${formData.title}`);
+        uploadData.append('category', 'activities');
 
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL || API_BASE_URL}/api/media/upload`, {
-          method: 'POST',
+        const response = await api.post('/cloudinary/gallery', uploadData, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: uploadData
+            'Content-Type': 'multipart/form-data'
+          }
         });
 
-        const result = await response.json();
-        if (result.success && result.url) {
-          finalData.image_url = result.url;
+        const result = response.data;
+        if (result?.success) {
+          finalData.image_url = result.data.image_url;
+          console.log('Cloudinary upload success:', result.data.image_url);
           // Clean up blob URL
           if (formData.image_url && formData.image_url.startsWith('blob:')) {
             URL.revokeObjectURL(formData.image_url);
           }
         } else {
-          throw new Error(result.error || 'Upload failed');
+          throw new Error(result?.message || 'Upload failed');
         }
       } catch (error) {
         console.error('Image upload failed:', error);
-        toast.error('Failed to upload image: ' + (error.message || 'Unknown error'));
+        toast.error('Failed to upload image: ' + (error.response?.data?.error || error.message));
         setUploading(false);
         return;
       } finally {
@@ -2477,23 +2487,25 @@ const EventForm = ({ data, onSave, onCancel }) => {
       setUploading(true);
       try {
         const uploadData = new FormData();
-        uploadData.append('file', selectedFile);
+        uploadData.append('image', selectedFile);
+        uploadData.append('title', `Event - ${formData.title}`);
+        uploadData.append('category', 'events');
 
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL || API_BASE_URL}/api/media/upload`, {
-          method: 'POST',
+        const response = await api.post('/cloudinary/gallery', uploadData, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: uploadData
+            'Content-Type': 'multipart/form-data'
+          }
         });
 
-        const result = await response.json();
-        if (result.success) {
-          finalData.image_url = result.url || result.data?.url || result.data?.image_url;
+        const result = response.data;
+        if (result?.success) {
+          finalData.image_url = result.data.image_url;
+        } else {
+          throw new Error(result?.message || 'Upload failed');
         }
       } catch (error) {
         console.error('Image upload failed:', error);
-        toast.error('Failed to upload image');
+        toast.error('Failed to upload image: ' + (error.response?.data?.error || error.message));
         setUploading(false);
         return;
       } finally {
