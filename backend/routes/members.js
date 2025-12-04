@@ -8,15 +8,27 @@ const { sendAdminMemberNotification, sendMemberApprovalEmail, sendMembershipCard
 
 const router = express.Router();
 
-// Configure multer for file uploads
+// Configure multer for file uploads - Store in frontend public directory
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === 'paymentScreenshot') {
-      cb(null, 'uploads/screenshots/');
+      const uploadPath = path.join(__dirname, '../../frontend/public/uploads/screenshots');
+      if (!require('fs').existsSync(uploadPath)) {
+        require('fs').mkdirSync(uploadPath, { recursive: true });
+      }
+      cb(null, uploadPath);
     } else if (file.fieldname === 'aadhaarFront' || file.fieldname === 'aadhaarBack') {
-      cb(null, 'uploads/aadhaar/');
+      const uploadPath = path.join(__dirname, '../../frontend/public/uploads/aadhaar');
+      if (!require('fs').existsSync(uploadPath)) {
+        require('fs').mkdirSync(uploadPath, { recursive: true });
+      }
+      cb(null, uploadPath);
     } else {
-      cb(null, 'uploads/');
+      const uploadPath = path.join(__dirname, '../../frontend/public/uploads');
+      if (!require('fs').existsSync(uploadPath)) {
+        require('fs').mkdirSync(uploadPath, { recursive: true });
+      }
+      cb(null, uploadPath);
     }
   },
   filename: (req, file, cb) => {
@@ -63,12 +75,12 @@ router.post('/register', upload.fields([
       pincode: pincode || '',
       date_of_birth: dateOfBirth || null,
       aadhaar_number: aadhaarNumber || '',
-      aadhaar_front_image: req.files?.aadhaarFront ? `https://sarboshaktisonatanisangathan.org/uploads/aadhaar/${req.files.aadhaarFront[0].filename}` : '',
-      aadhaar_back_image: req.files?.aadhaarBack ? `https://sarboshaktisonatanisangathan.org/uploads/aadhaar/${req.files.aadhaarBack[0].filename}` : '',
+      aadhaar_front_image: req.files?.aadhaarFront ? `/uploads/aadhaar/${req.files.aadhaarFront[0].filename}` : '',
+      aadhaar_back_image: req.files?.aadhaarBack ? `/uploads/aadhaar/${req.files.aadhaarBack[0].filename}` : '',
       membership_type: resolvedMembershipPlan,
       membership_fee: resolvedAmount,
       payment_status: razorpay_payment_id ? 'completed' : 'pending',
-      payment_id: req.files?.paymentScreenshot ? `https://sarboshaktisonatanisangathan.org/uploads/screenshots/${req.files.paymentScreenshot[0].filename}` : '',
+      payment_id: req.files?.paymentScreenshot ? `/uploads/screenshots/${req.files.paymentScreenshot[0].filename}` : '',
       razorpay_order_id: razorpay_order_id || '',
       razorpay_payment_id: razorpay_payment_id || '',
       razorpay_signature: razorpay_signature || ''

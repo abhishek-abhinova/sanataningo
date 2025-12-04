@@ -13,10 +13,10 @@ const ensureDir = (dir) => {
   }
 };
 
-// Gallery storage configuration
+// Gallery storage configuration - Store in frontend public directory
 const galleryStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = 'uploads/gallery';
+    const uploadPath = path.join(__dirname, '../../frontend/public/uploads/gallery');
     ensureDir(uploadPath);
     cb(null, uploadPath);
   },
@@ -27,10 +27,10 @@ const galleryStorage = multer.diskStorage({
   }
 });
 
-// Video storage configuration
+// Video storage configuration - Store in frontend public directory
 const videoStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = 'uploads/videos';
+    const uploadPath = path.join(__dirname, '../../frontend/public/uploads/videos');
     ensureDir(uploadPath);
     cb(null, uploadPath);
   },
@@ -89,8 +89,8 @@ router.post('/upload', auth, galleryUpload.single('images'), async (req, res) =>
     let imageUrl = '/images/placeholder.jpg';
     
     if (req.file) {
-      // Store with full Hostinger URL for persistence
-      imageUrl = `https://sarboshaktisonatanisangathan.org/uploads/gallery/${req.file.filename}`;
+      // Store with relative path for frontend accessibility
+      imageUrl = `/uploads/gallery/${req.file.filename}`;
     }
     
     const galleryData = {
@@ -151,7 +151,7 @@ const handleImageUpload = async (req, res) => {
     const uploadedImages = [];
     
     for (const file of files) {
-      const imageUrl = `https://sarboshaktisonatanisangathan.org/uploads/gallery/${file.filename}`;
+      const imageUrl = `/uploads/gallery/${file.filename}`;
       
       // Check for duplicate
       const existingItem = await Gallery.findOne({ image: imageUrl });
@@ -203,7 +203,7 @@ router.post('/upload-video', auth, videoUpload.single('video'), async (req, res)
     if (youtubeUrl) {
       videoUrl = youtubeUrl;
     } else if (req.file) {
-      videoUrl = `https://sarboshaktisonatanisangathan.org/uploads/videos/${req.file.filename}`;
+      videoUrl = `/uploads/videos/${req.file.filename}`;
     }
 
     const galleryItem = new Gallery({
@@ -241,7 +241,7 @@ const handleVideoUpload = async (req, res) => {
     if (youtubeUrl) {
       videoUrl = youtubeUrl;
     } else if (req.file) {
-      videoUrl = `https://sarboshaktisonatanisangathan.org/uploads/videos/${req.file.filename}`;
+      videoUrl = `/uploads/videos/${req.file.filename}`;
     } else {
       // Create placeholder video item
       videoUrl = '/videos/placeholder.mp4';
