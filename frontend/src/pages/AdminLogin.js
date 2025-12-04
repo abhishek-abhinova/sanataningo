@@ -94,7 +94,7 @@ const AdminLogin = () => {
         >
           <div className="form-group">
             <div className="input-container">
-              <i className="fas fa-envelope input-icon"></i>
+              
               <input
                 type="email"
                 name="email"
@@ -109,7 +109,7 @@ const AdminLogin = () => {
 
           <div className="form-group">
             <div className="input-container">
-              <i className="fas fa-lock input-icon"></i>
+              
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"

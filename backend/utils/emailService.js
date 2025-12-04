@@ -27,13 +27,16 @@ const createTransporter = () => {
       pool: true,
       maxConnections: 5,
       maxMessages: 100,
-      greetingTimeout: 60000, // Increased timeout
-      connectionTimeout: 60000, // Increased timeout
-      socketTimeout: 60000, // Increased timeout
+      greetingTimeout: 120000, // 2 minutes
+      connectionTimeout: 120000, // 2 minutes
+      socketTimeout: 120000, // 2 minutes
       tls: { 
         rejectUnauthorized: false,
-        ciphers: 'SSLv3'
+        ciphers: 'SSLv3',
+        minVersion: 'TLSv1'
       },
+      dnsTimeout: 30000,
+      requireTLS: false,
       debug: process.env.NODE_ENV === 'development', // Enable debug in development
       logger: process.env.NODE_ENV === 'development' // Enable logger in development
     };

@@ -3,6 +3,7 @@ import api from '../utils/api';
 import { API_BASE_URL } from '../config/api';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
+import useAutoLogout from '../hooks/useAutoLogout';
 // import io from 'socket.io-client'; // Disabled for production
 
 const ComprehensiveAdminDashboard = () => {
@@ -26,6 +27,9 @@ const ComprehensiveAdminDashboard = () => {
   const [membersPage, setMembersPage] = useState(1);
   const [donationsPage, setDonationsPage] = useState(1);
   const itemsPerPage = 5;
+
+  // Auto-logout functionality
+  useAutoLogout();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
