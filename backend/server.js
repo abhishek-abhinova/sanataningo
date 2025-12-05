@@ -114,6 +114,7 @@ try {
   app.use('/api/database', databaseUploadRoutes);
   app.use('/api', realtimeRoutes);
   app.use('/api/test', testEmailRoutes);
+  app.use('/api/email-test', require('./routes/email-test'));
   app.use('/api/simple-email', require('./routes/test-simple-email'));
   app.use('/api/render-email', require('./routes/test-render-email'));
   app.use('/api/cloudinary', require('./routes/cloudinary-upload'));

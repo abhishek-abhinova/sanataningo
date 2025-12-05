@@ -3,7 +3,7 @@ const multer = require('multer');
 const Donation = require('../models/Donation');
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
-const { sendAdminDonationNotification, sendThankYouWithReceipt } = require('../utils/emailService');
+const { sendDonationReceiptEmailRender } = require('../utils/emailServiceRender');
 const router = express.Router();
 
 // Configure multer for file uploads
@@ -297,25 +297,14 @@ router.post('/approve/:id', auth, async (req, res) => {
     // Return immediate response to prevent timeout
     res.json({ success: true, message: 'Donation approved. Receipt will be sent to email shortly.' });
 
-    // Process receipt generation and email sending asynchronously
+    // Process email sending asynchronously
     setImmediate(async () => {
       try {
-        const { generateDonationReceipt } = require('../utils/cardGenerator');
-        const { sendDonationReceiptWithPDF } = require('../utils/emailService');
-
-        console.log('🧾 Generating donation receipt for:', donation.donor_name);
-        const receiptPath = await generateDonationReceipt(donation);
-        
-        // Update with receipt file path
-        await Donation.update(req.params.id, {
-          receipt_file: receiptPath
-        });
-
         console.log('📧 Sending donation receipt email to:', donation.email);
-        await sendDonationReceiptWithPDF(donation, receiptPath);
+        await sendDonationReceiptEmailRender(donation);
         console.log('✅ Donation receipt sent successfully to:', donation.email);
       } catch (error) {
-        console.error('❌ Receipt generation/email failed:', error);
+        console.error('❌ Email failed:', error);
       }
     });
   } catch (error) {
@@ -335,26 +324,14 @@ router.post('/send-receipt/:id', auth, async (req, res) => {
     // Return immediate response to prevent timeout
     res.json({ success: true, message: 'Receipt generation started. Email will be sent shortly.' });
 
-    // Process receipt generation and email sending asynchronously
+    // Process email sending asynchronously
     setImmediate(async () => {
       try {
-        const { generateDonationReceipt } = require('../utils/cardGenerator');
-        const { sendDonationReceiptWithPDF } = require('../utils/emailService');
-
-        console.log('🧾 Generating donation receipt for:', donation.donor_name);
-        const receiptPath = await generateDonationReceipt(donation);
-        
-        // Update donation record
-        await Donation.update(req.params.id, {
-          receipt_file: receiptPath,
-          receipt_generated: true
-        });
-
         console.log('📧 Sending donation receipt email to:', donation.email);
-        await sendDonationReceiptWithPDF(donation, receiptPath);
+        await sendDonationReceiptEmailRender(donation);
         console.log('✅ Donation receipt sent successfully to:', donation.email);
       } catch (error) {
-        console.error('❌ Failed to send receipt:', error);
+        console.error('❌ Email failed:', error);
       }
     });
   } catch (error) {

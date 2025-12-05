@@ -21,16 +21,20 @@ const Gallery = () => {
       const apiData = Array.isArray(response.data.gallery) ? response.data.gallery : [];
       
       // Separate photos and videos from API, exclude team member photos
-      const apiPhotos = apiData.filter(item => 
-        (item.type === 'photo' || !item.type) && 
-        item.category !== 'team' && 
-        !item.id?.toString().startsWith('team_')
-      );
-      const apiVideos = apiData.filter(item => 
-        item.type === 'video' && 
-        item.category !== 'team' && 
-        !item.id?.toString().startsWith('team_')
-      );
+      const apiPhotos = apiData.filter(item => {
+        const url = item.image_url || item.image || '';
+        const isVideo = /\.(mp4|webm|ogg|avi|mov)$/i.test(url) || url.includes('/video/');
+        return !isVideo && 
+               item.category !== 'team' && 
+               !item.id?.toString().startsWith('team_');
+      });
+      const apiVideos = apiData.filter(item => {
+        const url = item.image_url || item.image || '';
+        const isVideo = /\.(mp4|webm|ogg|avi|mov)$/i.test(url) || url.includes('/video/');
+        return isVideo && 
+               item.category !== 'team' && 
+               !item.id?.toString().startsWith('team_');
+      });
       
       // Use only database data
       setGalleryData({
@@ -232,134 +236,64 @@ const Gallery = () => {
           {!loading && activeTab === 'videos' && (
             <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(min(350px, 100%), 1fr))', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
               gap: '2rem'
             }}>
               {galleryData.videos.map((video, index) => {
-                const raw = video.image || video.image_url || '';
-                let src = '';
-                if (!raw) {
-                  src = '/videos/1.mp4';
-                } else if (raw.startsWith('/videos/')) {
-                  // Frontend public assets (sample videos)
-                  src = raw;
-                } else if (raw.startsWith('http')) {
-                  src = raw;
-                } else {
-                  src = `${API_BASE_URL}/${raw.replace(/^\/+/, '')}`;
-                }
-
-                const isYouTube = raw.includes('youtube.com') || raw.includes('youtu.be');
-
+                const videoUrl = video.image_url || video.image || '';
+                
                 return (
-                <motion.div
-                  key={video._id || video.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5, scale: 1.02 }}
-                  style={{
-                    background: 'white',
-                    borderRadius: '15px',
-                    overflow: 'hidden',
-                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  <div style={{ position: 'relative' }}>
-                    {isYouTube ? (
-                      <iframe
-                        src={src}
-                        title={video.title || 'Gallery video'}
-                        style={{
-                          width: '100%',
-                          height: '230px',
-                          border: 'none',
-                          display: 'block'
-                        }}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          const nextElement = e.target.nextElementSibling;
-                          if (nextElement) {
-                            nextElement.style.display = 'flex';
-                          }
-                        }}
-                      />
-                    ) : (
-                      <video 
-                        controls
-                        preload="metadata"
-                        style={{
-                          width: '100%',
-                          height: 'auto',
-                          maxHeight: '400px',
-                          objectFit: 'contain',
-                          display: 'block'
-                        }}
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          const nextElement = e.target.nextElementSibling;
-                          if (nextElement) {
-                            nextElement.style.display = 'flex';
-                          }
-                        }}
-                      >
-                        <source src={src} type="video/mp4" />
-                        Your browser does not support the video tag.
-                      </video>
-                    )}
-                    
-                    <div style={{
-                      display: 'none',
-                      minHeight: '200px',
-                      background: 'linear-gradient(135deg, #f0f0f0, #e0e0e0)',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexDirection: 'column',
-                      color: '#666'
-                    }}>
-                      <i className="fas fa-video" style={{ fontSize: '3rem', marginBottom: '1rem', color: '#d2691e' }}></i>
-                      <p style={{ margin: 0, fontSize: '1rem' }}>Video Coming Soon</p>
+                  <motion.div
+                    key={video._id || video.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    whileHover={{ y: -5, scale: 1.02 }}
+                    style={{
+                      background: 'white',
+                      borderRadius: '15px',
+                      overflow: 'hidden',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <video 
+                      src={videoUrl}
+                      controls
+                      preload="metadata"
+                      style={{
+                        width: '100%',
+                        height: '250px',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        console.error('Video load error:', videoUrl);
+                      }}
+                    />
+                    <div style={{ padding: '1.5rem' }}>
+                      <h4 style={{ margin: '0 0 0.5rem 0', color: '#333', fontSize: '1.1rem' }}>
+                        {video.title || 'Untitled Video'}
+                      </h4>
+                      <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
+                        {video.description || 'No description available'}
+                      </p>
                     </div>
-                    
-                    <div style={{
-                      position: 'absolute',
-                      top: '10px',
-                      right: '10px',
-                      background: 'rgba(0, 0, 0, 0.8)',
-                      color: 'white',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      fontWeight: '600'
-                    }}>
-                      {video.duration || '0:00'}
-                    </div>
-                  </div>
-                  
-                  <div style={{ padding: '1.5rem' }}>
-                    <h4 style={{ 
-                      color: '#333', 
-                      marginBottom: '0.5rem', 
-                      fontSize: '1.1rem', 
-                      fontWeight: '600' 
-                    }}>
-                      {video.title || video.caption || 'Untitled'}
-                    </h4>
-                    <p style={{ 
-                      color: '#666', 
-                      fontSize: '0.9rem', 
-                      margin: 0, 
-                      textTransform: 'capitalize' 
-                    }}>
-                      {(video.category || 'general').replace('_', ' ')} Program
-                    </p>
-                  </div>
-                </motion.div>
-              );})}
+                  </motion.div>
+                );
+              })}
+              
+              {galleryData.videos.length === 0 && (
+                <div style={{ 
+                  gridColumn: '1 / -1', 
+                  textAlign: 'center', 
+                  padding: '3rem',
+                  color: '#666'
+                }}>
+                  <i className="fas fa-video" style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.3 }}></i>
+                  <p>No videos available yet.</p>
+                </div>
+              )}
             </div>
           )}
         </div>
