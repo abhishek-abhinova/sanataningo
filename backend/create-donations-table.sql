@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS donations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  receipt_number VARCHAR(20) UNIQUE NOT NULL,
+  donor_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  donation_type VARCHAR(50) DEFAULT 'general',
+  message TEXT,
+  is_anonymous BOOLEAN DEFAULT FALSE,
+  payment_status ENUM('pending', 'completed', 'approved', 'rejected') DEFAULT 'pending',
+  payment_id VARCHAR(255),
+  razorpay_order_id VARCHAR(255),
+  razorpay_payment_id VARCHAR(255),
+  razorpay_signature VARCHAR(255),
+  pan_number VARCHAR(20),
+  tax_benefit BOOLEAN DEFAULT TRUE,
+  receipt_url VARCHAR(500),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

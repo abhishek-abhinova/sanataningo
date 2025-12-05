@@ -49,7 +49,7 @@ SMTP_USER=your-email@yourdomain.com
 SMTP_PASS=your-email-password
 SMTP_HOST=smtp.hostinger.com
 SMTP_PORT=587
-
+ 
 # Fallback SMTP (Gmail - Optional but Recommended)
 GMAIL_USER=your-gmail@gmail.com
 GMAIL_PASS=your-gmail-app-password

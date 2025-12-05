@@ -4,7 +4,7 @@ const path = require('path');
 const Member = require('../models/Member');
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
-const { sendAdminMemberNotification, sendMemberApprovalEmail, sendMembershipCardEmail } = require('../utils/emailService');
+const { sendMembershipCardGmail } = require('../utils/emailServiceMember');
 
 const router = express.Router();
 
@@ -200,30 +200,17 @@ router.put('/approve/:id', auth, async (req, res) => {
     // Generate and send membership card automatically
     try {
       const { generateMembershipCard } = require('../utils/cardGenerator');
-      const { sendMembershipCardWithPDF } = require('../utils/emailService');
-
-      // Map member data to camelCase for email functions
+      // Map member data for email
       const mappedMember = {
-        _id: member.id,
         memberId: member.member_id,
         fullName: member.full_name,
         email: member.email,
-        phone: member.phone,
-        dateOfBirth: member.date_of_birth,
-        aadhaarNumber: member.aadhaar_number,
         membershipPlan: member.membership_type,
-        validTill: validTill, // Already set above
-        amount: member.membership_fee,
-        createdAt: member.created_at
+        validTill: validTill
       };
 
-      console.log('🎫 Generating membership card for:', mappedMember.fullName);
-      const cardPath = await generateMembershipCard(mappedMember);
-      member.cardFile = cardPath;
-      await member.save();
-
       console.log('📧 Sending membership card email to:', mappedMember.email);
-      await sendMembershipCardWithPDF(mappedMember, cardPath);
+      await sendMembershipCardGmail(mappedMember);
       console.log('✅ Membership card sent successfully to', mappedMember.email);
 
       res.json({ success: true, message: 'Member approved and ID card sent to email successfully' });
@@ -246,31 +233,17 @@ router.post('/member/send-card/:id', auth, async (req, res) => {
     }
 
     const { generateMembershipCard } = require('../utils/cardGenerator');
-    const { sendMembershipCardWithPDF } = require('../utils/emailService');
-
-    // Map member data to camelCase for email functions
+    // Map member data for email
     const mappedMember = {
-      _id: member.id,
       memberId: member.member_id,
       fullName: member.full_name,
       email: member.email,
-      phone: member.phone,
-      dateOfBirth: member.date_of_birth,
-      aadhaarNumber: member.aadhaar_number,
       membershipPlan: member.membership_type,
-      validTill: member.valid_till,
-      amount: member.membership_fee,
-      createdAt: member.created_at
+      validTill: member.valid_till
     };
 
-    console.log('🎫 Generating membership card for:', mappedMember.fullName);
-    const cardPath = await generateMembershipCard(mappedMember);
-    member.cardFile = cardPath;
-    member.cardGenerated = true;
-    await member.save();
-
     console.log('📧 Sending membership card email to:', mappedMember.email);
-    await sendMembershipCardWithPDF(mappedMember, cardPath);
+    await sendMembershipCardGmail(mappedMember);
     console.log('✅ Membership card sent successfully to', mappedMember.email);
 
     res.json({ success: true, message: 'Membership card sent successfully to ' + mappedMember.email });
@@ -430,16 +403,8 @@ router.post('/:id/send-card', auth, async (req, res) => {
     }
 
     const { generateMembershipCard } = require('../utils/cardGenerator');
-    const { sendMembershipCardWithPDF } = require('../utils/emailService');
-
-    console.log('🎫 Generating membership card for:', member.fullName);
-    const cardPath = await generateMembershipCard(member);
-    member.cardFile = cardPath;
-    member.cardGenerated = true;
-    await member.save();
-
     console.log('📧 Sending membership card email to:', member.email);
-    await sendMembershipCardWithPDF(member, cardPath);
+    await sendMembershipCardGmail(member);
     console.log('✅ Membership card sent successfully to', member.email);
 
     res.json({ success: true, message: 'Membership card sent successfully to ' + member.email });
