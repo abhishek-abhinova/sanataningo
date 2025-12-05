@@ -6,43 +6,21 @@ const sendEmailGmail = async (mailOptions) => {
     const transporter = nodemailer.createTransporter({
       service: 'gmail',
       auth: {
-        user: 'manishlakta@gmail.com',
-        pass: 'your-app-password' // Use Gmail App Password
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD
       }
     });
 
     const result = await transporter.sendMail({
       ...mailOptions,
-      from: '"Sarboshakti Sanatani Sangathan" <manishlakta@gmail.com>'
+      from: `"${process.env.ORG_NAME || 'Sarboshakti Sanatani Sangathan'}" <${process.env.GMAIL_USER}>`
     });
 
     console.log('✅ Email sent via Gmail:', result.messageId);
     return result;
   } catch (error) {
     console.error('❌ Gmail email failed:', error.message);
-    
-    // Fallback to Ethereal
-    try {
-      const testAccount = await nodemailer.createTestAccount();
-      const ethTransporter = nodemailer.createTransporter({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass
-        }
-      });
-
-      const result = await ethTransporter.sendMail(mailOptions);
-      const previewUrl = nodemailer.getTestMessageUrl(result);
-      
-      console.log('✅ Email sent via Ethereal (preview):', previewUrl);
-      return { ...result, previewUrl };
-    } catch (ethError) {
-      console.error('❌ Ethereal fallback failed:', ethError.message);
-      throw error;
-    }
+    throw error;
   }
 };
 
@@ -90,7 +68,19 @@ const sendDonationReceiptGmail = async (donation) => {
   return await sendEmailGmail(mailOptions);
 };
 
+// Generic Gmail email sender
+const sendGmailEmail = async (emailData) => {
+  return await sendEmailGmail(emailData);
+};
+
+// Send donation receipt with PDF
+const sendDonationReceiptWithPDF = async (donation) => {
+  return await sendDonationReceiptGmail(donation);
+};
+
 module.exports = {
   sendDonationReceiptGmail,
-  sendEmailGmail
+  sendEmailGmail,
+  sendGmailEmail,
+  sendDonationReceiptWithPDF
 };

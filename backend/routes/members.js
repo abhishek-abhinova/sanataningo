@@ -4,7 +4,7 @@ const path = require('path');
 const Member = require('../models/Member');
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
-const { sendMembershipCardGmail } = require('../utils/emailServiceMember');
+const { sendMembershipCardEmail } = require('../utils/emailServiceMember');
 
 const router = express.Router();
 
@@ -210,7 +210,7 @@ router.put('/approve/:id', auth, async (req, res) => {
       };
 
       console.log('📧 Sending membership card email to:', mappedMember.email);
-      await sendMembershipCardGmail(mappedMember);
+      await sendMembershipCardEmail(mappedMember);
       console.log('✅ Membership card sent successfully to', mappedMember.email);
 
       res.json({ success: true, message: 'Member approved and ID card sent to email successfully' });
@@ -243,7 +243,7 @@ router.post('/member/send-card/:id', auth, async (req, res) => {
     };
 
     console.log('📧 Sending membership card email to:', mappedMember.email);
-    await sendMembershipCardGmail(mappedMember);
+    await sendMembershipCardEmail(mappedMember);
     console.log('✅ Membership card sent successfully to', mappedMember.email);
 
     res.json({ success: true, message: 'Membership card sent successfully to ' + mappedMember.email });
@@ -271,9 +271,9 @@ router.post('/donation/approve/:id', auth, async (req, res) => {
 
     // Send receipt email
     try {
-      const { sendDonationReceiptGmail } = require('../utils/emailServiceGmail');
+      const { sendDonationReceiptWithPDF } = require('../utils/emailServiceGmail');
       console.log('📧 Sending donation receipt email to:', donation.email);
-      await sendDonationReceiptGmail(donation);
+      await sendDonationReceiptWithPDF(donation);
       console.log('✅ Donation receipt sent successfully');
     } catch (error) {
       console.error('❌ Receipt email failed:', error);
@@ -295,8 +295,8 @@ router.post('/donation/send-receipt/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Donation not found' });
     }
 
-    const { sendDonationReceiptGmail } = require('../utils/emailServiceGmail');
-    await sendDonationReceiptGmail(donation);
+    const { sendDonationReceiptWithPDF } = require('../utils/emailServiceGmail');
+    await sendDonationReceiptWithPDF(donation);
     
     donation.receiptGenerated = true;
     await donation.save();
@@ -392,7 +392,7 @@ router.post('/:id/send-card', auth, async (req, res) => {
 
     const { generateMembershipCard } = require('../utils/cardGenerator');
     console.log('📧 Sending membership card email to:', member.email);
-    await sendMembershipCardGmail(member);
+    await sendMembershipCardEmail(member);
     console.log('✅ Membership card sent successfully to', member.email);
 
     res.json({ success: true, message: 'Membership card sent successfully to ' + member.email });

@@ -4,7 +4,7 @@ const Donation = require('../models/Donation');
 const DonationLocal = require('../models/DonationLocal');
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
-const { sendDonationReceiptGmail } = require('../utils/emailServiceGmail');
+const { sendDonationReceiptWithPDF } = require('../utils/emailServiceGmail');
 const router = express.Router();
 
 // Configure multer for file uploads
@@ -146,7 +146,7 @@ router.post('/approve/:id', auth, async (req, res) => {
     setImmediate(async () => {
       try {
         console.log('📧 Sending donation receipt via Gmail to:', donation.email);
-        await sendDonationReceiptGmail(donation);
+        await sendDonationReceiptWithPDF(donation);
         console.log('✅ Donation receipt sent successfully to:', donation.email);
       } catch (error) {
         console.error('❌ Email failed:', error);
@@ -173,7 +173,7 @@ router.post('/send-receipt/:id', auth, async (req, res) => {
     setImmediate(async () => {
       try {
         console.log('📧 Sending donation receipt via Gmail to:', donation.email);
-        await sendDonationReceiptGmail(donation);
+        await sendDonationReceiptWithPDF(donation);
         console.log('✅ Donation receipt sent successfully to:', donation.email);
       } catch (error) {
         console.error('❌ Email failed:', error);

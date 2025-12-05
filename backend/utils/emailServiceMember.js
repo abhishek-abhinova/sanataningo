@@ -6,13 +6,13 @@ const sendMembershipCardGmail = async (member, cardPath = null) => {
     const transporter = nodemailer.createTransporter({
       service: 'gmail',
       auth: {
-        user: 'manishlakta@gmail.com',
-        pass: 'your-app-password' // Use Gmail App Password
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD
       }
     });
 
     const mailOptions = {
-      from: '"Sarboshakti Sanatani Sangathan" <manishlakta@gmail.com>',
+      from: `"${process.env.ORG_NAME || 'Sarboshakti Sanatani Sangathan'}" <${process.env.GMAIL_USER}>`,
       to: member.email,
       subject: '🎫 Your Membership ID Card - Sarboshakti Sanatani Sangathan',
       html: `
@@ -61,32 +61,16 @@ const sendMembershipCardGmail = async (member, cardPath = null) => {
 
   } catch (error) {
     console.error('❌ Gmail membership card email failed:', error.message);
-    
-    // Fallback to Ethereal
-    try {
-      const testAccount = await nodemailer.createTestAccount();
-      const ethTransporter = nodemailer.createTransporter({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass
-        }
-      });
-
-      const result = await ethTransporter.sendMail(mailOptions);
-      const previewUrl = nodemailer.getTestMessageUrl(result);
-      
-      console.log('✅ Membership card email sent via Ethereal (preview):', previewUrl);
-      return { ...result, previewUrl };
-    } catch (ethError) {
-      console.error('❌ Ethereal fallback failed:', ethError.message);
-      throw error;
-    }
+    throw error;
   }
 };
 
+// Alias for compatibility
+const sendMembershipCardEmail = async (member, cardPath = null) => {
+  return await sendMembershipCardGmail(member, cardPath);
+};
+
 module.exports = {
-  sendMembershipCardGmail
+  sendMembershipCardGmail,
+  sendMembershipCardEmail
 };
