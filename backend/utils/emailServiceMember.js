@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 // Gmail-based email service for member cards
 const sendMembershipCardGmail = async (member, cardPath = null) => {
   try {
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.GMAIL_USER,
