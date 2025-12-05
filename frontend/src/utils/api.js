@@ -30,24 +30,13 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// Response interceptor - NO automatic logout, only manual logout via button
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    // Only auto-logout on authentication-related 401 errors, not on timeout/email failures
-    if (error.response?.status === 401 && 
-        (error.response?.data?.error?.includes('token') || 
-         error.response?.data?.error?.includes('auth') ||
-         error.config?.url?.includes('/auth/') ||
-         error.config?.url?.includes('/login'))) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      if (window.location.pathname.includes('/admin')) {
-        window.location.href = '/admin/login';
-      }
-    }
+    // No automatic logout - let components handle 401 errors manually
     return Promise.reject(error);
   }
 );
