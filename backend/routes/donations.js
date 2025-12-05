@@ -134,6 +134,11 @@ router.post('/approve/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Donation not found' });
     }
 
+    // Update donation status
+    donation.paymentStatus = 'approved';
+    donation.receiptGenerated = true;
+    await donation.save();
+
     // Return immediate response
     res.json({ success: true, message: 'Donation approved. Receipt will be sent to email shortly.' });
 
@@ -149,6 +154,33 @@ router.post('/approve/:id', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Donation approval failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Send donation receipt
+router.post('/send-receipt/:id', auth, async (req, res) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) {
+      return res.status(404).json({ error: 'Donation not found' });
+    }
+
+    // Return immediate response
+    res.json({ success: true, message: 'Receipt will be sent to email shortly.' });
+
+    // Send email asynchronously
+    setImmediate(async () => {
+      try {
+        console.log('📧 Sending donation receipt via Gmail to:', donation.email);
+        await sendDonationReceiptGmail(donation);
+        console.log('✅ Donation receipt sent successfully to:', donation.email);
+      } catch (error) {
+        console.error('❌ Email failed:', error);
+      }
+    });
+  } catch (error) {
+    console.error('❌ Failed to send receipt:', error);
     res.status(500).json({ error: error.message });
   }
 });
