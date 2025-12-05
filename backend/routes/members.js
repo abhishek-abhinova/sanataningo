@@ -269,22 +269,14 @@ router.post('/donation/approve/:id', auth, async (req, res) => {
 
     await donation.save();
 
-    // Generate and send receipt automatically
+    // Send receipt email
     try {
-      const { generateDonationReceipt } = require('../utils/cardGenerator');
-      const { sendDonationReceiptWithPDF } = require('../utils/emailService');
-
-      console.log('🧾 Generating donation receipt for:', donation.donorName);
-      const receiptPath = await generateDonationReceipt(donation);
-      donation.receiptFile = receiptPath;
-      await donation.save();
-
+      const { sendDonationReceiptGmail } = require('../utils/emailServiceGmail');
       console.log('📧 Sending donation receipt email to:', donation.email);
-      await sendDonationReceiptWithPDF(donation, receiptPath);
+      await sendDonationReceiptGmail(donation);
       console.log('✅ Donation receipt sent successfully');
     } catch (error) {
-      console.error('❌ Receipt generation/email failed:', error);
-      // Don't fail the approval if receipt sending fails
+      console.error('❌ Receipt email failed:', error);
     }
 
     res.json({ success: true, message: 'Donation approved and receipt sent to email successfully' });
@@ -303,15 +295,11 @@ router.post('/donation/send-receipt/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Donation not found' });
     }
 
-    const { generateDonationReceipt } = require('../utils/cardGenerator');
-
-    const receiptPath = await generateDonationReceipt(donation);
-    donation.receiptFile = receiptPath;
+    const { sendDonationReceiptGmail } = require('../utils/emailServiceGmail');
+    await sendDonationReceiptGmail(donation);
+    
     donation.receiptGenerated = true;
     await donation.save();
-
-    const { sendDonationReceiptWithPDF } = require('../utils/emailService');
-    await sendDonationReceiptWithPDF(donation, receiptPath);
 
     res.json({ success: true, message: 'Receipt sent successfully' });
   } catch (error) {

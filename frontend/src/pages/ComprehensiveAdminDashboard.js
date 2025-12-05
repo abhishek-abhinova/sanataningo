@@ -367,6 +367,39 @@ const ComprehensiveAdminDashboard = () => {
                       >
                         <i className="fas fa-eye"></i>
                       </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await api.put(`/members/approve/${member._id}`);
+                            toast.success('Member approved and ID card sent to email!');
+                            await fetchData('/admin/members', 'members');
+                          } catch (error) {
+                            console.error('Approve member error:', error);
+                            toast.error('Failed to approve member: ' + (error.response?.data?.error || error.message));
+                          }
+                        }}
+                        className="btn-icon"
+                        style={{ background: '#28a745', color: 'white' }}
+                        title="Approve Member & Send ID Card"
+                      >
+                        <i className="fas fa-user-check"></i>
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await api.post(`/members/${member._id}/send-card`);
+                            toast.success('ID card sent to email successfully!');
+                          } catch (error) {
+                            console.error('Send ID card error:', error);
+                            toast.error('Failed to send ID card: ' + (error.response?.data?.error || error.message));
+                          }
+                        }}
+                        className="btn-icon"
+                        style={{ background: '#17a2b8', color: 'white' }}
+                        title="Send ID Card Email"
+                      >
+                        <i className="fas fa-id-card"></i>
+                      </button>
                       <select
                         value={member.payment_status || 'pending'}
                         onChange={async (e) => {
@@ -388,24 +421,21 @@ const ComprehensiveAdminDashboard = () => {
                       <button
                         onClick={async () => {
                           try {
-                            const next = member.status === 'active' ? 'inactive' : 'active';
-                            if (next === 'active') {
-                              await api.put(`/admin/members/${member._id}/activate`);
-                              toast.success('Member activated and activation email sent');
-                            } else {
-                              await api.put(`/admin/members/${member._id}`, { status: next });
-                              toast.success('Member marked as inactive');
+                            const reason = prompt('Enter rejection reason:');
+                            if (reason) {
+                              await api.put(`/members/reject/${member._id}`, { reason });
+                              toast.success('Member rejected');
+                              await fetchData('/admin/members', 'members');
                             }
-                            await fetchData('/admin/members', 'members');
                           } catch (err) {
-                            toast.error(err.response?.data?.error || 'Failed to update status');
+                            toast.error(err.response?.data?.error || 'Failed to reject member');
                           }
                         }}
                         className="btn-icon"
-                        title={member.status === 'active' ? 'Set inactive' : 'Set active'}
-                        style={{ background: member.status === 'active' ? '#ffc107' : '#28a745', color: 'white' }}
+                        style={{ background: '#dc3545', color: 'white' }}
+                        title="Reject Member"
                       >
-                        <i className={member.status === 'active' ? 'fas fa-user-slash' : 'fas fa-user-check'}></i>
+                        <i className="fas fa-user-times"></i>
                       </button>
                       <button
                         onClick={() => deleteItem('members', member._id)}
@@ -884,15 +914,7 @@ const ComprehensiveAdminDashboard = () => {
     }
   };
 
-  const sendDonationReceipt = async (donation) => {
-    try {
-      await api.post(`/admin/donations/${donation._id}/send-receipt`);
-      toast.success(`Receipt sent to ${donation.donorEmail}`);
-    } catch (error) {
-      console.error('Send receipt error:', error);
-      toast.error('Failed to send receipt: ' + (error.response?.data?.error || error.message));
-    }
-  };
+
 
   const saveItem = async (type, data) => {
     try {
@@ -1061,7 +1083,7 @@ const ComprehensiveAdminDashboard = () => {
                         <th>Phone</th>
                         <th>Amount</th>
                         <th>Purpose</th>
-                        <th>Payment</th>
+                        <th>Status</th>
                         <th>Screenshot</th>
                         <th>Date</th>
                         <th>Actions</th>
@@ -1076,24 +1098,9 @@ const ComprehensiveAdminDashboard = () => {
                           <td>₹{donation.amount}</td>
                           <td>{donation.purpose}</td>
                           <td>
-                            <select
-                              value={donation.paymentStatus || 'pending'}
-                              onChange={async (e) => {
-                                try {
-                                  const next = e.target.value;
-                                  await api.put(`/admin/donations/${donation._id}`, { payment_status: next });
-                                  toast.success('Donation payment updated');
-                                  await fetchData('/admin/donations', 'donations');
-                                } catch (err) {
-                                  toast.error(err.response?.data?.error || 'Failed to update payment');
-                                }
-                              }}
-                              style={{ padding: '6px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}
-                            >
-                              <option value="pending">pending</option>
-                              <option value="completed">completed</option>
-                              <option value="failed">failed</option>
-                            </select>
+                            <span className={`status-badge ${donation.paymentStatus || 'pending'}`}>
+                              {donation.paymentStatus || 'pending'}
+                            </span>
                           </td>
                           <td>
                             {donation.paymentScreenshot ? (
@@ -1116,12 +1123,38 @@ const ComprehensiveAdminDashboard = () => {
                           <td>
                             <div className="action-buttons">
                               <button
-                                onClick={() => sendDonationReceipt(donation)}
+                                onClick={async () => {
+                                  try {
+                                    await api.post(`/donations/approve/${donation._id}`);
+                                    toast.success('Receipt sent to email successfully!');
+                                    await fetchData('/admin/donations', 'donations');
+                                  } catch (error) {
+                                    console.error('Send receipt error:', error);
+                                    toast.error('Failed to send receipt: ' + (error.response?.data?.error || error.message));
+                                  }
+                                }}
                                 className="btn-icon"
                                 style={{ background: '#28a745', color: 'white' }}
                                 title="Send Receipt Email"
                               >
                                 <i className="fas fa-envelope"></i>
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const status = donation.paymentStatus === 'approved' ? 'pending' : 'approved';
+                                    await api.put(`/admin/donations/${donation._id}`, { paymentStatus: status });
+                                    toast.success(`Donation ${status}`);
+                                    await fetchData('/admin/donations', 'donations');
+                                  } catch (error) {
+                                    toast.error('Failed to update status');
+                                  }
+                                }}
+                                className="btn-icon"
+                                style={{ background: donation.paymentStatus === 'approved' ? '#ffc107' : '#17a2b8', color: 'white' }}
+                                title={donation.paymentStatus === 'approved' ? 'Mark as Pending' : 'Approve Donation'}
+                              >
+                                <i className={donation.paymentStatus === 'approved' ? 'fas fa-clock' : 'fas fa-check'}></i>
                               </button>
                               <button onClick={() => deleteItem('donations', donation._id)} className="btn-icon btn-delete">
                                 <i className="fas fa-trash"></i>
@@ -1323,30 +1356,30 @@ const ComprehensiveAdminDashboard = () => {
         .dashboard-grid {
           display: flex;
           flex-direction: column;
-          gap: 2rem;
+          gap: 3rem;
         }
         .stats-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 2rem;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 2.5rem;
         }
         .stat-card {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(25px);
-          border-radius: 24px;
-          padding: 2.5rem;
-          box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+          background: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(30px);
+          border-radius: 28px;
+          padding: 3rem;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.15);
           display: flex;
           align-items: center;
-          gap: 2rem;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          gap: 2.5rem;
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.4);
+          border: 1px solid rgba(255,255,255,0.5);
         }
         .stat-card:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+          transform: translateY(-12px) scale(1.03);
+          box-shadow: 0 30px 60px rgba(0,0,0,0.25);
         }
         .stat-card::before {
           content: '';
@@ -1379,15 +1412,26 @@ const ComprehensiveAdminDashboard = () => {
           100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
         .stat-icon {
-          width: 70px;
-          height: 70px;
-          border-radius: 20px;
+          width: 80px;
+          height: 80px;
+          border-radius: 24px;
           display: flex;
           align-items: center;
           justify-content: center;
           color: white;
-          font-size: 1.8rem;
-          box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+          font-size: 2rem;
+          box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+          position: relative;
+        }
+        .stat-icon::before {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: 26px;
+          padding: 2px;
+          background: linear-gradient(45deg, rgba(255,255,255,0.3), transparent, rgba(255,255,255,0.3));
+          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          mask-composite: exclude;
         }
         .stat-content h3 {
           margin: 0;
@@ -1398,11 +1442,14 @@ const ComprehensiveAdminDashboard = () => {
           letter-spacing: 0.5px;
         }
         .stat-number {
-          font-size: 2.5rem;
-          font-weight: 800;
-          color: #1e293b;
+          font-size: 3rem;
+          font-weight: 900;
+          background: linear-gradient(135deg, #1e293b, #475569);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
           margin: 0.5rem 0;
           line-height: 1;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .section-header {
           display: flex;
@@ -1460,14 +1507,25 @@ const ComprehensiveAdminDashboard = () => {
         }
         .enhanced-table {
           background: rgba(255, 255, 255, 0.98);
-          border-radius: 20px;
+          border-radius: 24px;
           overflow-x: auto;
           overflow-y: visible;
-          box-shadow: 0 15px 35px rgba(0,0,0,0.12);
-          border: 1px solid rgba(255,255,255,0.3);
-          backdrop-filter: blur(10px);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+          border: 1px solid rgba(255,255,255,0.4);
+          backdrop-filter: blur(15px);
           max-width: 100%;
           -webkit-overflow-scrolling: touch;
+          position: relative;
+        }
+        .enhanced-table::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(135deg, #d2691e, #8b4513);
+          border-radius: 24px 24px 0 0;
         }
         .enhanced-table table {
           width: 100%;
@@ -1475,27 +1533,32 @@ const ComprehensiveAdminDashboard = () => {
           border-collapse: collapse;
         }
         .enhanced-table th {
-          background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-          padding: 1.25rem 1rem;
+          background: linear-gradient(135deg, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.95));
+          padding: 1.5rem 1.25rem;
           text-align: left;
           font-weight: 700;
           color: #1e293b;
-          border-bottom: 2px solid #e2e8f0;
-          font-size: 1rem;
+          border-bottom: 2px solid rgba(226, 232, 240, 0.5);
+          font-size: 1.05rem;
           white-space: nowrap;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-size: 0.9rem;
         }
         .enhanced-table td {
-          padding: 1rem 1rem;
-          border-bottom: 1px solid #f1f5f9;
+          padding: 1.25rem 1.25rem;
+          border-bottom: 1px solid rgba(241, 245, 249, 0.5);
           vertical-align: middle;
-          font-size: 0.95rem;
+          font-size: 1rem;
           white-space: nowrap;
         }
         .enhanced-table.large td, .enhanced-table.large th {
           font-size: 1.05rem;
         }
         .enhanced-table tr:hover {
-          background: #f8fafc;
+          background: linear-gradient(135deg, rgba(210, 105, 30, 0.05), rgba(255, 215, 0, 0.05));
+          transform: scale(1.005);
+          transition: all 0.3s ease;
         }
         .status-badge {
           padding: 0.5rem 1rem;
@@ -1518,22 +1581,31 @@ const ComprehensiveAdminDashboard = () => {
           background: #fef2f2;
           color: #dc2626;
         }
+        .status-badge.completed {
+          background: #dcfce7;
+          color: #166534;
+        }
+        .status-badge.failed {
+          background: #fef2f2;
+          color: #dc2626;
+        }
         .action-buttons {
           display: flex;
           gap: 0.5rem;
         }
         .btn-icon {
-          width: 40px;
-          height: 40px;
+          width: 44px;
+          height: 44px;
           border: none;
-          border-radius: 12px;
+          border-radius: 14px;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           overflow: hidden;
+          font-size: 1rem;
         }
         .btn-icon::before {
           content: '';
@@ -1556,8 +1628,8 @@ const ComprehensiveAdminDashboard = () => {
           color: #dc2626;
         }
         .btn-icon:hover {
-          transform: translateY(-3px) scale(1.05);
-          box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+          transform: translateY(-4px) scale(1.08);
+          box-shadow: 0 12px 25px rgba(0,0,0,0.3);
         }
         .admin-section {
           padding: 2rem;
