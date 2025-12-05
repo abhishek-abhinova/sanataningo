@@ -36,7 +36,12 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
+    // Only auto-logout on authentication-related 401 errors, not on timeout/email failures
+    if (error.response?.status === 401 && 
+        (error.response?.data?.error?.includes('token') || 
+         error.response?.data?.error?.includes('auth') ||
+         error.config?.url?.includes('/auth/') ||
+         error.config?.url?.includes('/login'))) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       if (window.location.pathname.includes('/admin')) {

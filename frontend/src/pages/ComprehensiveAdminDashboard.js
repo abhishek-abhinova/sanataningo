@@ -387,11 +387,19 @@ const ComprehensiveAdminDashboard = () => {
                       <button
                         onClick={async () => {
                           try {
-                            await api.post(`/members/${member._id}/send-card`);
+                            const response = await api.post(`/members/${member._id}/send-card`, {}, {
+                              timeout: 30000 // 30 second timeout
+                            });
                             toast.success('ID card sent to email successfully!');
                           } catch (error) {
                             console.error('Send ID card error:', error);
-                            toast.error('Failed to send ID card: ' + (error.response?.data?.error || error.message));
+                            if (error.response?.status === 401) {
+                              toast.error('Session expired. Please login again.');
+                              localStorage.removeItem('token');
+                              window.location.href = '/admin/login';
+                            } else {
+                              toast.error('Failed to send ID card: ' + (error.response?.data?.error || error.message));
+                            }
                           }
                         }}
                         className="btn-icon"
@@ -1125,12 +1133,20 @@ const ComprehensiveAdminDashboard = () => {
                               <button
                                 onClick={async () => {
                                   try {
-                                    await api.post(`/donations/approve/${donation._id}`);
+                                    const response = await api.post(`/donations/approve/${donation._id}`, {}, {
+                                      timeout: 30000 // 30 second timeout
+                                    });
                                     toast.success('Receipt sent to email successfully!');
                                     await fetchData('/admin/donations', 'donations');
                                   } catch (error) {
                                     console.error('Send receipt error:', error);
-                                    toast.error('Failed to send receipt: ' + (error.response?.data?.error || error.message));
+                                    if (error.response?.status === 401) {
+                                      toast.error('Session expired. Please login again.');
+                                      localStorage.removeItem('token');
+                                      window.location.href = '/admin/login';
+                                    } else {
+                                      toast.error('Failed to send receipt: ' + (error.response?.data?.error || error.message));
+                                    }
                                   }
                                 }}
                                 className="btn-icon"
