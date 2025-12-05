@@ -337,18 +337,60 @@ const generateTeamIdCard = async (team) => {
       .text('SARBOSHAKTI SANATANI SANGATHAN', 12, 14, { width: 376, align: 'center' });
     doc.font('Helvetica').fontSize(9).text('Team Identity Card', 12, 30, { width: 376, align: 'center' });
 
-    // Photo
-    let photoPath = null;
-    if (team.photo_url && typeof team.photo_url === 'string' && !team.photo_url.startsWith('http')) {
-      const rel = team.photo_url.replace(/^\/*/, '');
-      const candidate = path.join(__dirname, '..', rel);
-      if (fs.existsSync(candidate)) photoPath = candidate;
-    }
-    if (photoPath) {
+    // Photo handling
+    let photoAdded = false;
+    if (team.photo_url && typeof team.photo_url === 'string') {
       try {
-        doc.image(photoPath, 20, 60, { width: 70, height: 90, fit: [70, 90] });
-      } catch {}
-    } else {
+        if (team.photo_url.startsWith('http')) {
+          // Handle URL images (Cloudinary, etc.)
+          const https = require('https');
+          const http = require('http');
+          const client = team.photo_url.startsWith('https') ? https : http;
+          
+          await new Promise((resolve) => {
+            client.get(team.photo_url, (response) => {
+              if (response.statusCode === 200) {
+                const chunks = [];
+                response.on('data', chunk => chunks.push(chunk));
+                response.on('end', () => {
+                  try {
+                    const buffer = Buffer.concat(chunks);
+                    doc.image(buffer, 20, 60, { width: 70, height: 90, fit: [70, 90] });
+                    photoAdded = true;
+                  } catch (e) {
+                    console.log('Failed to add image from URL:', e.message);
+                  }
+                  resolve();
+                });
+              } else {
+                resolve();
+              }
+            }).on('error', () => resolve());
+          });
+        } else {
+          // Handle local file paths
+          const rel = team.photo_url.replace(/^\/*/, '');
+          const candidates = [
+            path.join(__dirname, '..', rel),
+            path.join(__dirname, '../uploads', rel),
+            path.join(__dirname, '../public', rel)
+          ];
+          
+          for (const candidate of candidates) {
+            if (fs.existsSync(candidate)) {
+              doc.image(candidate, 20, 60, { width: 70, height: 90, fit: [70, 90] });
+              photoAdded = true;
+              break;
+            }
+          }
+        }
+      } catch (error) {
+        console.log('Photo processing error:', error.message);
+      }
+    }
+    
+    // Fallback photo placeholder
+    if (!photoAdded) {
       doc.rect(20, 60, 70, 90).stroke(accent);
       doc.fontSize(9).fillColor('#666').text('PHOTO', 45, 100);
     }
