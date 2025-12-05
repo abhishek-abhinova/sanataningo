@@ -6,24 +6,19 @@ const { normalizeDonationData } = require('./donationFormatter');
 const createTransporter = () => {
   try {
     const opts = {
-      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-      port: parseInt(process.env.SMTP_PORT, 10) || 587,
+      host: 'smtp.hostinger.com',
+      port: 587,
       secure: false,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
       },
-      pool: false,
-      maxConnections: 1,
-      greetingTimeout: 10000,
-      connectionTimeout: 10000,
-      socketTimeout: 10000,
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 5000,
       tls: { 
-        rejectUnauthorized: false,
-        minVersion: 'TLSv1'
-      },
-      debug: false,
-      logger: false
+        rejectUnauthorized: false
+      }
     };
 
     console.log('📧 Creating SMTP transporter:', {
@@ -44,7 +39,7 @@ const createTransporter = () => {
 let transporter = createTransporter();
 
 // Helper to send mail with retry and Ethereal fallback for local testing
-const sendMailWithRetry = async (mailOptions, attempts = 3) => {
+const sendMailWithRetry = async (mailOptions, attempts = 1) => {
   let lastErr = null;
   
   // Skip verification to avoid timeout issues
@@ -93,11 +88,10 @@ const sendMailWithRetry = async (mailOptions, attempts = 3) => {
         responseCode: err.responseCode
       });
       
-      // Wait before retry (exponential backoff)
+      // Wait before retry
       if (i < attempts - 1) {
-        const waitTime = Math.pow(2, i) * 1000; // 1s, 2s, 4s...
-        console.log(`⏳ Waiting ${waitTime}ms before retry...`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
+        console.log('⏳ Waiting 500ms before retry...');
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
       
       // On failure, try to recreate transporter in case of transient errors
