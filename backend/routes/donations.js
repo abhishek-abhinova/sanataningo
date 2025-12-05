@@ -148,18 +148,12 @@ router.put('/:id/approve', auth, async (req, res) => {
     donation.receiptGenerated = true;
     await donation.save();
 
-    // Generate and send PDF receipt via email
+    // Send receipt email
     try {
-      const { generateDonationReceipt } = require('../utils/cardGenerator');
-      const { sendDonationReceiptWithPDF } = require('../utils/emailService');
-
-      const receiptPath = await generateDonationReceipt(donation);
-      donation.receiptFile = receiptPath;
-      await donation.save();
-
-      await sendDonationReceiptWithPDF(donation, receiptPath);
+      await sendDonationReceiptEmailRender(donation);
+      console.log('✅ Donation receipt sent successfully');
     } catch (emailError) {
-      console.error('Receipt email failed:', emailError);
+      console.error('❌ Receipt email failed:', emailError);
     }
 
     res.json({ success: true, message: 'Donation approved and receipt sent to email successfully' });
