@@ -90,6 +90,7 @@ try {
   const galleryRoutes = require('./routes/gallery');
   const realtimeRoutes = require('./routes/realtime');
   const testEmailRoutes = require('./routes/test-email');
+  const testGmailRoutes = require('./routes/test-gmail');
   const teamRoutes = require('./routes/team');
   const eventsRoutes = require('./routes/events');
   const activitiesRoutes = require('./routes/activities');
@@ -114,6 +115,7 @@ try {
   app.use('/api/database', databaseUploadRoutes);
   app.use('/api', realtimeRoutes);
   app.use('/api/test', testEmailRoutes);
+  app.use('/api/test', testGmailRoutes);
   app.use('/api/email-test', require('./routes/email-test'));
   app.use('/api/simple-email', require('./routes/test-simple-email'));
   app.use('/api/render-email', require('./routes/test-render-email'));

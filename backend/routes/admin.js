@@ -300,7 +300,7 @@ router.post('/donations/:id/send-receipt', auth, async (req, res) => {
 
     // Use reliable PDF generation with PDFDocument (pdfkit)
     const { generateDonationReceipt } = require('../utils/cardGenerator');
-    const { sendDonationReceiptWithPDF } = require('../utils/emailServiceEthereal');
+    const { sendDonationReceiptWithPDF } = require('../utils/emailServiceGmail');
 
     try {
       console.log('📄 Generating PDF receipt for donation', donation.donationId || donation._id);
