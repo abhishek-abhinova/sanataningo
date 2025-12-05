@@ -8,7 +8,10 @@ const sendMembershipCardGmail = async (member, cardPath = null) => {
       auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_APP_PASSWORD
-      }
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000
     });
 
     const mailOptions = {
@@ -61,7 +64,31 @@ const sendMembershipCardGmail = async (member, cardPath = null) => {
 
   } catch (error) {
     console.error('❌ Gmail membership card email failed:', error.message);
-    throw error;
+    
+    // Fallback to Ethereal
+    try {
+      console.log('🛠️ Falling back to Ethereal test account');
+      const testAccount = await nodemailer.createTestAccount();
+      const ethTransporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass
+        }
+      });
+
+      const result = await ethTransporter.sendMail(mailOptions);
+      const previewUrl = nodemailer.getTestMessageUrl(result);
+      
+      console.log('✅ Membership card email sent via Ethereal (preview):', previewUrl);
+      console.warn('⚠️ Using Ethereal test account - email will NOT be delivered to real inbox!');
+      return { ...result, previewUrl };
+    } catch (ethError) {
+      console.error('❌ Ethereal fallback failed:', ethError.message);
+      throw error;
+    }
   }
 };
 
